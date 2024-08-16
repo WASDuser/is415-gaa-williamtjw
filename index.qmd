@@ -1,10 +1,8 @@
 ---
-title: "is415-gaa-williamtjw"
+title: "Geospatial Analytics and Applications (GAA)"
 ---
 
-This is a Quarto website.
-
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+This is website contains my notes, ICEs, assignments for **GAA**. Enjoy.
 
 ```{r}
 1 + 1
