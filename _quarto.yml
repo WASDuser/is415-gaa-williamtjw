@@ -2,16 +2,21 @@ project:
   type: website
 
 website:
-  title: "is415-gaa-williamtjw"
+  title: "IS415"
   navbar:
     left:
+    - text: "Hands-on Exercise"
+      menu:
+        - text: "Hands-on Exercise 1"
+          href: "resources/Hands-on_Ex/ex1/Hands-On_Ex_1.qmd"
+    right: 
       - href: index.qmd
         text: Home
       - about.qmd
 
 format:
   html:
-    theme: cosmo
+    theme: zephyr
     css: styles.css
     toc: true
 
