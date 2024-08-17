@@ -174,7 +174,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#importing-polyline-feature-data-in-shapefile-form" id="toc-importing-polyline-feature-data-in-shapefile-form" class="nav-link" data-scroll-target="#importing-polyline-feature-data-in-shapefile-form"><strong>Importing polyline feature data in shapefile form</strong></a></li>
   <li><a href="#importing-gis-data-in-kml-format" id="toc-importing-gis-data-in-kml-format" class="nav-link" data-scroll-target="#importing-gis-data-in-kml-format"><strong>Importing GIS data in kml format</strong></a></li>
   </ul></li>
-  <li><a href="#methods-to-check-the-content-of-a-simple-feature-data-frame" id="toc-methods-to-check-the-content-of-a-simple-feature-data-frame" class="nav-link" data-scroll-target="#methods-to-check-the-content-of-a-simple-feature-data-frame"><strong>Methods to Check the Content of A Simple Feature Data Frame</strong></a>
+  <li><a href="#methods-to-check-the-content-of-a-simple-feature-data-frame" id="toc-methods-to-check-the-content-of-a-simple-feature-data-frame" class="nav-link" data-scroll-target="#methods-to-check-the-content-of-a-simple-feature-data-frame">Methods to Check the Content of A Simple Feature Data Frame</a>
   <ul class="collapse">
   <li><a href="#st_geometry" id="toc-st_geometry" class="nav-link" data-scroll-target="#st_geometry"><strong>st_geometry()</strong></a></li>
   <li><a href="#glimpse" id="toc-glimpse" class="nav-link" data-scroll-target="#glimpse"><strong>glimpse()</strong></a></li>
@@ -186,12 +186,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#assigning-epsg-code-to-a-simple-feature-data-frame" id="toc-assigning-epsg-code-to-a-simple-feature-data-frame" class="nav-link" data-scroll-target="#assigning-epsg-code-to-a-simple-feature-data-frame"><strong>Assigning EPSG code to a simple feature data frame</strong></a></li>
   <li><a href="#transforming-the-projection-of-preschool-from-wgs84-to-svy21." id="toc-transforming-the-projection-of-preschool-from-wgs84-to-svy21." class="nav-link" data-scroll-target="#transforming-the-projection-of-preschool-from-wgs84-to-svy21."><strong>Transforming the projection of preschool from wgs84 to svy21.</strong></a></li>
   </ul></li>
-  <li><a href="#importing-and-converting-an-aspatial-data" id="toc-importing-and-converting-an-aspatial-data" class="nav-link" data-scroll-target="#importing-and-converting-an-aspatial-data"><strong>Importing and Converting An Aspatial Data</strong></a>
+  <li><a href="#importing-and-converting-an-aspatial-data" id="toc-importing-and-converting-an-aspatial-data" class="nav-link" data-scroll-target="#importing-and-converting-an-aspatial-data">Importing and Converting An Aspatial Data</a>
   <ul class="collapse">
   <li><a href="#importing" id="toc-importing" class="nav-link" data-scroll-target="#importing">Importing</a></li>
   <li><a href="#creating-a-simple-feature-data-frame-from-an-aspatial-data-frame" id="toc-creating-a-simple-feature-data-frame-from-an-aspatial-data-frame" class="nav-link" data-scroll-target="#creating-a-simple-feature-data-frame-from-an-aspatial-data-frame"><strong>Creating a simple feature data frame from an aspatial data frame</strong></a></li>
   </ul></li>
-  <li><a href="#geoprocessing-with-sf-package" id="toc-geoprocessing-with-sf-package" class="nav-link" data-scroll-target="#geoprocessing-with-sf-package"><strong>Geoprocessing with sf package</strong></a>
+  <li><a href="#geoprocessing-with-sf-package" id="toc-geoprocessing-with-sf-package" class="nav-link" data-scroll-target="#geoprocessing-with-sf-package">Geoprocessing with sf package</a>
   <ul class="collapse">
   <li><a href="#buffering" id="toc-buffering" class="nav-link" data-scroll-target="#buffering">Buffering</a></li>
   <li><a href="#point-in-polygon-count" id="toc-point-in-polygon-count" class="nav-link" data-scroll-target="#point-in-polygon-count">Point-in-polygon count</a></li>
@@ -351,7 +351,7 @@ Geodetic CRS:  WGS 84</code></pre>
 </section>
 </section>
 <section id="methods-to-check-the-content-of-a-simple-feature-data-frame" class="level1">
-<h1><strong>Methods to Check the Content of A Simple Feature Data Frame</strong></h1>
+<h1>Methods to Check the Content of A Simple Feature Data Frame</h1>
 <section id="st_geometry" class="level3">
 <h3 class="anchored" data-anchor-id="st_geometry"><strong>st_geometry()</strong></h3>
 <p>The column in the sf data.frame that contains the geometries is a list, of class <code>sfc</code>. We can retrieve the geometry list-column in this case by mpsz$geom or mpsz[[1]], but the more general way uses <em>st_geometry()</em> as shown in the code chunk below.</p>
@@ -668,7 +668,7 @@ First 5 geometries:</code></pre>
 </section>
 </section>
 <section id="importing-and-converting-an-aspatial-data" class="level1">
-<h1><strong>Importing and Converting An Aspatial Data</strong></h1>
+<h1>Importing and Converting An Aspatial Data</h1>
 <p>In this section, you will learn how to import an aspatial data into R environment and save it as a tibble data frame. Next, you will convert it into a simple feature data frame.</p>
 <p>For the purpose of this exercise, the <code>listings.csv</code> data downloaded from AirBnb will be used.</p>
 <section id="importing" class="level3">
@@ -820,7 +820,7 @@ $ geometry                                     &lt;POINT [m]&gt; POINT (41972.5 
 </section>
 </section>
 <section id="geoprocessing-with-sf-package" class="level1">
-<h1><strong>Geoprocessing with sf package</strong></h1>
+<h1>Geoprocessing with sf package</h1>
 <p>Besides providing functions to handling (i.e.&nbsp;importing, exporting, assigning projection, transforming projection etc) geospatial data, <strong>sf</strong> package also offers a wide range of geoprocessing (also known as GIS analysis) functions.</p>
 <p>In this section, you will learn how to perform two commonly used geoprocessing functions, namely <a href="https://www.gislounge.com/buffers-in-gis/">buffering</a> and point in polygon count.</p>
 <section id="buffering" class="level3">

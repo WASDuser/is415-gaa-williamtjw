@@ -112,7 +112,7 @@ preschool = st_read("data/geospatial/PreSchoolsLocation.kml")
 
 The message above reveals that `preschool` is a point feature data frame. There are a total of 2290 features and 2 fields. Different from the previous two simple feature data frame, preschool is in **wgs84** coordinates system.
 
-# **Methods to Check the Content of A Simple Feature Data Frame**
+# Methods to Check the Content of A Simple Feature Data Frame
 
 ### **st_geometry()**
 
@@ -229,7 +229,7 @@ st_geometry(preschool3414)
 
 Notice that it is in svy21 projected coordinate system now. Furthermore, if you refer to *Bounding box:*, the values are greater than 0-360 range of decimal degree commonly used by most of the geographic coordinate systems.
 
-# **Importing and Converting An Aspatial Data**
+# Importing and Converting An Aspatial Data
 
 In this section, you will learn how to import an aspatial data into R environment and save it as a tibble data frame. Next, you will convert it into a simple feature data frame.
 
@@ -280,7 +280,7 @@ glimpse(listings_sf)
 
 Table above shows the content of `listing_sf`. Notice that a new column called `geometry` has been added into the data frame. On the other hand, the `longitude` and `latitude` columns have been dropped from the data frame.
 
-# **Geoprocessing with sf package**
+# Geoprocessing with sf package
 
 Besides providing functions to handling (i.e. importing, exporting, assigning projection, transforming projection etc) geospatial data, **sf** package also offers a wide range of geoprocessing (also known as GIS analysis) functions.
 
@@ -416,4 +416,8 @@ ggplot(data=mpsz3414,
 
 -   {r eval=FALSE} can 'hide' output text but potentially important result cannot be referenced later on
 
--   collapsible sections using <details></details>
+-   collapsible sections using
+
+    <details>
+
+    </details>
