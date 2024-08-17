@@ -116,7 +116,7 @@ The message above reveals that `preschool` is a point feature data frame. There 
 
 ### **st_geometry()**
 
-The column in the sf data.frame that contains the geometries is a list, of class `sfc`. We can retrieve the geometry list-column in this case by mpsz\$geom or mpsz\[\[1\]\], but the more general way uses *st_geometry()* as shown in the code chunk below.
+The column in the sf data.frame that contains the geometries is a list, of class `sfc`. Use *st_geometry()* to retrieve the geometry list-column as shown in the code chunk below.
 
 ```{r}
 st_geometry(mpsz)
@@ -136,7 +136,7 @@ glimpse(mpsz)
 
 ### **head()**
 
-Sometimes we would like to reveal complete information of a feature object, this is the job of [*head()*](https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/head) of Base R.
+head() to reveal top n entries of a feature object.
 
 ```{r}
 head(mpsz, n=5)
@@ -184,15 +184,13 @@ st_crs(mpsz)
 
 Although `mpsz` data frame is projected in svy21 but when we read until the end of the print, it indicates that the EPSG is 9001. This is a wrong EPSG code because the correct EPSG code for svy21 should be [3414](https://epsg.io/3414).
 
-In order to assign the correct EPSG code to `mpsz` data frame, *st_set_crs()* of **sf** package is used as shown in the code chunk below.
-
-Now, let us check the CSR again by using the code chunk below.
+*st_set_crs()* of **sf** package to assign the correct EPSG code to `mpsz` data frame.
 
 ```{r warning=FALSE}
 mpsz3414 <- st_set_crs(mpsz, 3414)
 ```
 
-Now, let us check the CSR again by using the code chunk below.
+Check the CSR.
 
 ```{r}
 st_crs(mpsz3414)
@@ -227,23 +225,23 @@ Display the content of preschool3414 sf data frame as shown below.
 st_geometry(preschool3414)
 ```
 
-Notice that it is in svy21 projected coordinate system now. Furthermore, if you refer to *Bounding box:*, the values are greater than 0-360 range of decimal degree commonly used by most of the geographic coordinate systems.
+Notice that it is in svy21 projected coordinate system now. In the *Bounding box:*, the values are greater than 0-360 range of decimal degree commonly used by most of the geographic coordinate systems.
 
 # Importing and Converting An Aspatial Data
 
-In this section, you will learn how to import an aspatial data into R environment and save it as a tibble data frame. Next, you will convert it into a simple feature data frame.
+I will be importing an aspatial data into R environment and save it as a tibble data frame, converting it into a simple feature data frame.
 
 For the purpose of this exercise, the `listings.csv` data downloaded from AirBnb will be used.
 
 ### Importing
 
-Since `listings` data set is in csv file format, we will use [*read_csv()*](https://readr.tidyverse.org/reference/read_delim.html) of **readr** package to import `listing.csv` as shown the code chunk below. The output R object is called `listings` and it is a [tibble data frame](https://r4ds.had.co.nz/tibbles.html).
+Since `listings` data set is in csv file format, use [*read_csv()*](https://readr.tidyverse.org/reference/read_delim.html) of **readr** package to import `listing.csv` as shown the code chunk below. The output R object is called `listings` and it is a [tibble data frame](https://r4ds.had.co.nz/tibbles.html).
 
 ```{r }
 listings <- read_csv("data/aspatial/listings.csv.gz")
 ```
 
-After importing the data file into R, it is important for us to examine if the data file has been imported correctly.
+After importing the data file into R, it is important verify that it has been imported correctly.
 
 The code chunk below shows *list()* of Base R instead of *glimpse()* is used to do the job.
 
@@ -272,7 +270,7 @@ Things to learn from the arguments above:
 
 -   *`%>%`* is used to nest *st_transform()* to transform the newly created simple feature data frame into svy21 projected coordinates system.
 
-Let us examine the content of this newly created simple feature data frame.
+This is the newly created simple feature data frame.
 
 ```{r}
 glimpse(listings_sf)
@@ -283,8 +281,6 @@ Table above shows the content of `listing_sf`. Notice that a new column called `
 # Geoprocessing with sf package
 
 Besides providing functions to handling (i.e. importing, exporting, assigning projection, transforming projection etc) geospatial data, **sf** package also offers a wide range of geoprocessing (also known as GIS analysis) functions.
-
-In this section, you will learn how to perform two commonly used geoprocessing functions, namely [buffering](https://www.gislounge.com/buffers-in-gis/) and point in polygon count.
 
 ### Buffering
 
@@ -341,7 +337,7 @@ top_n(mpsz3414, 1, `PreSch Count`)
 
 <details>
 
-<summary>Solution:</summary>
+<summary>Solution: \<click to reveal\></summary>
 
 <br>
 
@@ -391,7 +387,7 @@ ggplot(data=mpsz3414,
 
 <details>
 
-<summary>Solution:</summary>
+<summary>Solution: \<click to reveal\>:</summary>
 
 <br>
 
@@ -416,8 +412,4 @@ ggplot(data=mpsz3414,
 
 -   {r eval=FALSE} can 'hide' output text but potentially important result cannot be referenced later on
 
--   collapsible sections using
-
-    <details>
-
-    </details>
+-   collapsible sections using `<details></details>`

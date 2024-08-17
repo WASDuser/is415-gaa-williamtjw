@@ -354,7 +354,7 @@ Geodetic CRS:  WGS 84</code></pre>
 <h1>Methods to Check the Content of A Simple Feature Data Frame</h1>
 <section id="st_geometry" class="level3">
 <h3 class="anchored" data-anchor-id="st_geometry"><strong>st_geometry()</strong></h3>
-<p>The column in the sf data.frame that contains the geometries is a list, of class <code>sfc</code>. We can retrieve the geometry list-column in this case by mpsz$geom or mpsz[[1]], but the more general way uses <em>st_geometry()</em> as shown in the code chunk below.</p>
+<p>The column in the sf data.frame that contains the geometries is a list, of class <code>sfc</code>. Use <em>st_geometry()</em> to retrieve the geometry list-column as shown in the code chunk below.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_geometry</span>(mpsz)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -413,7 +413,7 @@ $ geometry   &lt;MULTIPOLYGON [m]&gt; MULTIPOLYGON (((31495.56 30..., MULTIPOLYG
 </section>
 <section id="head" class="level3">
 <h3 class="anchored" data-anchor-id="head"><strong>head()</strong></h3>
-<p>Sometimes we would like to reveal complete information of a feature object, this is the job of <a href="https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/head"><em>head()</em></a> of Base R.</p>
+<p>head() to reveal top n entries of a feature object.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mpsz, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -542,12 +542,11 @@ PROJCRS["SVY21",
 </div>
 </div>
 <p>Although <code>mpsz</code> data frame is projected in svy21 but when we read until the end of the print, it indicates that the EPSG is 9001. This is a wrong EPSG code because the correct EPSG code for svy21 should be <a href="https://epsg.io/3414">3414</a>.</p>
-<p>In order to assign the correct EPSG code to <code>mpsz</code> data frame, <em>st_set_crs()</em> of <strong>sf</strong> package is used as shown in the code chunk below.</p>
-<p>Now, let us check the CSR again by using the code chunk below.</p>
+<p><em>st_set_crs()</em> of <strong>sf</strong> package to assign the correct EPSG code to <code>mpsz</code> data frame.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>mpsz3414 <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(mpsz, <span class="dv">3414</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, let us check the CSR again by using the code chunk below.</p>
+<p>Check the CSR.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mpsz3414)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -664,16 +663,16 @@ First 5 geometries:</code></pre>
 <pre><code>POINT Z (28637.82 35038.49 0)</code></pre>
 </div>
 </div>
-<p>Notice that it is in svy21 projected coordinate system now. Furthermore, if you refer to <em>Bounding box:</em>, the values are greater than 0-360 range of decimal degree commonly used by most of the geographic coordinate systems.</p>
+<p>Notice that it is in svy21 projected coordinate system now. In the <em>Bounding box:</em>, the values are greater than 0-360 range of decimal degree commonly used by most of the geographic coordinate systems.</p>
 </section>
 </section>
 <section id="importing-and-converting-an-aspatial-data" class="level1">
 <h1>Importing and Converting An Aspatial Data</h1>
-<p>In this section, you will learn how to import an aspatial data into R environment and save it as a tibble data frame. Next, you will convert it into a simple feature data frame.</p>
+<p>I will be importing an aspatial data into R environment and save it as a tibble data frame, converting it into a simple feature data frame.</p>
 <p>For the purpose of this exercise, the <code>listings.csv</code> data downloaded from AirBnb will be used.</p>
 <section id="importing" class="level3">
 <h3 class="anchored" data-anchor-id="importing">Importing</h3>
-<p>Since <code>listings</code> data set is in csv file format, we will use <a href="https://readr.tidyverse.org/reference/read_delim.html"><em>read_csv()</em></a> of <strong>readr</strong> package to import <code>listing.csv</code> as shown the code chunk below. The output R object is called <code>listings</code> and it is a <a href="https://r4ds.had.co.nz/tibbles.html">tibble data frame</a>.</p>
+<p>Since <code>listings</code> data set is in csv file format, use <a href="https://readr.tidyverse.org/reference/read_delim.html"><em>read_csv()</em></a> of <strong>readr</strong> package to import <code>listing.csv</code> as shown the code chunk below. The output R object is called <code>listings</code> and it is a <a href="https://r4ds.had.co.nz/tibbles.html">tibble data frame</a>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>listings <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/listings.csv.gz"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -689,7 +688,7 @@ date  (5): last_scraped, host_since, calendar_last_scraped, first_review, la...
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
 </div>
-<p>After importing the data file into R, it is important for us to examine if the data file has been imported correctly.</p>
+<p>After importing the data file into R, it is important verify that it has been imported correctly.</p>
 <p>The code chunk below shows <em>list()</em> of Base R instead of <em>glimpse()</em> is used to do the job.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(listings) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -734,7 +733,7 @@ date  (5): last_scraped, host_since, calendar_last_scraped, first_review, la...
 <li><p><em><code>crs</code></em> argument requires you to provide the coordinates system in epsg format. <a href="https://epsg.io/4326">EPSG: 4326</a> is wgs84 GCS and <a href="https://epsg.io/3414">EPSG: 3414</a> is Singapore SVY21 PCS. You can search for other country’s epsg code by referring to <a href="https://epsg.io/">epsg.io</a>.</p></li>
 <li><p><em><code>%&gt;%</code></em> is used to nest <em>st_transform()</em> to transform the newly created simple feature data frame into svy21 projected coordinates system.</p></li>
 </ul>
-<p>Let us examine the content of this newly created simple feature data frame.</p>
+<p>This is the newly created simple feature data frame.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(listings_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -822,7 +821,6 @@ $ geometry                                     &lt;POINT [m]&gt; POINT (41972.5 
 <section id="geoprocessing-with-sf-package" class="level1">
 <h1>Geoprocessing with sf package</h1>
 <p>Besides providing functions to handling (i.e.&nbsp;importing, exporting, assigning projection, transforming projection etc) geospatial data, <strong>sf</strong> package also offers a wide range of geoprocessing (also known as GIS analysis) functions.</p>
-<p>In this section, you will learn how to perform two commonly used geoprocessing functions, namely <a href="https://www.gislounge.com/buffers-in-gis/">buffering</a> and point in polygon count.</p>
 <section id="buffering" class="level3">
 <h3 class="anchored" data-anchor-id="buffering">Buffering</h3>
 <p>E.g. The authority is planning to upgrade the exiting cycling path. To do so, they need to acquire 5 metres of reserved land on the both sides of the current cycling path. You are tasked to determine the extend of the land need to be acquired and their total area.</p>
@@ -885,7 +883,7 @@ Projected CRS: SVY21 / Singapore TM
 </blockquote>
 <details>
 <summary>
-Solution:
+Solution: &lt;click to reveal&gt;
 </summary>
 <p><br></p>
 <p>Firstly, the code chunk below uses <a href="https://r-spatial.github.io/sf/reference/geos_measures.html"><em>st_area()</em></a> of <strong>sf</strong> package to derive the area of each planning subzone.</p>
@@ -969,9 +967,7 @@ Solution:
 <ul>
 <li><p>{r warning=FALSE} to remove warning messages</p></li>
 <li><p>{r eval=FALSE} can ‘hide’ output text but potentially important result cannot be referenced later on</p></li>
-<li><p>collapsible sections using</p>
-<details>
-</details></li>
+<li><p>collapsible sections using <code>&lt;details&gt;&lt;/details&gt;</code></p></li>
 </ul>
 
 
