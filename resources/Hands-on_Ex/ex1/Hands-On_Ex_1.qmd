@@ -1,6 +1,7 @@
 ---
 title: "Hands-on Exercise 1"
 author: "William"
+date: "August 17, 2024"
 ---
 
 # Overview
