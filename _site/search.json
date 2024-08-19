@@ -26,5 +26,12 @@
     "title": "Geospatial Analytics and Applications (GAA)",
     "section": "",
     "text": "This is website contains my notes, ICEs, assignments for GAA. Enjoy."
+  },
+  {
+    "objectID": "resources/ICEs/ex1/data/MPSZ-2019.html",
+    "href": "resources/ICEs/ex1/data/MPSZ-2019.html",
+    "title": "IS415",
+    "section": "",
+    "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     dataset\n\n\n        0 0     false"
   }
 ]
