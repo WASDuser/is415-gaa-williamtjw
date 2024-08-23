@@ -1,0 +1,10 @@
+---
+title: "Hands-on Exercise 2: Choropleth Mapping with R"
+author: "William"
+date: "August 23, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---

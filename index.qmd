@@ -3,4 +3,3 @@ title: "Geospatial Analytics and Applications (GAA)"
 ---
 
 This is website contains my notes, ICEs, assignments for **GAA**. Enjoy.
-
