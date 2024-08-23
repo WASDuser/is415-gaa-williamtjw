@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 2: Choropleth Mapping with R"
+title: "Hands-on Exercise 2: Thematic Mapping & Geovisualisation with R"
 author: "William"
 date: "August 23, 2024"
 date-modified: "last-modified"
@@ -8,3 +8,57 @@ execute:
   echo: true
   freeze: true
 ---
+
+# Overview
+
+### Terms & Concepts
+
+Geovisualisation: The **over-arching concept** that involve any geographic data visualisation technique
+
+Thematic mapping: Use of map types/symbols to visualise variables that are **not naturally visible** in a geographical area
+
+Chloropleth mapping: Type of thematic mapping to visualise variability across a region using **color**
+
+I will be using `tmap` package to build cartographic quality thematic maps.
+
+### Readings
+
++----------------------------------------------------------------------------------------------------------------+---------------------------------------------+---------------------------------------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------+----------------+
+|                                                                                                                | Usage                                       | Pros                                                                | Cons                                                                       | Applications                                                       | Notes          |
++================================================================================================================+=============================================+=====================================================================+============================================================================+====================================================================+================+
+| [Proportional Symbols](https://www.axismaps.com/guide/univariate/proportional-symbols/ "Proportional Symbols") | Scale symbols proportionate to data values  | -   versatile (raw & standardized data)                             | -   congested symbols are hard to read                                     | -   numerical data                                                 | -   congestion |
+|                                                                                                                |                                             |                                                                     |                                                                            |                                                                    |                |
+|                                                                                                                |                                             | -   multivariate encoding                                           | -   size comparison                                                        | -   order categorical data (rating level)                          | -   complexity |
++----------------------------------------------------------------------------------------------------------------+---------------------------------------------+---------------------------------------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------+----------------+
+| [Choropleth Maps](Choropleth Maps)                                                                             | Color intensity proportionate to data value | -   Clear regional trends                                           | -   Small areas with high data values can get overshadowed by large areas  | -   %s, rates, pop. density, ...                                   | -   Area bias  |
+|                                                                                                                |                                             |                                                                     |                                                                            |                                                                    |                |
+|                                                                                                                |                                             | -   Clear contrast between intensities                              | -   Color perception is still imperfect                                    | -   data **aggregated over a geographic area** (enumeration units) |                |
+|                                                                                                                |                                             |                                                                     |                                                                            |                                                                    |                |
+|                                                                                                                |                                             | -   Color-coded regions can be compared less subjectively than size |                                                                            |                                                                    |                |
++----------------------------------------------------------------------------------------------------------------+---------------------------------------------+---------------------------------------------------------------------+----------------------------------------------------------------------------+--------------------------------------------------------------------+----------------+
+
+[Data Classification](https://www.axismaps.com/guide/data/data-classification/ "The Basics of Data Classification")
+
+-   defined as grouping a large number of data values into ranges, allowing for data categorisation and subsequent visualisation on a map
+
+-   Purpose
+
+    -   minimize misleading representations or patterns
+
+    -   minimize within-group variance; maximize between-group variance (also method)
+
+-   Methods
+
+    -   Equal interval
+
+    -   Quantile
+
+    -   Manual (based on summary stats or other criteria)
+
+-   Tools (for future reference)
+
+    -   [QGIS](https://www.qgis.org/)
+
+    -   ArcGIS
+
+    -   [D3](https://d3js.org/getting-started) - JS libraries for visualising spatial data (web mapping)
