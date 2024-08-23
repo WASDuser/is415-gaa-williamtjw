@@ -26,5 +26,12 @@
     "title": "Geospatial Analytics and Applications (GAA)",
     "section": "",
     "text": "This is website contains my notes, ICEs, assignments for GAA. Enjoy."
+  },
+  {
+    "objectID": "resources/Hands-on_Ex/ex2/Hands-On_Ex_2.html",
+    "href": "resources/Hands-on_Ex/ex2/Hands-On_Ex_2.html",
+    "title": "Hands-on Exercise 2: Thematic Mapping & Geovisualisation with R",
+    "section": "",
+    "text": "Overview\n\nTerms & Concepts\n\nGeovisualisation: The over-arching concept that involve any geographic data visualisation technique\nThematic mapping: Use of map types/symbols to visualise variables that are not naturally visible in a geographical area\nChloropleth mapping: Type of thematic mapping to visualise variability across a region using color\n\nI will be using tmap package to build cartographic quality thematic maps.\n\n\nReadings\n\n\n\nReference\nUsage\nPros\nCons\nApplications\nNotes\n\n\n\n\nProportional Symbols\nScale symbols proportionate to data values\n\nversatile (raw & standardized data)\nmultivariate encoding\n\n\ncongested symbols are hard to read\nsize comparison\n\n\nnumerical data\norder categorical data (rating level)\n\n\ncongestion\ncomplexity\n\n\n\nChoropleth Maps\nColor intensity proportionate to data value\n\nClear regional trends\nClear contrast between intensities\nColor-coded regions can be compared less subjectively than size\n\n\nSmall areas with high data values can get overshadowed by large areas\nColor perception is still imperfect\n\n\n%s, rates, pop. density, …\ndata aggregated over a geographic area (enumeration units)\n\n\nArea bias\n\n\n\n\nData Classification\n\ndefined as grouping a large number of data values into ranges, allowing for data categorisation and subsequent visualisation on a map\nPurpose\n\nminimize misleading representations or patterns\nminimize within-group variance; maximize between-group variance (also method)\n\nMethods\n\nEqual interval\nQuantile\nManual (based on summary stats or other criteria)\n\nTools (for future reference)\n\nQGIS\nArcGIS\nD3 - JS libraries for visualising spatial data (web mapping)"
   }
 ]

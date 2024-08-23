@@ -9,7 +9,7 @@
 <meta name="author" content="William">
 <meta name="dcterms.date" content="2024-08-23">
 
-<title>Hands-on Exercise 2: Choropleth Mapping with R – IS415</title>
+<title>Hands-on Exercise 2: Thematic Mapping &amp; Geovisualisation with R – IS415</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -137,15 +137,25 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#terms-concepts" id="toc-terms-concepts" class="nav-link" data-scroll-target="#terms-concepts">Terms &amp; Concepts</a></li>
+  <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings">Readings</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Hands-on Exercise 2: Choropleth Mapping with R</h1>
+<h1 class="title">Hands-on Exercise 2: Thematic Mapping &amp; Geovisualisation with R</h1>
 </div>
 
 
@@ -169,7 +179,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">August 23, 2024</p>
+      <p class="date-modified">August 24, 2024</p>
     </div>
   </div>
     
@@ -180,8 +190,98 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="terms-concepts" class="level3">
+<h3 class="anchored" data-anchor-id="terms-concepts">Terms &amp; Concepts</h3>
+<ul>
+<li><p>Geovisualisation: The <strong>over-arching concept</strong> that involve any geographic data visualisation technique</p></li>
+<li><p>Thematic mapping: Use of map types/symbols to visualise variables that are <strong>not naturally visible</strong> in a geographical area</p></li>
+<li><p>Chloropleth mapping: Type of thematic mapping to visualise variability across a region using <strong>color</strong></p></li>
+</ul>
+<p>I will be using <code>tmap</code> package to build cartographic quality thematic maps.</p>
+</section>
+<section id="readings" class="level3">
+<h3 class="anchored" data-anchor-id="readings">Readings</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Reference</th>
+<th style="text-align: left;">Usage</th>
+<th style="text-align: left;">Pros</th>
+<th style="text-align: left;">Cons</th>
+<th style="text-align: left;">Applications</th>
+<th style="text-align: left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><a href="https://www.axismaps.com/guide/univariate/proportional-symbols/" title="Proportional Symbols">Proportional Symbols</a></td>
+<td style="text-align: left;">Scale symbols proportionate to data values</td>
+<td style="text-align: left;"><ul>
+<li><p>versatile (raw &amp; standardized data)</p></li>
+<li><p>multivariate encoding</p></li>
+</ul></td>
+<td style="text-align: left;"><ul>
+<li><p>congested symbols are hard to read</p></li>
+<li><p>size comparison</p></li>
+</ul></td>
+<td style="text-align: left;"><ul>
+<li><p>numerical data</p></li>
+<li><p>order categorical data (rating level)</p></li>
+</ul></td>
+<td style="text-align: left;"><ul>
+<li><p>congestion</p></li>
+<li><p>complexity</p></li>
+</ul></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="Choropleth Maps">Choropleth Maps</a></td>
+<td style="text-align: left;">Color intensity proportionate to data value</td>
+<td style="text-align: left;"><ul>
+<li><p>Clear regional trends</p></li>
+<li><p>Clear contrast between intensities</p></li>
+<li><p>Color-coded regions can be compared less subjectively than size</p></li>
+</ul></td>
+<td style="text-align: left;"><ul>
+<li><p>Small areas with high data values can get overshadowed by large areas</p></li>
+<li><p>Color perception is still imperfect</p></li>
+</ul></td>
+<td style="text-align: left;"><ul>
+<li><p>%s, rates, pop. density, …</p></li>
+<li><p>data <strong>aggregated over a geographic area</strong> (enumeration units)</p></li>
+</ul></td>
+<td style="text-align: left;"><ul>
+<li>Area bias</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+<p><a href="https://www.axismaps.com/guide/data/data-classification/" title="The Basics of Data Classification">Data Classification</a></p>
+<ul>
+<li><p>defined as grouping a large number of data values into ranges, allowing for data categorisation and subsequent visualisation on a map</p></li>
+<li><p>Purpose</p>
+<ul>
+<li><p>minimize misleading representations or patterns</p></li>
+<li><p>minimize within-group variance; maximize between-group variance (also method)</p></li>
+</ul></li>
+<li><p>Methods</p>
+<ul>
+<li><p>Equal interval</p></li>
+<li><p>Quantile</p></li>
+<li><p>Manual (based on summary stats or other criteria)</p></li>
+</ul></li>
+<li><p>Tools (for future reference)</p>
+<ul>
+<li><p><a href="https://www.qgis.org/">QGIS</a></p></li>
+<li><p>ArcGIS</p></li>
+<li><p><a href="https://d3js.org/getting-started">D3</a> - JS libraries for visualising spatial data (web mapping)</p></li>
+</ul></li>
+</ul>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
