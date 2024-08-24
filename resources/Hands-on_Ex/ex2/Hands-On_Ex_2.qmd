@@ -443,7 +443,7 @@ tm_shape(mpsz_pop2020)+
 
 > Note: Values outside the breakpoints that may be essential for analysis
 
-#### Color Scheme
+### Color Scheme
 
 **`tmap`** supports colour ramps either defined by the user or a set of predefined colour ramps from the **RColorBrewer** package
 
@@ -472,7 +472,7 @@ tm_shape(mpsz_pop2020)+
 
 > Notice that the colour scheme has been reversed.
 
-#### Map layout
+### Map layout
 
 Map layout refers to the combination of all map elements into a cohensive map. Map elements include among others the objects to be mapped, the title, the scale bar, the compass, margins and aspects ratios. Colour settings and data classification methods covered in the previous section relate to the palette and break-points are used to affect how the map looks.
 
@@ -547,7 +547,7 @@ tm_shape(mpsz_pop2020)+
 > tmap_style("white")
 > ```
 
-#### **Drawing Small Multiple Choropleth Maps**
+### **Drawing Small Multiple Choropleth Maps**
 
 **Small multiple maps**, also referred to as **facet maps**, are composed of many maps arrange side-by-side, and sometimes stacked vertically. Small multiple maps enable the visualisation of how spatial relationships change with respect to another variable, such as time.
 
@@ -612,7 +612,7 @@ agedmap <- tm_shape(mpsz_pop2020)+
 tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
 ```
 
-#### **Mapping Spatial Object Meeting a Selection Criterion**
+### **Mapping Spatial Object Meeting a Selection Criterion**
 
 Use selection funtion to map spatial objects meeting the selection criterion
 
