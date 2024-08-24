@@ -193,6 +193,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#using-qtm" id="toc-using-qtm" class="nav-link" data-scroll-target="#using-qtm"><strong>Using <code>qtm()</code></strong></a></li>
   <li><a href="#using-tmap-elements" id="toc-using-tmap-elements" class="nav-link" data-scroll-target="#using-tmap-elements"><strong>Using <code>tmap</code> elements</strong></a></li>
   <li><a href="#data-classification-methods-of-tmap" id="toc-data-classification-methods-of-tmap" class="nav-link" data-scroll-target="#data-classification-methods-of-tmap"><strong>Data classification methods of <code>tmap</code></strong></a></li>
+  <li><a href="#color-scheme" id="toc-color-scheme" class="nav-link" data-scroll-target="#color-scheme">Color Scheme</a></li>
+  <li><a href="#map-layout" id="toc-map-layout" class="nav-link" data-scroll-target="#map-layout">Map layout</a></li>
+  <li><a href="#drawing-small-multiple-choropleth-maps" id="toc-drawing-small-multiple-choropleth-maps" class="nav-link" data-scroll-target="#drawing-small-multiple-choropleth-maps"><strong>Drawing Small Multiple Choropleth Maps</strong></a></li>
+  <li><a href="#mapping-spatial-object-meeting-a-selection-criterion" id="toc-mapping-spatial-object-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mapping-spatial-object-meeting-a-selection-criterion"><strong>Mapping Spatial Object Meeting a Selection Criterion</strong></a></li>
   </ul></li>
   <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings">Readings</a></li>
   </ul>
@@ -891,8 +895,9 @@ Computing Hierarchical Clustering</code></pre>
 <p>Note: Values outside the breakpoints that may be essential for analysis</p>
 </blockquote>
 </section>
-<section id="color-scheme" class="level4">
-<h4 class="anchored" data-anchor-id="color-scheme">Color Scheme</h4>
+</section>
+<section id="color-scheme" class="level3">
+<h3 class="anchored" data-anchor-id="color-scheme">Color Scheme</h3>
 <p><strong><code>tmap</code></strong> supports colour ramps either defined by the user or a set of predefined colour ramps from the <strong>RColorBrewer</strong> package</p>
 <section id="colourbrewer-palette" class="level5">
 <h5 class="anchored" data-anchor-id="colourbrewer-palette">ColourBrewer palette</h5>
@@ -934,8 +939,8 @@ Computing Hierarchical Clustering</code></pre>
 </blockquote>
 </section>
 </section>
-<section id="map-layout" class="level4">
-<h4 class="anchored" data-anchor-id="map-layout">Map layout</h4>
+<section id="map-layout" class="level3">
+<h3 class="anchored" data-anchor-id="map-layout">Map layout</h3>
 <p>Map layout refers to the combination of all map elements into a cohensive map. Map elements include among others the objects to be mapped, the title, the scale bar, the compass, margins and aspects ratios. Colour settings and data classification methods covered in the previous section relate to the palette and break-points are used to affect how the map looks.</p>
 <section id="map-legend" class="level5">
 <h5 class="anchored" data-anchor-id="map-legend">Map Legend</h5>
@@ -1031,8 +1036,8 @@ Computing Hierarchical Clustering</code></pre>
 </blockquote>
 </section>
 </section>
-<section id="drawing-small-multiple-choropleth-maps" class="level4">
-<h4 class="anchored" data-anchor-id="drawing-small-multiple-choropleth-maps"><strong>Drawing Small Multiple Choropleth Maps</strong></h4>
+<section id="drawing-small-multiple-choropleth-maps" class="level3">
+<h3 class="anchored" data-anchor-id="drawing-small-multiple-choropleth-maps"><strong>Drawing Small Multiple Choropleth Maps</strong></h3>
 <p><strong>Small multiple maps</strong>, also referred to as <strong>facet maps</strong>, are composed of many maps arrange side-by-side, and sometimes stacked vertically. Small multiple maps enable the visualisation of how spatial relationships change with respect to another variable, such as time.</p>
 <p>In <strong><code>tmap</code></strong>, small multiple maps can be plotted in three ways:</p>
 <section id="assign-multiple-values-to-at-least-one-of-the-asthetic-arguments" class="level5">
@@ -1131,8 +1136,8 @@ therefore deprecated</code></pre>
 </div>
 </section>
 </section>
-<section id="mapping-spatial-object-meeting-a-selection-criterion" class="level4">
-<h4 class="anchored" data-anchor-id="mapping-spatial-object-meeting-a-selection-criterion"><strong>Mapping Spatial Object Meeting a Selection Criterion</strong></h4>
+<section id="mapping-spatial-object-meeting-a-selection-criterion" class="level3">
+<h3 class="anchored" data-anchor-id="mapping-spatial-object-meeting-a-selection-criterion"><strong>Mapping Spatial Object Meeting a Selection Criterion</strong></h3>
 <p>Use selection funtion to map spatial objects meeting the selection criterion</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2020[mpsz_pop2020<span class="sc">$</span>REGION_N<span class="sc">==</span><span class="st">"CENTRAL REGION"</span>,])<span class="sc">+</span></span>
@@ -1165,7 +1170,6 @@ Please use legend.outside.size to control the width of the outside legend</code>
 <blockquote class="blockquote">
 <p>Warning: <code>legend.width</code> controls the width of the legend within a map. Please use <code>legend.outside.size</code> to control the width of the outside legend</p>
 </blockquote>
-</section>
 </section>
 </section>
 <section id="readings" class="level1">

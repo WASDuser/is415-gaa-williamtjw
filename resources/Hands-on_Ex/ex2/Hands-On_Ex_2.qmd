@@ -11,19 +11,15 @@ execute:
 
 # Overview
 
-### Terms & Concepts
+**Terms & Concepts**:
 
--   Geovisualisation: The **over-arching concept** that involve any geographic data visualisation technique
+-   **Geovisualisation**: The **over-arching concept** that involve any geographic data visualisation technique
 
--   Thematic mapping: Use of map types/symbols to visualise variables that are **not naturally visible** in a geographical area
+-   **Thematic** mapping: Use of map types/symbols to visualise variables that are **not naturally visible** in a geographical area
 
--   Chloropleth mapping: Type of thematic mapping to visualise variability across a region using **color**
+-   **Choropleth** mapping: Type of thematic mapping to visualise variability across a region using **color**
 
-I will be using R packages to build cartographic quality thematic maps.
-
-# Getting Started
-
-R packages used:
+I will be using these R packages to build cartographic quality thematic maps:
 
 -   **tmap**
 
@@ -71,7 +67,7 @@ Alternatively, use the one of the following code to explore the spatial data wit
 View(mspz) # opens a separate tab to view the data in RStudios
 ```
 
-```{r eval=FALSE}
+```{r}
 str(mspz) # check structure
 ```
 
@@ -161,9 +157,9 @@ mpsz_pop2020 <- left_join(mspz,popdata2020,by = c('SUBZONE_N'='SZ')) # c() is a 
 write_rds(mpsz_pop2020,'data/rds/mpszpop2020.rds')
 ```
 
-# **Choropleth Mapping Geospatial Data Using `tmap`** 
+# Choropleth Mapping Geospatial Data Using `tmap` 
 
-### **Using `qtm()`** 
+### Using `qtm()` 
 
 Plot a cartographic standard choropleth map
 
@@ -173,7 +169,7 @@ qtm(mpsz_pop2020,
     fill = "DEPENDENCY")  # map the attribute (i.e. DEPENDENCY)
 ```
 
-### **Using `tmap` elements**
+### Using `tmap` elements
 
 Despite its usefulness of drawing a choropleth map quickly and easily, the disadvantge of *qtm()* is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, **tmap**’s drawing elements should be used.
 
@@ -240,7 +236,7 @@ tm_shape(mpsz_pop2020)+tm_fill("DEPENDENCY") +
 # lty = border line type. The default is “solid”.
 ```
 
-### **Data classification methods of `tmap`**
+### Data classification methods of `tmap`
 
 Most choropleth maps employ some methods of data classification. The point of classification is to take a large number of observations and group them into data ranges or classes.
 
@@ -428,7 +424,7 @@ summary(mpsz_pop2020$DEPENDENCY)
 
 -   With reference to the results above, set break point at 0.60, 0.70, 0.80, and 0.90.
 
--   Include a minimum and maximum at 0 and 100.
+-   Include a minimum and maximum at 0 and 1.00.
 
 -   Hence `c(0, 0.60, 0.70, 0.80, 0.90, 1.00)`
 
@@ -543,11 +539,11 @@ tm_shape(mpsz_pop2020)+
 > To reset the default style,
 >
 > ``` R
-> {r eval=FALSE}
+> {r}
 > tmap_style("white")
 > ```
 
-### **Drawing Small Multiple Choropleth Maps**
+### Drawing Small Multiple Choropleth Maps
 
 **Small multiple maps**, also referred to as **facet maps**, are composed of many maps arrange side-by-side, and sometimes stacked vertically. Small multiple maps enable the visualisation of how spatial relationships change with respect to another variable, such as time.
 
