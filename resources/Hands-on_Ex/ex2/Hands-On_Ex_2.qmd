@@ -19,9 +19,153 @@ execute:
 
 -   Chloropleth mapping: Type of thematic mapping to visualise variability across a region using **color**
 
-I will be using `tmap` package to build cartographic quality thematic maps.
+I will be using R packages to build cartographic quality thematic maps.
 
-### Readings
+# Getting Started
+
+R packages used:
+
+-   **tmap**
+
+-   **tidyverse p**
+
+    -   [**readr**](https://readr.tidyverse.org/) for importing delimited text file,
+
+    -   [**tidyr**](https://tidyr.tidyverse.org/) for tidying data,
+
+    -   [**dplyr**](https://dplyr.tidyverse.org/) for wrangling data and
+
+    -   [**sf**](https://cran.r-project.org/web/packages/sf/index.html) for handling geospatial data.
+
+Load the packages into RStudio.
+
+```{r results='hide'}
+pacman::p_load(sf, tmap, tidyverse)
+```
+
+# Import Data
+
+### Data
+
+The following datasets will be used to create a choropleth map:
+
+-   [Master Plan 2014 Subzone](https://beta.data.gov.sg/datasets?query=Master+Plan+2014+Subzone+Boundary+%28Web%29&resultId=d_d14da225fccf921049ab64238ff473d9 "ESRI shapefile")[Boundary](https://beta.data.gov.sg/datasets?query=Master+Plan+2014+Subzone+Boundary+%28Web%29&resultId=d_d14da225fccf921049ab64238ff473d9)[(Web)](https://beta.data.gov.sg/datasets?query=Master+Plan+2014+Subzone+Boundary+%28Web%29&resultId=d_d14da225fccf921049ab64238ff473d9 "ESRI shapefile") : geospatial data consisting of the geographical boundary of SGP at the planning subzone level
+
+-   [Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2011-2020](https://www.singstat.gov.sg/find-data/search-by-theme/population/geographic-distribution/latest-data "csv format; aspatial data fie") : does not contain any coordinates values, but it’s PA and SZ fields can be used as UIDs to geocode to `MP14_SUBZONE_WEB_PL` shapefile
+
+### Import Geospatial Data using `st_read()` from `sf`
+
+```{r}
+mspz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
+```
+
+```{r}
+mspz
+```
+
+> Note: It displays only the first 10 rows (or features) by default. This is a feature of the `sf` package to prevent overwhelming the console with too much information at once, especially when working with large datasets.
+
+Alternatively, use the one of the following code to explore the spatial data without being limited by the default limit
+
+```{r eval=FALSE}
+View(mspz) # opens a separate tab to view the data in RStudios
+```
+
+```{r eval=FALSE}
+str(mspz) # check structure
+```
+
+### Import Attribute Data using `read_csv()` from `readr` package
+
+Import `respopagsex2011to2020.csv` file into RStudio and save the file into an R dataframe called `popdata`
+
+```{r}
+popdata <- read_csv("data/aspatial/respopagesexfa2011to2020.csv")
+```
+
+```{r eval=FALSE}
+view(popdata)
+```
+
+### Data Preparation
+
+Prepare a data table with year 2020 values. The data table should include the variables PA, SZ, YOUNG, ECONOMY ACTIVE, AGED, TOTAL, DEPENDENCY.
+
+-   YOUNG: age group 0 to 4 until age groyup 20 to 24,
+
+-   ECONOMY ACTIVE: age group 25-29 until age group 60-64,
+
+-   AGED: age group 65 and above,
+
+-   TOTAL: all age group, and
+
+-   DEPENDENCY: the ratio between young and aged against economy active group
+
+##### Data Wrangling
+
+> [Data wrangling](https://online.hbs.edu/blog/post/data-wrangling) is the process of transforming and structuring data from one raw form into a desired format with the intent of improving data quality and making it more consumable and useful for analytics or machine learning.
+
+Data wrangling & transformation functions used:
+
+-   `pivot_wider()` of **tidyr** package, and
+
+-   `mutate()`, `filter()`, `group_by()` and `select()` of **dplyr** package
+
+```{r}
+popdata2020 <- popdata %>%
+  # group_by -> summarise -> ungroup
+  filter(Time==2020) %>%   # keeps rows where the 'Time' col is 2020
+  group_by(PA,SZ,AG) %>%   # needed for summarise() to work
+  summarise(POP=sum(Pop)) %>% # summarises GROUPED DATA by summing 'Pop' value in each (PA,SZ,AG) group & stores in new col 'POP'
+  ungroup() %>%                   # removes grouping structure, allows us to perform further operations on the data
+  pivot_wider(names_from = AG,values_from =POP)  # reshapes data to WIDE format
+```
+
+Visualise `popdata2020` dataset before calculating age group totals.
+
+```{r eval=FALSE}
+View(popdata2020)
+```
+
+```{r}
+popdata2020 <- popdata2020 %>% 
+  # CALCULATING AGE GROUP TOTALS
+  mutate(`YOUNG`=rowSums(.[3:6])+rowSums(.[14])) %>%                # CREATES new col 'YOUNG'
+  mutate(`ECONOMY ACTIVE`=rowSums(.[7:13])+rowSums(.[15])) %>%   # CREATES new col `ECONOMY ACTIVE`
+  mutate(`AGED`=rowSums(.[16:21])) %>%                              # CREATES new col `AGED`
+  mutate(`TOTAL`=rowSums(.[3:21])) %>%                              # CREATES new col `TOTAL`
+  mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)/`ECONOMY ACTIVE`) %>%   # CREATES new col `DEPENDENCY` to calculate dependency ratio
+  select(`PA`, `SZ`, `YOUNG`, `ECONOMY ACTIVE`, `AGED`, `TOTAL`, `DEPENDENCY`) # determines column order and contents in OUTPUT DATASET
+
+```
+
+##### Join attribute and geospatial data
+
+Before we can perform the georelational join, one extra step is required to convert the values in PA and SZ fields to uppercase. This is because the values of PA and SZ fields are made up of upper- and lowercase. On the other, hand the SUBZONE_N and PLN_AREA_N are in uppercase.
+
+```{r}
+popdata2020 <- popdata2020 %>% 
+  mutate_at(.vars = vars(PA,SZ),.funs = list(toupper)) %>% 
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+Next, *left_join()* of **dplyr** is used to join the geographical data and attribute table using planning subzone name e.g. *SUBZONE_N* and *SZ* as the common identifier.
+
+```{r}
+mpsz_pop2020 <- left_join(mspz,popdata2020,by = c('SUBZONE_N'='SZ')) # c() is a generic func which combines its args
+```
+
+> Note that the format of the **left** data table (`mpsz` simple feature dataframe) is preserved in the output, because of `left_join`
+
+```{r}
+write_rds(mpsz_pop2020,'data/rds/mpszpop2020.rds')
+```
+
+# **Choropleth Mapping Geospatial Data Using `tmap`** 
+
+### **Plotting quickly by using `qtm()`** 
+
+# Readings
 
 +----------------------------------------------------------------------------------------------------------------+---------------------------------------------+---------------------------------------------------------------------+---------------------------------------------------------------------------+--------------------------------------------------------------------+----------------+
 | Reference                                                                                                      | Usage                                       | Pros                                                                | Cons                                                                      | Applications                                                       | Notes          |
