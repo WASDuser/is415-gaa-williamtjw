@@ -164,14 +164,13 @@ write_rds(mpsz_pop2020,'data/rds/mpszpop2020.rds')
 Plot a cartographic standard choropleth map
 
 ```{r}
-tmap_mode("plot")         # produce a static map; for interactive mode, “view” option should be used.
-qtm(mpsz_pop2020, 
-    fill = "DEPENDENCY")  # map the attribute (i.e. DEPENDENCY)
+tmap_mode("plot") # produce a static map; for interactive mode, “view” option should be used.
+qtm(mpsz_pop2020, fill = "DEPENDENCY") # map the attribute (i.e. DEPENDENCY)
 ```
 
 ### Using `tmap` elements
 
-Despite its usefulness of drawing a choropleth map quickly and easily, the disadvantge of *qtm()* is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, **tmap**’s drawing elements should be used.
+Despite its usefulness of drawing a choropleth map quickly and easily, the disadvantge of `qtm()` is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, `tmap`’s drawing elements should be used.
 
 ```{r}
 tm_shape(mpsz_pop2020)+
@@ -240,7 +239,29 @@ tm_shape(mpsz_pop2020)+tm_fill("DEPENDENCY") +
 
 Most choropleth maps employ some methods of data classification. The point of classification is to take a large number of observations and group them into data ranges or classes.
 
-**`tmap`** provides a total ten data classification methods, namely: *fixed*, *sd*, *equal*, *pretty* (default), *quantile*, *kmeans*, *hclust*, *bclust*, *fisher*, and *jenks*.
+**`tmap`** provides a total ten data classification methods, namely:
+
+~(click\ to\ jump\ to\ corresponding\ section)~
+
+-   *fixed*,
+
+-   [*sd*],
+
+-   [*equal*],
+
+-   [pretty (default],
+
+-   [*quantile*],
+
+-   [*kmeans*],
+
+-   [*hclust*],
+
+-   [*bclust*],
+
+-   [bclust], and
+
+-   [*jenks*].
 
 To define a data classification method, the `style` argument of `tm_fill()` or `tm_polygons()` will be used.
 
@@ -283,8 +304,6 @@ tm_shape(mpsz_pop2020)+
 ```
 
 > Notice that the distribution of quantile data classification method are more evenly distributed then equal data classification method.
-
-> DIY: Using what you had learned, prepare choropleth maps by using different classification methods supported by tmap and compare their differences.
 
 ##### sd
 
@@ -414,7 +433,7 @@ tm_shape(mpsz_pop2020)+
 
 #### Plotting choropleth map with custom break
 
-For all the built-in styles, the category breaks are computed internally. In order to override these defaults, the breakpoints can be set explicitly by means of the `breaks` argument to the `tm_fill()`. In **`tmap`** the breaks include a minimum and maximum. As a result, in order to end up with n categories, n+1 elements must be specified in the `breaks` option (ascending order).
+For all the built-in styles, the category breaks are computed internally. To override these defaults, set the breakpoints using the `breaks` argument in `tm_fill()`. In **`tmap`** the breaks include a minimum and maximum. Hence to have n categories, n+1 elements must be specified in the `breaks` option in ascending order.
 
 Compute and display the descriptive statistics of **DEPENDENCY** field
 
@@ -462,15 +481,13 @@ tm_shape(mpsz_pop2020)+
 tm_shape(mpsz_pop2020)+
   tm_fill("DEPENDENCY",
           style = "quantile",
-          palette = "-Greens") +
+          palette = "-Greens") + # lower data values = deeper green shading
   tm_borders(alpha = 0.5)
 ```
 
-> Notice that the colour scheme has been reversed.
-
 ### Map layout
 
-Map layout refers to the combination of all map elements into a cohensive map. Map elements include among others the objects to be mapped, the title, the scale bar, the compass, margins and aspects ratios. Colour settings and data classification methods covered in the previous section relate to the palette and break-points are used to affect how the map looks.
+Map layout refers to the combination of all map elements into a cohensive map. Map elements include map objects, the title, the scale bar, the compass, margins and aspects ratios. Colour settings and data classification methods covered in the previous section relate to the palette and break-points are used to affect how the map looks.
 
 ##### Map Legend
 
@@ -538,8 +555,7 @@ tm_shape(mpsz_pop2020)+
 
 > To reset the default style,
 >
-> ``` R
-> {r}
+> ```{r eval=FALSE}
 > tmap_style("white")
 > ```
 
@@ -575,7 +591,7 @@ tm_shape(mpsz_pop2020)+
 
 ##### Define a group-by variable in `tm_facets()`
 
-Create multiple small choropleth maps using **`tm_facets()`**.
+-   Create multiple small choropleth maps using **`tm_facets()`**.
 
 ```{r}
 tm_shape(mpsz_pop2020) +
@@ -592,7 +608,7 @@ tm_shape(mpsz_pop2020) +
   tm_borders(alpha = 0.5)
 ```
 
-Create multiple stand-alone maps with `tmap_arrange()`.
+##### Create multiple stand-alone maps with `tmap_arrange()`.
 
 ```{r}
 youngmap <- tm_shape(mpsz_pop2020)+ 
@@ -608,7 +624,7 @@ agedmap <- tm_shape(mpsz_pop2020)+
 tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
 ```
 
-### **Mapping Spatial Object Meeting a Selection Criterion**
+### Mapping Spatial Object Meeting a Selection Criterion
 
 Use selection funtion to map spatial objects meeting the selection criterion
 
