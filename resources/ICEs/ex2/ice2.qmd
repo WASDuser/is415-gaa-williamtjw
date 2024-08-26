@@ -12,10 +12,14 @@ execute:
 # Load packages
 
 ```{r}
-pacman::p_load(tidyverse,sf,)
+pacman::p_load(tidyverse,sf)
 ```
 
 # Import data
+
+### [**Master Plan 2014 Subzone Boundary (Web)**](https://beta.data.gov.sg/datasets?query=Master+Plan+2014+Subzone+Boundary+%28Web%29&resultId=d_5cb80a95445f236737f6bc2bfe5f159d)
+
+##### **SHP**
 
 ```{r }
 mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
@@ -32,26 +36,36 @@ mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
 View(mpsz14_shp)
 ```
 
+##### **KML**
+
 ```{r eval=FALSE}
 mpsz14_kml = st_read('data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml')
 # supposed to trigger a error message saying its unsupported / corrupted
 ```
 
-**`MasterPlan2014SubzoneBoundaryWebKML.kml` from data.gov.sg is apparently corrupted. This is a quick fix:**
+**`MasterPlan2014SubzoneBoundaryWebKML.kml` from data.gov.sg is apparently corrupted.**
+
+**This is a quick fix:**
 
 ```{r warning=FALSE}
 st_write(mpsz14_shp, 'data/geospatial/MP14_SUBZONE_WEB_PL.kml', delete_dsn = TRUE)
 ```
 
-**Import Master Plan 2019 Subzone Boundary (No sea) kml and geojson**
+### **Master Plan 2019 Subzone Boundary (No sea)** 
+
+##### **kml**
 
 ```{r}
 mpsz19_kml = st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml')
 ```
 
+##### **SHP** (from ice1 in elearn)
+
 ```{r}
 mpsz19_shp <- st_read(dsn = 'data/MPSZ-2019/', layer = 'MPSZ-2019')
 ```
+
+##### **geojson**
 
 ```{r}
 mpsz19_geojson <- st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson')

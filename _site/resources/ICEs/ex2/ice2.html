@@ -175,8 +175,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#load-packages" id="toc-load-packages" class="nav-link active" data-scroll-target="#load-packages">Load packages</a></li>
+  <li><a href="#import-data" id="toc-import-data" class="nav-link" data-scroll-target="#import-data">Import data</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -218,13 +225,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Load packages</p>
+<section id="load-packages" class="level1">
+<h1>Load packages</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse,sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse,sf,)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Your package installed</code></pre>
 </div>
-<p>Import data</p>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in pacman::p_load(tidyverse, sf, ): Failed to install/load:</code></pre>
+</div>
+</div>
+</section>
+<section id="import-data" class="level1">
+<h1>Import data</h1>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mpsz14_shp <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/geospatial/'</span>, <span class="at">layer =</span> <span class="st">'MP14_SUBZONE_WEB_PL'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mpsz14_shp <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/geospatial/'</span>, <span class="at">layer =</span> <span class="st">'MP14_SUBZONE_WEB_PL'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `MP14_SUBZONE_WEB_PL' from data source 
   `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex2/data/geospatial' 
@@ -235,9 +252,79 @@ Dimension:     XY
 Bounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33
 Projected CRS: SVY21</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># layer means sf will search for the engine(?)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># layer wont need extension because it knows to seek for a shapefile</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#'&lt;-' or '=' works on windows+macOS</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<blockquote class="blockquote">
+<p>Note: R is a OOP enabled language, sf being the object class</p>
+</blockquote>
+<p><strong>Examine the data</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(mpsz14_shp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mpsz14_kml <span class="ot">=</span> <span class="fu">st_read</span>(<span class="st">'data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml'</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># supposed to trigger a error message saying its unsupported / corrupted</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong><code>MasterPlan2014SubzoneBoundaryWebKML.kml</code> from data.gov.sg is apparently corrupted. This is a quick fix:</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(mpsz14_shp, <span class="st">'data/geospatial/MP14_SUBZONE_WEB_PL.kml'</span>, <span class="at">delete_dsn =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Deleting source `data/geospatial/MP14_SUBZONE_WEB_PL.kml' using driver `KML'
+Writing layer `MP14_SUBZONE_WEB_PL' to data source 
+  `data/geospatial/MP14_SUBZONE_WEB_PL.kml' using driver `KML'
+Writing 323 features with 15 fields and geometry type Multi Polygon.</code></pre>
+</div>
+</div>
+<p><strong>Import Master Plan 2019 Subzone Boundary (No sea) kml and geojson</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mpsz19_kml <span class="ot">=</span> <span class="fu">st_read</span>(<span class="st">'data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `URA_MP19_SUBZONE_NO_SEA_PL' from data source 
+  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex2/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml' 
+  using driver `KML'
+Simple feature collection with 332 features and 2 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY, XYZ
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+z_range:       zmin: 0 zmax: 0
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>mpsz19_shp <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/MPSZ-2019/'</span>, <span class="at">layer =</span> <span class="st">'MPSZ-2019'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `MPSZ-2019' from data source 
+  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex2/data/MPSZ-2019' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 332 features and 6 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mpsz19_geojson <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">'data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `MasterPlan2019SubzoneBoundaryNoSeaGEOJSON' from data source 
+  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex2/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson' 
+  using driver `GeoJSON'
+Simple feature collection with 332 features and 2 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY, XYZ
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+z_range:       zmin: 0 zmax: 0
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Note: geojson format is very messy because the data is buried under html tags so lines of code is needed to extract; while in the kml / shp formats the data is readily accessible</p>
+</blockquote>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
