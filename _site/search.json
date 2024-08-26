@@ -33,5 +33,12 @@
     "title": "Geospatial Analytics and Applications (GAA)",
     "section": "",
     "text": "This is website contains my notes, ICEs, assignments for GAA. Enjoy."
+  },
+  {
+    "objectID": "resources/ICEs/ex2/ice2.html",
+    "href": "resources/ICEs/ex2/ice2.html",
+    "title": "ICE 2:",
+    "section": "",
+    "text": "Load packages\n\npacman::p_load(tidyverse,sf)\n\nImport data\n\nmpsz14_shp &lt;- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')\n\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex2/data/geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21"
   }
 ]

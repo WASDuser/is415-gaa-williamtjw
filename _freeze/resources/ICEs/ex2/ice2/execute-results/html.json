@@ -1,0 +1,15 @@
+{
+  "hash": "2426f2e2bd178b16655de3da5da8ff33",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"ICE 2: \"\nauthor: \"William\"\ndate: \"August 26, 2024\"\ndate-modified: \"last-modified\"\nexecute: \n  eval: true\n  echo: true\n  freeze: true\n---\n\n\n\nLoad packages\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(tidyverse,sf)\n```\n:::\n\n\n\nImport data\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex2/data/geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n```\n\n\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

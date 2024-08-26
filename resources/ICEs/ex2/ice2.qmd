@@ -1,0 +1,22 @@
+---
+title: "ICE 2: "
+author: "William"
+date: "August 26, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+Load packages
+
+```{r}
+pacman::p_load(tidyverse,sf)
+```
+
+Import data
+
+```{r}
+mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
+```

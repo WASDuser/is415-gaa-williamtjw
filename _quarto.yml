@@ -16,6 +16,8 @@ website:
       menu:
         - text: "ICE 1"
           href: "resources/ICEs/ex1/ice1.qmd"
+        - text: "ICE 2"
+          href: "resources/ICEs/ex2/ice2.qmd"          
     right: 
       - href: index.qmd
         text: Home

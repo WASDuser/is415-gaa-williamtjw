@@ -157,9 +157,9 @@ mpsz_pop2020 <- left_join(mspz,popdata2020,by = c('SUBZONE_N'='SZ')) # c() is a 
 write_rds(mpsz_pop2020,'data/rds/mpszpop2020.rds')
 ```
 
-# Choropleth Mapping Geospatial Data Using `tmap` 
+# Choropleth Mapping Geospatial Data Using `tmap`
 
-### Using `qtm()` 
+### Using `qtm()`
 
 Plot a cartographic standard choropleth map
 
@@ -211,7 +211,7 @@ tm_shape(mpsz_pop2020)+tm_polygons("DEPENDENCY")
 # By default, Missing value will be shaded in grey.
 ```
 
-##### Plotting a choropleth map using `tm_fill()` and `tm_border()` 
+##### Plotting a choropleth map using `tm_fill()` and `tm_border()`
 
 `tm_fill()` shades the polygons by using the default colour scheme and `tm_borders()` adds the borders of the shapefile onto the choropleth map
 
@@ -241,27 +241,27 @@ Most choropleth maps employ some methods of data classification. The point of cl
 
 **`tmap`** provides a total ten data classification methods, namely:
 
-~(click\ to\ jump\ to\ corresponding\ section)~
+~(click to jump to corresponding section)~
 
 -   *fixed*,
 
--   [*sd*],
+-   \[*sd*\],
 
--   [*equal*],
+-   \[*equal*\],
 
--   [pretty (default],
+-   \[pretty (default\],
 
--   [*quantile*],
+-   \[*quantile*\],
 
--   [*kmeans*],
+-   \[*kmeans*\],
 
--   [*hclust*],
+-   \[*hclust*\],
 
--   [*bclust*],
+-   \[*bclust*\],
 
 -   [bclust], and
 
--   [*jenks*].
+-   \[*jenks*\].
 
 To define a data classification method, the `style` argument of `tm_fill()` or `tm_polygons()` will be used.
 
