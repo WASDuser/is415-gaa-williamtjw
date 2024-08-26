@@ -26,7 +26,7 @@ mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
 
 > Note: R is a OOP enabled language, sf being the object class
 
-Examine the data
+**Examine the data**
 
 ```{r eval=FALSE}
 View(mpsz14_shp)
@@ -37,8 +37,24 @@ mpsz14_kml = st_read('data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml')
 # supposed to trigger a error message saying its unsupported / corrupted
 ```
 
-`MasterPlan2014SubzoneBoundaryWebKML.kml` from data.gov.sg is apparently corrupted. This is a quick fix:
+**`MasterPlan2014SubzoneBoundaryWebKML.kml` from data.gov.sg is apparently corrupted. This is a quick fix:**
 
 ```{r warning=FALSE}
 st_write(mpsz14_shp, 'data/geospatial/MP14_SUBZONE_WEB_PL.kml', delete_dsn = TRUE)
 ```
+
+**Import Master Plan 2019 Subzone Boundary (No sea) kml and geojson**
+
+```{r}
+mpsz19_kml = st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml')
+```
+
+```{r}
+mpsz19_shp <- st_read(dsn = 'data/MPSZ-2019/', layer = 'MPSZ-2019')
+```
+
+```{r}
+mpsz19_geojson <- st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson')
+```
+
+> Note: geojson format is very messy because the data is buried under html tags so lines of code is needed to extract; while in the kml / shp formats the data is readily accessible
