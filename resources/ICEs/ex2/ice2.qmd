@@ -9,14 +9,36 @@ execute:
   freeze: true
 ---
 
-Load packages
+# Load packages
 
 ```{r}
-pacman::p_load(tidyverse,sf)
+pacman::p_load(tidyverse,sf,)
 ```
 
-Import data
+# Import data
 
-```{r}
+```{r }
 mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
+# layer means sf will search for the engine(?)
+# layer wont need extension because it knows to seek for a shapefile
+#'<-' or '=' works on windows+macOS
+```
+
+> Note: R is a OOP enabled language, sf being the object class
+
+Examine the data
+
+```{r eval=FALSE}
+View(mpsz14_shp)
+```
+
+```{r eval=FALSE}
+mpsz14_kml = st_read('data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml')
+# supposed to trigger a error message saying its unsupported / corrupted
+```
+
+`MasterPlan2014SubzoneBoundaryWebKML.kml` from data.gov.sg is apparently corrupted. This is a quick fix:
+
+```{r warning=FALSE}
+st_write(mpsz14_shp, 'data/geospatial/MP14_SUBZONE_WEB_PL.kml', delete_dsn = TRUE)
 ```
