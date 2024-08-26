@@ -12,7 +12,7 @@ execute:
 # Load packages
 
 ```{r}
-pacman::p_load(tidyverse,sf)
+pacman::p_load(tidyverse,sf,ggstatsplot,tmap)
 ```
 
 # Import data
@@ -83,14 +83,62 @@ mpsz19_geojson <- st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEO
 popdata2023 = read_csv('data/respopagesexfa2023.csv')
 ```
 
+# Data Wrangling
+
 **Prepare a data frame using the population data**
 
 ```{r}
-popdata2023 = popdata %>% 
+popdata2023 = popdata2023 %>% 
   group_by(PA,SZ,AG) %>% 
   summarise(POP=sum(Pop)) %>% 
-  ungroup()
+  ungroup() %>% 
+  pivot_wider(names_from = AG,values_from = POP)
 ```
+
+> pivot_wider() transposes the data table structure for easier function application
+
+**Examine the data structure**
+
+```{r}
+str(popdata2023)
+```
+
+> Note: age ranges are not in sequential order
+
+```{r}
+colnames(popdata2023)
+```
+
+> Note: index starts from 1
+
+**Fix the data table (override the previous)**
+
+```{r}
+popdata2023 = popdata2023 %>% 
+  # CALCULATING AGE GROUP TOTALS
+  mutate(`YOUNG`=rowSums(.[3:6])+rowSums(.[14])) %>%                # CREATES new col 'YOUNG'
+  mutate(`ECONOMY ACTIVE`=rowSums(.[7:13])+rowSums(.[15])) %>%   # CREATES new col `ECONOMY ACTIVE`
+  mutate(`AGED`=rowSums(.[16:21])) %>%                              # CREATES new col `AGED`
+  mutate(`TOTAL`=rowSums(.[3:21])) %>%                              # CREATES new col `TOTAL`
+  mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)/`ECONOMY ACTIVE`) %>%   # CREATES new col `DEPENDENCY` to calculate dependency ratio
+  select(`PA`, `SZ`, `YOUNG`, `ECONOMY ACTIVE`, `AGED`, `TOTAL`, `DEPENDENCY`) # determines column order and contents in OUTPUT DATASET
+
+```
+
+**Because R is case sensitive, convert everything into the same upper/lowercase in all the datasets**
+
+```{r}
+popdata2023 = popdata2023 %>% 
+  mutate_at(.vars = vars(PA,SZ),.funs = list(toupper))
+```
+
+**Combine**
+
+```{r}
+popdata2023 = left_join(popdata2023,mpsz19_shp, by = c('SZ'='SUBZONE_N'))
+```
+
+> Note: In the c() function, the column names' positions correspond to which data table is the left table
 
 # Transforming Coordinate System
 
