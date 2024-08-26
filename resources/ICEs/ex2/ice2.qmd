@@ -72,3 +72,40 @@ mpsz19_geojson <- st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEO
 ```
 
 > Note: geojson format is very messy because the data is buried under html tags so lines of code is needed to extract; while in the kml / shp formats the data is readily accessible
+
+> Note: under 'geometry' if the values tend to be large, its because its in PCS (measure in meters)
+
+### Singapore Residents by Planning Area / Subzone, Age Group, Sex and Floor Area of Residence 2023
+
+> Note: use the .csv file
+
+```{r}
+popdata2023 = read_csv('data/respopagesexfa2023.csv')
+```
+
+**Prepare a data frame using the population data**
+
+```{r}
+popdata2023 = popdata %>% 
+  group_by(PA,SZ,AG) %>% 
+  summarise(POP=sum(Pop)) %>% 
+  ungroup()
+```
+
+# Transforming Coordinate System
+
+```{r}
+mpsz19_shp = st_read(dsn = 'data/MPSZ-2019/', layer = 'MPSZ-2019') %>% # piping caches for next operation, saving memory
+  st_transform(crs = 3414)
+```
+
+```{r}
+preschool = st_read('data/PreSchoolsLocation.kml') %>% 
+  st_transform(crs = 3414)
+```
+
+**Checking CRS**
+
+```{r}
+st_crs(mpsz19_shp)
+```
