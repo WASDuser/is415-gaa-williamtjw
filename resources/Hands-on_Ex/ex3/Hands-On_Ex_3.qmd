@@ -31,11 +31,19 @@ execute:
 
             -   **Kernel density estimation:** compute intensity of a point distribution (Adaptive v. Fixed Bandwidth)
 
-            -   **Quadrat analysis:**
+            -   **Quadrat analysis** to obtain variance-mean ratio (VMR: \>0,0,\<0)**:** measure of **dispersion** rather than a measure of **pattern;** single measure for the entire distribution, so **variation within the region are not recognised**
 
         -   Distance-based
 
             -   Nearest Neighbour Index
+
+            -   G-function
+
+            -   F-function
+
+            -   K-function
+
+            -   L-function
 
 </details>
 
@@ -44,3 +52,5 @@ execute:
 -   [Intro to GIS and Spatial Analysis](https://mgimond.github.io/Spatial/index.html)
 
 -   [POINT PATTERN ANALYSIS](https://storymaps.arcgis.com/stories/2d7ebcc8ae5c4df3b8ad56a3e9a82317)
+
+-   [spatstat](https://cran.r-project.org/web/packages/spatstat/)
