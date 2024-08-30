@@ -1,0 +1,22 @@
+---
+title: "Hands-on Exercise 3: 1st and 2nd Order Spatial Point Patterns Analysis Methods"
+author: "William"
+date: "August 23, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Overview
+
+![~Distribution of Crime Incidents~](data/img/distribution-of-crime-with-vacant-properties.jpg){fig-align="center"}
+
+-   **Point pattern analysis** (PPA) is the study of the spatial arrangements of points in (usually 2D) space to find out if the pattern is random or the result of something.
+
+    ![](data/img/spatial-ppa.jpg)
+
+-   First-order vs Second-order Analysis of spatial point patterns
+
+    ![](data/img/spatial-ppa-methods.jpg)
