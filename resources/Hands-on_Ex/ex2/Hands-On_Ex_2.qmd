@@ -675,12 +675,6 @@ tm_shape(mpsz_pop2020[mpsz_pop2020$REGION_N=="CENTRAL REGION",])+
 
 -   Methods
 
-    -   Equal interval
-
-    -   Quantile
-
-    -   Manual (based on summary stats or other criteria)
-
 -   Tools (for future reference)
 
     -   [QGIS](https://www.qgis.org/)
@@ -688,3 +682,9 @@ tm_shape(mpsz_pop2020[mpsz_pop2020$REGION_N=="CENTRAL REGION",])+
     -   ArcGIS
 
     -   [D3](https://d3js.org/getting-started) - JS libraries for visualising spatial data (web mapping)
+
+[dplyr](https://dplyr.tidyverse.org/) cheatsheets
+
+[![](data/dplyr-cheatsheet.png)](https://dplyr.tidyverse.org/)
+
+[![](data/dplyr-cheatsheet2.png)](https://dplyr.tidyverse.org/)

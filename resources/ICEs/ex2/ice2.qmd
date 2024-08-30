@@ -51,7 +51,7 @@ mpsz14_kml = st_read('data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml')
 st_write(mpsz14_shp, 'data/geospatial/MP14_SUBZONE_WEB_PL.kml', delete_dsn = TRUE)
 ```
 
-### **Master Plan 2019 Subzone Boundary (No sea)** 
+### **Master Plan 2019 Subzone Boundary (No sea)**
 
 ##### **kml**
 
