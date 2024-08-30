@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="William">
+<meta name="dcterms.date" content="2024-08-30">
 
-<title>Geospatial Analytics and Applications (GAA) – IS415</title>
+<title>Hands-on Exercise 3: 1st and 2nd Order Spatial Point Patterns Analysis Methods – IS415</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,22 +25,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -68,7 +70,7 @@ ul.task-list li input[type="checkbox"] {
 }</script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../../styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -78,7 +80,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../../index.html">
     <span class="navbar-title">IS415</span>
     </a>
   </div>
@@ -94,15 +96,15 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercise">    
         <li>
-    <a class="dropdown-item" href="./resources/Hands-on_Ex/ex1/Hands-On_Ex_1.html">
+    <a class="dropdown-item" href="../../../resources/Hands-on_Ex/ex1/Hands-On_Ex_1.html">
  <span class="dropdown-text">Hands-on Exercise 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./resources/Hands-on_Ex/ex2/Hands-On_Ex_2.html">
+    <a class="dropdown-item" href="../../../resources/Hands-on_Ex/ex2/Hands-On_Ex_2.html">
  <span class="dropdown-text">Hands-on Exercise 2</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./resources/Hands-on_Ex/ex3/Hands-On_Ex_3.html">
+    <a class="dropdown-item" href="../../../resources/Hands-on_Ex/ex3/Hands-On_Ex_3.html">
  <span class="dropdown-text">Hands-on Exercise 3</span></a>
   </li>  
     </ul>
@@ -113,11 +115,11 @@ ul.task-list li input[type="checkbox"] {
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercise-(ice">    
         <li>
-    <a class="dropdown-item" href="./resources/ICEs/ex1/ice1.html">
+    <a class="dropdown-item" href="../../../resources/ICEs/ex1/ice1.html">
  <span class="dropdown-text">ICE 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="./resources/ICEs/ex2/ice2.html">
+    <a class="dropdown-item" href="../../../resources/ICEs/ex2/ice2.html">
  <span class="dropdown-text">ICE 2</span></a>
   </li>  
     </ul>
@@ -125,11 +127,11 @@ ul.task-list li input[type="checkbox"] {
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../../../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
 </ul>
@@ -143,23 +145,51 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#lesson-notes" id="toc-lesson-notes" class="nav-link" data-scroll-target="#lesson-notes">Lesson Notes</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Geospatial Analytics and Applications (GAA)</h1>
+<h1 class="title">Hands-on Exercise 3: 1st and 2nd Order Spatial Point Patterns Analysis Methods</h1>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>William </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 30, 2024</p>
+    </div>
+  </div>
   
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">August 31, 2024</p>
+    </div>
+  </div>
     
   </div>
   
@@ -168,9 +198,49 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>This is website contains my notes, ICEs, assignments for <strong>GAA</strong>. Enjoy.</p>
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<section id="lesson-notes" class="level3">
+<h3 class="anchored" data-anchor-id="lesson-notes">Lesson Notes</h3>
+<details>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="data/img/distribution-of-crime-with-vacant-properties.jpg" class="img-fluid figure-img"></p>
+<figcaption><sub>Distribution&nbsp;of&nbsp;Crime&nbsp;Incidents</sub></figcaption>
+</figure>
+</div>
+<ul>
+<li><p><strong>Point pattern analysis</strong> (PPA) is the study of the spatial arrangements of points in (usually 2D) space to find out if the pattern is random or the result of something.</p>
+<p><img src="data/img/spatial-ppa.jpg" class="img-fluid"></p></li>
+<li><p>Spatial PPA Methods</p>
+<p><img src="data/img/spatial-ppa-methods.jpg" class="img-fluid"></p>
+<ul>
+<li><p>1<sup>st</sup> order</p>
+<ul>
+<li><p>Density-based</p>
+<ul>
+<li><p><strong>Kernel density estimation:</strong> compute intensity of a point distribution (Adaptive v. Fixed Bandwidth)</p></li>
+<li><p><strong>Quadrat analysis:</strong></p></li>
+</ul></li>
+<li><p>Distance-based</p>
+<ul>
+<li>Nearest Neighbour Index</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</details>
+</section>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<ul>
+<li><p><a href="https://mgimond.github.io/Spatial/index.html">Intro to GIS and Spatial Analysis</a></p></li>
+<li><p><a href="https://storymaps.arcgis.com/stories/2d7ebcc8ae5c4df3b8ad56a3e9a82317">POINT PATTERN ANALYSIS</a></p></li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -47,5 +47,12 @@
     "title": "IS415",
     "section": "",
     "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     dataset\n\n\n        0 0     false"
+  },
+  {
+    "objectID": "resources/Hands-on_Ex/ex3/Hands-On_Ex_3.html",
+    "href": "resources/Hands-on_Ex/ex3/Hands-On_Ex_3.html",
+    "title": "Hands-on Exercise 3: 1st and 2nd Order Spatial Point Patterns Analysis Methods",
+    "section": "",
+    "text": "Overview\n\nLesson Notes\n\n\n\n\nDistribution of Crime Incidents\n\n\n\nPoint pattern analysis (PPA) is the study of the spatial arrangements of points in (usually 2D) space to find out if the pattern is random or the result of something.\n\nSpatial PPA Methods\n\n\n1st order\n\nDensity-based\n\nKernel density estimation: compute intensity of a point distribution (Adaptive v. Fixed Bandwidth)\nQuadrat analysis:\n\nDistance-based\n\nNearest Neighbour Index\n\n\n\n\n\n\n\n\nReferences\n\nIntro to GIS and Spatial Analysis\nPOINT PATTERN ANALYSIS"
   }
 ]
