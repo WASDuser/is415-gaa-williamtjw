@@ -1,7 +1,7 @@
 ---
 title: "Hands-on Exercise 3: 1st and 2nd Order Spatial Point Patterns Analysis Methods"
 author: "William"
-date: "August 23, 2024"
+date: "August 30, 2024"
 date-modified: "last-modified"
 execute: 
   eval: true
