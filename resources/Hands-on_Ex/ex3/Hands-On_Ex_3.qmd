@@ -694,11 +694,49 @@ plot(density(childcare_tm_ppp_km,
 
 Perform the **Clark-Evans test of aggregation** for a spatial point pattern by using [`clarkevans.test()`](https://www.rdocumentation.org/packages/spatstat/versions/1.63-3/topics/clarkevans.test) of **statspat**.
 
--   H~o~ = The distribution of childcare services are randomly distributed.
+This test measures whether a spatial point pattern is more regular (evenly spaced) or more clustered than a random distribution.
+
+-   H~o~ = The distribution of childcare services are randomly distributed (CSR).
 
 -   H~1~= The distribution of childcare services are not randomly distributed.
 
 -   95% confidence level
+
+```{r}
+clarkevans.test(childcareSG_ppp,
+                correction="none",
+                clipregion="sg_owin",
+                alternative=c("clustered"), # type of alternative for the hypothesis test
+                nsim=99                     # Number of Monte Carlo simulations to perform
+  )
+# clarkevans test is a crude measure of clustering or ordering of a point pattern.
+
+# This very small p-value (and <0.05) indicates strong evidence against Ho, suggesting that the spatial pattern childcareSG_ppps is significantly different from CSR.
+```
+
+### **Clark and Evans Test: Choa Chu Kang planning area**
+
+```{r}
+clarkevans.test(childcare_ck_ppp,
+                correction="none",
+                clipregion=NULL,
+                alternative=c("two.sided"), # check for deviations in both directions—whether the pattern is more regular or more clustered.
+                nsim=999)
+
+# p-value < 0.05: no statistical evidence that the spatial pattern in childcare_ck_ppp is different from CSR
+```
+
+### **Clark and Evans Test: Tampines planning area**
+
+```{r}
+clarkevans.test(childcare_tm_ppp,
+                correction="none",
+                clipregion=NULL,
+                alternative=c("two.sided"),
+                nsim=999)
+
+# same conclusion as above
+```
 
 # References
 
