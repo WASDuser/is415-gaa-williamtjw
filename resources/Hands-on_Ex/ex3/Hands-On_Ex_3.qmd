@@ -179,6 +179,67 @@ tmap_mode('plot')
 
 > Always remember to switch back to plot mode after the interactive map. This is because, each interactive mode will consume a connection. You should also avoid displaying ecessive numbers of interactive maps (i.e. not more than 10) in one RMarkdown document when publish on Netlify.
 
+## **Geospatial Data wrangling**
+
+Many geospatial analysis packages require the input geospatial data in sp’s Spatial\* classes.
+
+### **Converting sf data frames to sp’s Spatial\* class**
+
+```{r}
+childcare <- as_Spatial(childcare_sf3414)
+sg <- as_Spatial(sg_sf3414)
+mpsz <- as_Spatial(mpsz_sf3414)
+```
+
+**Examine the information of these three Spatial\* classes.**
+
+```{r}
+structure(childcare) # class: SpatialPointsDataFrame
+```
+
+```{r}
+structure(sg) # class: SpatialPolygonsDataFrame
+```
+
+```{r}
+structure(mpsz) # class: SpatialPolygonsDataFrame
+```
+
+### **Converting the Spatial\* class into generic sp format**
+
+```{r}
+childcare_sp <- as(childcare, 'SpatialPoints')
+sg_sp <- as(sg, 'SpatialPolygons')
+mpsz_sp <- as(mpsz, 'SpatialPolygons')
+```
+
+```{r}
+childcare_sp
+```
+
+```{r}
+sg_sp
+```
+
+```{r}
+mpsz_sp
+```
+
+### **Converting the generic sp format into spatstat’s ppp format**
+
+Use `as.ppp()` function of `spatstat` to convert the spatial data into `spatstat`’s `ppp` object format
+
+```{r}
+childcare_ppp <- as.ppp(childcare_sf)
+childcare_ppp
+```
+
+Plot `childcare_ppp`
+
+```{r}
+plot(childcare_ppp)
+```
+
 # References
 
 -   [Intro to GIS and Spatial Analysis](https://mgimond.github.io/Spatial/index.html)
