@@ -343,7 +343,7 @@ plot(childcareSG_ppp)
 
 -   performing **Confirmatory SPPA** by using **Nearest Neighbour (NN)** statistics.
 
-## **KDE (of childcare services in Singapore)**
+### **KDE (of childcare services in Singapore)**
 
 #### Using automatic bandwidth selection method
 
@@ -407,7 +407,7 @@ plot(kde_childcareSG_bw)
 
 > KDE map is similar to the first but with a different scale in the legend
 
-## **Working with different automatic badwidth methods**
+### **Working with different automatic bandwidth methods**
 
 Beside `bw.diggle()`, there are three other **spatstat** functions can be used to determine the bandwidth, they are: `bw.CvL()`, `bw.scott()`, and `bw.ppl()`.
 
@@ -448,7 +448,7 @@ plot(kde_childcareSG_bw,main='bw.diggle')
 plot(kde_childcareSG_ppl,main='bw.ppl')
 ```
 
-## **Working with different kernel methods**
+### **Working with different kernel methods**
 
 By default, the kernel method used in *density.ppp()* is *gaussian*. But there are three other options, namely: Epanechnikov, Quartic and Dics.
 
@@ -483,7 +483,7 @@ par(mar=c(1,1,1,1))
 #instead, the error is fixed; or u could simply resize your window.
 ```
 
-# **Fixed and Adaptive KDE**
+## **Fixed and Adaptive KDE**
 
 ### Compute KDE using fixed BW
 
@@ -524,6 +524,181 @@ par(mfrow=c(1,2))
 plot(kde_childcareSG_bw, main = "Fixed BW")
 plot(kde_childcareSG_adaptive, main = "Adaptive BW")
 ```
+
+### **Converting KDE output into grid object**
+
+Convert it so that it is suitable for mapping purposes.
+
+```{r}
+gridded_kde_childcareSG_bw <- as(kde_childcareSG_bw,'SpatialGridDataFrame')
+spplot(gridded_kde_childcareSG_bw)
+```
+
+#### Converting gridded output into raster
+
+Convert the gridded kernal density objects into `RasterLayer` object by using `raster()` of **raster** package
+
+```{r}
+kde_childcareSG_bw_raster <- raster(kde_childcareSG_bw)
+```
+
+```{r}
+kde_childcareSG_bw_raster # min value differs from reference output(?)
+```
+
+#### Assigning projection systems
+
+Include the CRS information on `kde_childcareSG_bw_raster` RasterLayer
+
+```{r}
+projection(kde_childcareSG_bw_raster) <- CRS("+init=EPSG:3414")
+kde_childcareSG_bw_raster
+```
+
+> Note the changes in the 'CRS' property.
+
+### **Visualising the output in `tmap`**
+
+Display the raster in cartographic quality map
+
+```{r}
+tm_shape(kde_childcareSG_bw_raster) + 
+  tm_raster("layer", palette = "viridis") +
+  tm_layout(legend.position = c("right", "bottom"), frame = FALSE)
+```
+
+### **Comparing Spatial Point Patterns using KDE**
+
+Compare KDE of childcare at Punggol, Tampines, Chua Chu Kang and Jurong West planning areas.
+
+**Extract and Plot study areas**
+
+```{r}
+pg <- mpsz_sf %>% filter(PLN_AREA_N == "PUNGGOL")
+tm <- mpsz_sf %>% filter(PLN_AREA_N == "TAMPINES")
+ck <- mpsz_sf %>% filter(PLN_AREA_N == "CHOA CHU KANG")
+jw <- mpsz_sf %>% filter(PLN_AREA_N == "JURONG WEST")
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(pg, main = "Punggol")
+```
+
+```{r}
+plot(tm, main = "Tampines")
+```
+
+```{r}
+plot(ck, main = "Choa Chu Kang")
+```
+
+```{r}
+plot(jw, main = "Jurong West")
+```
+
+**Create `owin` object**
+
+-   convert these `sf` objects into `owin` objects that is required by **spatstat**.
+
+```{r}
+pg_owin = as.owin(pg)
+tm_owin = as.owin(tm)
+ck_owin = as.owin(ck)
+jw_owin = as.owin(jw)
+```
+
+**Combine childcare points and the study area**
+
+-   extract childcare that is within the specific region for future analysis
+
+```{r}
+childcare_pg_ppp = childcare_ppp_jit[pg_owin]
+childcare_tm_ppp = childcare_ppp_jit[tm_owin]
+childcare_ck_ppp = childcare_ppp_jit[ck_owin]
+childcare_jw_ppp = childcare_ppp_jit[jw_owin]
+```
+
+-   convert `m` to `km` using `rescale.ppp()`
+
+```{r}
+childcare_pg_ppp_km = rescale.ppp(childcare_pg_ppp, 1000, "km")
+childcare_tm_ppp_km = rescale.ppp(childcare_tm_ppp, 1000, "km")
+childcare_ck_ppp_km = rescale.ppp(childcare_ck_ppp, 1000, "km")
+childcare_jw_ppp_km = rescale.ppp(childcare_jw_ppp, 1000, "km")
+```
+
+-   plot these four study areas and the locations of the childcare centres
+
+```{r}
+par(mfrow=c(2,2))
+plot(childcare_pg_ppp_km, main="Punggol")
+plot(childcare_tm_ppp_km, main="Tampines")
+plot(childcare_ck_ppp_km, main="Choa Chu Kang")
+plot(childcare_jw_ppp_km, main="Jurong West")
+```
+
+-   compute KDE (`bw.diggle` method is used to derive each of the bandwidth)
+
+```{r}
+par(mfrow=c(2,2))
+plot(density(childcare_pg_ppp_km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Punggol")
+plot(density(childcare_tm_ppp_km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Tampines")
+plot(density(childcare_ck_ppp_km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Choa Chu Kang")
+plot(density(childcare_jw_ppp_km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Jurong West")
+```
+
+-   Compute fixed bandwidth KDE (250m for comparison)
+
+```{r}
+par(mfrow=c(2,2))
+plot(density(childcare_ck_ppp_km, 
+             sigma=0.25, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Choa Chu Kang")
+plot(density(childcare_jw_ppp_km, 
+             sigma=0.25, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Jurong West")
+plot(density(childcare_pg_ppp_km, 
+             sigma=0.25, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Punggol")
+plot(density(childcare_tm_ppp_km, 
+             sigma=0.25, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Tampines")
+```
+
+## **Nearest Neighbour Analysis**
+
+Perform the **Clark-Evans test of aggregation** for a spatial point pattern by using [`clarkevans.test()`](https://www.rdocumentation.org/packages/spatstat/versions/1.63-3/topics/clarkevans.test) of **statspat**.
+
+-   H~o~ = The distribution of childcare services are randomly distributed.
+
+-   H~1~= The distribution of childcare services are not randomly distributed.
+
+-   95% confidence level
 
 # References
 
