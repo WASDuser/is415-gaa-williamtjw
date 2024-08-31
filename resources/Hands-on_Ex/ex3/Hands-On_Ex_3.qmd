@@ -738,6 +738,161 @@ clarkevans.test(childcare_tm_ppp,
 # same conclusion as above
 ```
 
+# 2^nd^ order SPPA 
+
+### Using G-function
+
+-   measures the distribution of the distances from an arbitrary event to its nearest event
+
+#### Choa Chu Kang Planning Area
+
+Compute G-function using `Gest()` of **spatat** package.
+
+```{r}
+G_CK = Gest(childcare_ck_ppp, correction = "border")
+plot(G_CK, xlim=c(0,500))
+```
+
+Test for CSR:
+
+-   Ho = The distribution of childcare services at Choa Chu Kang are randomly distributed.
+
+-   H1= The distribution of childcare services at Choa Chu Kang are not randomly distributed.
+
+-   The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001.
+
+```{r}
+G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
+```
+
+```{r}
+plot(G_CK.csr)
+```
+
+Repeat the above steps for the other areas
+
+#### Tampines Planning Area
+
+```{r}
+G_tm = Gest(childcare_tm_ppp, correction = "best")
+plot(G_tm)
+```
+
+```{r}
+G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
+```
+
+```{r}
+plot(G_tm.csr)
+```
+
+### **Using F-Function**
+
+-   estimates the empty space function F(r) or its hazard rate h(r) from a point pattern in a window of arbitrary shape
+
+#### **Choa Chu Kang planning area**
+
+```{r}
+F_CK = Fest(childcare_ck_ppp)
+plot(F_CK)
+```
+
+```{r}
+F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
+```
+
+```{r}
+plot(F_CK.csr)
+```
+
+#### **Tampines planning area**
+
+```{r}
+F_tm = Gest(childcare_tm_ppp, correction = "best")
+plot(F_tm)
+```
+
+```{r}
+F_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
+```
+
+```{r}
+plot(F_tm.csr)
+```
+
+### **Using K-Function**
+
+-   measures the number of events found up to a given distance of any particular event
+
+#### **Choa Chu Kang planning area**
+
+```{r}
+K_ck = Kest(childcare_ck_ppp, correction = "Ripley")
+plot(K_ck, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, global=TRUE)
+```
+
+```{r}
+plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+#### **Tampines planning area**
+
+```{r}
+K_tm = Kest(childcare_tm_ppp, correction = "Ripley")
+plot(K_tm, . -r ~ r, 
+     ylab= "K(d)-r", xlab = "d(m)", 
+     xlim=c(0,1000))
+```
+
+```{r}
+K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, rank = 1, global=TRUE)
+```
+
+```{r}
+plot(K_tm.csr, . - r ~ r, 
+     xlab="d", ylab="K(d)-r", xlim=c(0,500))
+```
+
+### Using L-Function
+
+#### **Choa Chu Kang planning area**
+
+```{r}
+L_ck = Lest(childcare_ck_ppp, correction = "Ripley")
+plot(L_ck, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, global=TRUE)
+```
+
+```{r}
+plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
+```
+
+#### Tampines planning area
+
+```{r}
+L_tm = Lest(childcare_tm_ppp, correction = "Ripley")
+plot(L_tm, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)", 
+     xlim=c(0,1000))
+```
+
+```{r}
+L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, global=TRUE)
+```
+
+```{r}
+plot(L_tm.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r", xlim=c(0,500))
+```
+
 # References
 
 -   [Intro to GIS and Spatial Analysis](https://mgimond.github.io/Spatial/index.html)
