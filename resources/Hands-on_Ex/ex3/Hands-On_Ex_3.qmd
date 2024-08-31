@@ -448,6 +448,83 @@ plot(kde_childcareSG_bw,main='bw.diggle')
 plot(kde_childcareSG_ppl,main='bw.ppl')
 ```
 
+## **Working with different kernel methods**
+
+By default, the kernel method used in *density.ppp()* is *gaussian*. But there are three other options, namely: Epanechnikov, Quartic and Dics.
+
+```{r}
+par(mfrow=c(2,2))
+plot(density(childcareSG_ppp_km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="gaussian"), 
+     main="Gaussian")
+plot(density(childcareSG_ppp_km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="epanechnikov"), 
+     main="Epanechnikov")
+plot(density(childcareSG_ppp_km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="quartic"), 
+     main="Quartic")
+plot(density(childcareSG_ppp_km, 
+             sigma=bw.ppl, 
+             edge=TRUE, 
+             kernel="disc"), 
+     main="Disc")
+```
+
+```{r eval=FALSE}
+# If your editor window is too small, might get the error: "Error in plot.new() : figure margins too large".
+# By writing 
+par(mar=c(1,1,1,1)) 
+#instead, the error is fixed; or u could simply resize your window.
+```
+
+# **Fixed and Adaptive KDE**
+
+### Compute KDE using fixed BW
+
+```{r}
+kde_childcareSG_600 <- density(
+  childcareSG_ppp_km,
+  sigma=0.6,
+  edge=TRUE,
+  kernel='gaussian'
+)
+
+# sigma = 0.6 instead of 600 because
+# childcareSG_ppp_km object is in KILOMETERS
+```
+
+```{r}
+plot(kde_childcareSG_600)
+```
+
+### Compute using adaptive BW
+
+Fixed bandwidth method is very sensitive to highly skewed distribution of spatial point patterns over geographical units (for example urban versus rural). One solution is to use adaptive BW instead.
+
+*Derive adaptive KDE using* [`density.adaptive()`](https://rdrr.io/cran/spatstat/man/adaptive.density.html) of **spatstat**.
+
+```{r}
+kde_childcareSG_adaptive <- adaptive.density(
+  childcareSG_ppp_km,
+  method = 'kernel' # voronoi, kernel, nearest being the other methods
+)
+plot(kde_childcareSG_adaptive)
+```
+
+Compare the fixed and adaptive KDE outputs.
+
+```{r}
+par(mfrow=c(1,2))
+plot(kde_childcareSG_bw, main = "Fixed BW")
+plot(kde_childcareSG_adaptive, main = "Adaptive BW")
+```
+
 # References
 
 -   [Intro to GIS and Spatial Analysis](https://mgimond.github.io/Spatial/index.html)
