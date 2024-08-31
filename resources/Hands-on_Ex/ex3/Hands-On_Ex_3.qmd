@@ -91,6 +91,18 @@ pacman::p_load(sf, raster, spatstat, tmap, tidyverse)
 childcare_sf <- st_read('data/child-care-services-geojson.geojson') %>% st_transform(crs = 3414)
 ```
 
+> Note that the CRS for `childcare_sf` is WGS84, not SVY21.
+
+```{r}
+childcare_sf3414 <- st_transform(childcare_sf, crs = 3414)
+```
+
+**To check,**
+
+```{r}
+st_geometry(childcare_sf3414)
+```
+
 ```{r}
 sg_sf <- st_read(dsn = 'data/', layer = 'CostalOutline')
 ```
@@ -102,7 +114,7 @@ mpsz_sf <- st_read(dsn = 'data/', layer = 'MP14_SUBZONE_WEB_PL')
 **Ensure that they are projected in same projection system**
 
 ```{r}
-st_crs(childcare_sf)
+st_crs(childcare_sf3414)
 ```
 
 ```{r}
@@ -120,6 +132,52 @@ st_crs(mpsz_sf)
 ```{r}
 sg_sf3414 <- st_set_crs(sg_sf, 3414)
 ```
+
+```{r}
+mpsz_sf3414 <- st_set_crs(mpsz_sf, 3414)
+```
+
+**To check,**
+
+```{r}
+st_crs(sg_sf3414)
+```
+
+```{r}
+st_crs(mpsz_sf3414)
+```
+
+```{r}
+st_geometry(sg_sf3414)
+```
+
+```{r}
+st_geometry(mpsz_sf3414)
+```
+
+### **Plotting to show spatial patterns**
+
+```{r}
+tmap_mode('plot')
+tm_shape(mpsz_sf3414) + tm_polygons() +
+  tm_shape(childcare_sf3414) + tm_dots()
+```
+
+> Notice that all the geospatial layers are within the same map extend. This shows that their referencing system and coordinate values are referred to similar spatial context. This is very important in any geospatial analysis.
+
+```{r}
+tmap_mode('view')
+tm_shape(childcare_sf)+
+  tm_dots()
+```
+
+> This is the default background of the internet map layer: ESRI.WorldGrayCanvas. Currently, three internet map layers: ESRI.WorldGrayCanvas, OpenStreetMap, and ESRI.WorldTopoMap.
+
+```{r}
+tmap_mode('plot')
+```
+
+> Always remember to switch back to plot mode after the interactive map. This is because, each interactive mode will consume a connection. You should also avoid displaying ecessive numbers of interactive maps (i.e. not more than 10) in one RMarkdown document when publish on Netlify.
 
 # References
 
