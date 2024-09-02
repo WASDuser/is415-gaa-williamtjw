@@ -39,13 +39,11 @@ sg_sf <- mpsz_sf %>% st_union()
 ```
 
 ```{r}
-#sg_sf <- mpsz_sf %>% st_union()
-#plot(sg_sf)
+sg_sf <- mpsz_sf %>% st_union()
+plot(sg_sf)
 
 # doesnt work cuz idk, will troubleshoot later
 ```
-
-![](images/clipboard-1140148492.png)
 
 > Note: straight convert to sf for consistency
 >
@@ -55,15 +53,11 @@ sg_sf <- mpsz_sf %>% st_union()
 
 [Reference](https://piazza.com/class/lz7t191n3cp723/post/14_f2)
 
--   maptools method
+-   maptools method: **as.SpatialGridDataFrame.im(x)**
 
-![](images/clipboard-3461504571.png)
+In hands-on exercise 3, there will be an error if the above syntax is used, but can be resolved if maptools package is loaded in initially or if the following method is used.
 
-This is resolved if maptools package is loaded in initially or use the following method
-
--   spatstat.geom method
-
-![](images/clipboard-1959006224.png)
+-   spatstat.geom method: **as(x, 'SpatialGridDataFrame')**
 
 # Take-Home Exercise 1: Geospatial Analysis for Social Good: Myanmar Armmed Conflict Case Study
 
