@@ -8,3 +8,53 @@ execute:
   echo: true
   freeze: true
 ---
+
+# Issue 1: Installing maptools
+
+Install from Posit Public Package Manager snapshots, because maptools is **retired** and binary is removed from CRAN
+
+```{r eval=FALSE}
+install.packages('maptools', repos = 'https://packagemanager.posit.co/cran/2023-10-13')
+```
+
+> When retrieving archived versions, take note of **dependencies**.
+
+> After installing, ensure `eval=FALSE` the installing code to avoid maptools from being downloaded and installed **repetitively** every time the `qmd` is rendered.
+
+# Issue 2: Create coastal outline
+
+In sf package, there are 2 functions that allow the combining of multiple sf into one sf:
+
+-   st_combine() and
+
+-   st_union()
+
+``` r
+# derive coastal outline of tibble data.frame
+sg_sf <- mpsz_sf %>% st_union()
+```
+
+```{r}
+sg_sf <- mpsz_sf %>% st_union()
+plot(sg_sf)
+```
+
+> Note: straight convert to sf for consistency
+>
+> [Reference for enrichment](https://r-spatial.github.io/sf/reference/st_as_sf.html?q=ppp#ref-usage)
+
+# KDE - converting output into grid object
+
+[Reference](https://piazza.com/class/lz7t191n3cp723/post/14_f2)
+
+-   maptools method
+
+![](images/clipboard-3461504571.png)
+
+This is resolved if maptools package is loaded in initially or use the following method
+
+-   spatstat.geom method
+
+![](images/clipboard-1959006224.png)
+
+# Take-Home Exercise 1: Geospatial Analysis for Social Good: Myanmar Armmed Conflict Case Study
