@@ -9,6 +9,10 @@ execute:
   freeze: true
 ---
 
+```{r}
+pacman::p_load(sf, raster, spatstat, tmap, tidyverse)
+```
+
 # Issue 1: Installing maptools
 
 Install from Posit Public Package Manager snapshots, because maptools is **retired** and binary is removed from CRAN
@@ -58,3 +62,28 @@ This is resolved if maptools package is loaded in initially or use the following
 ![](images/clipboard-1959006224.png)
 
 # Take-Home Exercise 1: Geospatial Analysis for Social Good: Myanmar Armmed Conflict Case Study
+
+-   [**Data**](https://acleddata.com/data/)(if have access key, for now we use eLearn file of **Myanmar**)
+
+```{r}
+acled_Myanmar_sf <- read_csv("data/ACLED_Myanmar.csv") %>% 
+  st_as_sf(coords = c('longitude','latitude'),
+    crs = 4326) %>%                           # important to know which PCS to use
+  st_transform(crs = 32647) %>%               # source data
+  mutate(event_date = dmy(event_date))
+
+# note that myanmar cuts thru 2 different UTMs(a PCS)
+# dmy: As long as the order of formats is correct, these functions will parse dates correctly even when the input vectors contain differently formatted dates.
+```
+
+```{r}
+tmap_mode('view')
+acled_Myanmar_sf %>% 
+  filter(year==2023 | event_type=='Political violence') %>% 
+  tm_shape()+
+  tm_dots()
+```
+
+```{r}
+tmap_mode('plot')
+```
