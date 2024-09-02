@@ -4,10 +4,9 @@
 .httr-oauth
 .DS_Store
 .quarto
-
 /.quarto/
 data/
-
 # Temporary files created by R markdown
-*.utf8.md
-*.knit.md
+.utf8.md
+.knit.md
+site_libs
