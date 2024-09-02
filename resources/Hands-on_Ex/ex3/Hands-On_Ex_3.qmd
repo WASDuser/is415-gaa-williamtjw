@@ -45,6 +45,75 @@ execute:
 
             -   L-function
 
+### Extra References (Prof. Luc Anselin on point pattern analysis (YouTube):)
+
+-   [Point Pattern Analysis Concepts](https://www.youtube.com/watch?v=BN94XXT6Io4)
+
+-   [Point Pattern Analysis: Clustered, Regular and Dispersed Patterns](https://www.youtube.com/watch?v=FdcTgcOdAUg)
+
++---------------------+-------------------------------------------------------+----------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
+| Pattern             | Definition                                            | Statistical Implication                                  | Sources                                                                                               |
++=====================+=======================================================+==========================================================+=======================================================================================================+
+| Clustered           | -   Events that are more grouped than expected of CSR | -   smaller within-cluster distance between points       | -   contagion (event presence increases probability of events nearby)                                 |
+|                     |                                                       |                                                          |                                                                                                       |
+|                     |                                                       | -   bigger btwn-cluster distance                         | -   heterogeneity (no correlations; could be parent-offspring clusters; homogenous geography)         |
+|                     |                                                       |                                                          |                                                                                                       |
+|                     |                                                       | -   overdispersion (var. \> mean)                        |                                                                                                       |
++---------------------+-------------------------------------------------------+----------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
+| Dispersed / Uniform | -   opposite of clustered                             | -   opposite of clustered                                | -   competition between entities (their distancing modelled as min. allowed distance between points)  |
++---------------------+-------------------------------------------------------+----------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
+| Random              | -   neither one from the above                        | -   every point in space follows a Uniform dist.         |                                                                                                       |
+|                     |                                                       |                                                          |                                                                                                       |
+|                     | -   referred to as a "hypothetical" pattern           | -   Number of events in any area follows a Poisson dist. |                                                                                                       |
+|                     |                                                       |                                                          |                                                                                                       |
+|                     | -   constant intensity                                |                                                          |                                                                                                       |
++---------------------+-------------------------------------------------------+----------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
+
+-   [Point Pattern Analysis: Nearest Neighbor Statistics](https://is415-ay2024-25t1.netlify.app/outline/%E2%80%A2%20Point%20Pattern%20Analysis:%20Nearest%20Neighbor%20Statistics)
+
+| Terminology             | Detail                                                                                                                                                     |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Event                   | Actual observed location of an occurrence                                                                                                                  |
+| Point                   | Reference points, which may not coincide with event locations                                                                                              |
+| Event-to-Event Distance | Distance between two event points.                                                                                                                         |
+| Point-to-Event Distance | Distance from a reference point to the nearest event                                                                                                       |
+| Edge Corrections        | adjustments made to account for boundary effects, where the points near the edges of a study area might have neighboring events outside the study boundary |
+| Envelopes               | simulations are used to create a reference distribution under CSR                                                                                          |
+
+-   [Point Pattern Analysis: Quadrat Counts](https://www.youtube.com/watch?v=Ww95WKxUoZk)
+
+-   [Point Pattern Analysis: F and J Functions](https://www.youtube.com/watch?v=uNpbf7Y6WM8)
+
+-   [Point Pattern Analysis: K, L and Kd Functions](https://www.youtube.com/watch?v=oT_jMTkkld8)
+
++--------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| Functions    | Use                                                                                      | Interpretation                                                                                      |
++==============+==========================================================================================+=====================================================================================================+
+| F            | Measures point-to-event nearest neighbor distances                                       | -   **Above the CSR line**: Suggests regularity or inhibition (points are more spread out).         |
+|              |                                                                                          |                                                                                                     |
+|              |                                                                                          | -   **Below the CSR line**: Indicates clustering (points are closer together).                      |
++--------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| G            | Measures (only Nearest Neighbor) distances among events                                  | -   **Above the Envelope:** Indicates clustering, where many events are close together.             |
+|              |                                                                                          |                                                                                                     |
+|              |                                                                                          | -   **Below the Envelope:** Suggests regularity or inhibition, where events are more evenly spaced. |
++--------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| (Ripley's) K | Measures the expected number of points within a distance rrr of a randomly chosen point  |                                                                                                     |
+|              |                                                                                          |                                                                                                     |
+|              | -   Limitation of nearest neighbor distance method is that it uses only nearest distance |                                                                                                     |
+|              |                                                                                          |                                                                                                     |
+|              | -   Considers only the shortest scales of variation.                                     |                                                                                                     |
+|              |                                                                                          |                                                                                                     |
+|              | -   K function uses more points.                                                         |                                                                                                     |
+|              |                                                                                          |                                                                                                     |
+|              |     -   Provides an estimate of spatial dependence over a wider range of scales.         |                                                                                                     |
+|              |                                                                                          |                                                                                                     |
+|              |     -   Based on all the distances between events in the study area.                     |                                                                                                     |
+|              |                                                                                          |                                                                                                     |
+|              |     -   Assumes isotropy over the region.                                                |                                                                                                     |
++--------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| L            |                                                                                          |                                                                                                     |
++--------------+------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+
 </details>
 
 ### Introduction
@@ -80,6 +149,10 @@ The specific questions we would like to answer are as follows:
 ```{r}
 pacman::p_load(sf, raster, spatstat, tmap, tidyverse)
 ```
+
+> Before doing random evaluation, consider using `set.seed()` for reproducible results (for debugging).
+>
+> \- [Source](https://stackoverflow.com/questions/13605271/reasons-for-using-the-set-seed-function)
 
 # Spatial Data Wrangling
 
@@ -212,15 +285,15 @@ mpsz_sp <- as(mpsz, 'SpatialPolygons')
 ```
 
 ```{r}
-childcare_sp
+childcare_sp # SpatialPoints
 ```
 
 ```{r}
-sg_sp
+sg_sp # SpatialPolygons
 ```
 
 ```{r}
-mpsz_sp
+mpsz_sp # SpatialPolygons
 ```
 
 ### **Converting the generic sp format into spatstat’s ppp format**
@@ -411,6 +484,8 @@ plot(kde_childcareSG_bw)
 
 Beside `bw.diggle()`, there are three other **spatstat** functions can be used to determine the bandwidth, they are: `bw.CvL()`, `bw.scott()`, and `bw.ppl()`.
 
+> Some are **aesthetically smoother** than the rest, at the expense of **detail**.
+
 ```{r}
 bw.CvL(childcareSG_ppp_km)
 ```
@@ -506,6 +581,8 @@ plot(kde_childcareSG_600)
 ### Compute using adaptive BW
 
 Fixed bandwidth method is very sensitive to highly skewed distribution of spatial point patterns over geographical units (for example urban versus rural). One solution is to use adaptive BW instead.
+
+> **e.g. using kMeans to determine different bandwidth (search radius) to find a fixed number of events across all areas**
 
 *Derive adaptive KDE using* [`density.adaptive()`](https://rdrr.io/cran/spatstat/man/adaptive.density.html) of **spatstat**.
 
@@ -707,8 +784,9 @@ clarkevans.test(childcareSG_ppp,
                 correction="none",
                 clipregion="sg_owin",
                 alternative=c("clustered"), # type of alternative for the hypothesis test
-                nsim=99                     # Number of Monte Carlo simulations to perform
+                nsim=99                     # Number of Monte Carlo simulations to perform                                                 independent simulation of events
   )
+clark
 # clarkevans test is a crude measure of clustering or ordering of a point pattern.
 
 # This very small p-value (and <0.05) indicates strong evidence against Ho, suggesting that the spatial pattern childcareSG_ppps is significantly different from CSR.
@@ -738,7 +816,7 @@ clarkevans.test(childcare_tm_ppp,
 # same conclusion as above
 ```
 
-# 2^nd^ order SPPA 
+# 2^nd^ order SPPA
 
 ### Using G-function
 
