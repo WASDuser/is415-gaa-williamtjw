@@ -39,9 +39,13 @@ sg_sf <- mpsz_sf %>% st_union()
 ```
 
 ```{r}
-sg_sf <- mpsz_sf %>% st_union()
-plot(sg_sf)
+#sg_sf <- mpsz_sf %>% st_union()
+#plot(sg_sf)
+
+# doesnt work cuz idk, will troubleshoot later
 ```
+
+![](images/clipboard-1140148492.png)
 
 > Note: straight convert to sf for consistency
 >
