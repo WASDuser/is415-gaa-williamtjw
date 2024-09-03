@@ -9,17 +9,15 @@ execute:
   freeze: true
 ---
 
-# Load packages
+# Getting Started
 
 ```{r}
 pacman::p_load(tidyverse,sf,ggstatsplot,tmap)
 ```
 
-# Import data
+# Importing Data
 
-### [**Master Plan 2014 Subzone Boundary (Web)**](https://beta.data.gov.sg/datasets?query=Master+Plan+2014+Subzone+Boundary+%28Web%29&resultId=d_5cb80a95445f236737f6bc2bfe5f159d)
-
-##### **SHP**
+### [2014 Sub-zone Data](https://beta.data.gov.sg/datasets?query=Master+Plan+2014+Subzone+Boundary+%28Web%29&resultId=d_5cb80a95445f236737f6bc2bfe5f159d) (`shp` & `kml`)
 
 ```{r }
 mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
@@ -30,13 +28,9 @@ mpsz14_shp <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
 
 > Note: R is a OOP enabled language, sf being the object class
 
-**Examine the data**
-
 ```{r eval=FALSE}
 View(mpsz14_shp)
 ```
-
-##### **KML**
 
 ```{r eval=FALSE}
 mpsz14_kml = st_read('data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml')
@@ -51,21 +45,15 @@ mpsz14_kml = st_read('data/geospatial/MasterPlan2014SubzoneBoundaryWebKML.kml')
 st_write(mpsz14_shp, 'data/geospatial/MP14_SUBZONE_WEB_PL.kml', delete_dsn = TRUE)
 ```
 
-### **Master Plan 2019 Subzone Boundary (No sea)**
-
-##### **kml**
+### [**2019 Subzone Boundary (No sea)**](https://data.gov.sg/collections/1749/datasets/d_0900fdcfdb4666fe2a630f37a532fc06/view) (`kml`, `shp`, `geojson`)
 
 ```{r}
 mpsz19_kml = st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml')
 ```
 
-##### **SHP** (from ice1 in elearn)
-
 ```{r}
 mpsz19_shp <- st_read(dsn = 'data/MPSZ-2019/', layer = 'MPSZ-2019')
 ```
-
-##### **geojson**
 
 ```{r}
 mpsz19_geojson <- st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson')
@@ -75,17 +63,97 @@ mpsz19_geojson <- st_read('data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEO
 
 > Note: under 'geometry' if the values tend to be large, its because its in PCS (measure in meters)
 
-### Singapore Residents by Planning Area / Subzone, Age Group, Sex and Floor Area of Residence 2023
+**In-class discussion**
 
-> Note: use the .csv file
+<details>
+
+------------------------------------------------------------------------
+
+### [Singapore Residents by Planning Area / Subzone, Age Group, Sex and Floor Area of Residence 2023](https://www.singstat.gov.sg/-/media/files/find_data/population/statistical_tables/respopagesexfa2023e.ashx)
+
+> Note: use the .**csv** file
 
 ```{r}
 popdata2023 = read_csv('data/respopagesexfa2023.csv')
 ```
 
+------------------------------------------------------------------------
+
+</details>
+
+### [Pre-School Location](https://data.gov.sg/datasets?query=Pre-Schools+Location&page=1&resultId=d_61eefab99958fd70e6aab17320a71f1c) (both `kml` & `geojson` )
+
+```{r}
+preschool_kml = st_read('data/PreSchoolsLocation.kml')
+```
+
+```{r}
+preschool_geojson <- st_read('data/PreSchoolsLocation.geojson')
+```
+
+<details>
+
+# Transforming Coordinate System
+
+```{r}
+mpsz19_shp_3414 = mpsz14_shp %>% # pipe operator; saves memory
+  st_transform(crs = 3414)
+```
+
+```{r}
+preschool_kml_3414 = preschool_kml %>% 
+  st_transform(crs = 3414)
+```
+
+**Checking CRS**
+
+```{r}
+st_crs(mpsz19_shp)
+mpsz19_shp_3414
+```
+
 # Data Wrangling
 
-**Prepare a data frame using the population data**
+**Point-in-Polygon count:** count the number of pre-schools in each planning sub-zone
+
+```{r}
+mpsz19_shp_3414 <- mpsz19_shp_3414 %>% mutate(`PreSch Count` = lengths(st_intersects(mpsz19_shp_3414, preschool_kml_3414)))
+```
+
+Write a single line code to perform the following tasks:
+
+1.  **Derive the area** of each planning sub-zone.
+
+2.  Drop the **unit of measurement** of the area (i.e. m\^2)
+
+3.  **Calculate the density** of pre-school at the planning sub-zone level
+
+```{r}
+mpsz19_shp_3414 <- mpsz19_shp_3414 %>% 
+  mutate(
+    Area = units::drop_units(st_area(.)),
+    `PreSch Density` = `PreSch Count` / Area * 1000000
+    )
+```
+
+# Statistical Analysis
+
+Using Exploratory Data Analysis (EDA) and Confirmatory Data Analysis (CDA) methods to **explore and confirm the statistical relationship between Pre-school Density and Pre-school count.**
+
+```{r}
+mpsz19_shp_3414$`PreSch Density` <- as.numeric(as.character(mpsz19_shp_3414$`PreSch Density`))
+mpsz19_shp_3414$`PreSch Count` <- as.numeric(as.character(mpsz19_shp_3414$`PreSch Count`))
+mpsz19_shp_3414 <- as.data.frame(mpsz19_shp_3414)
+
+ggscatterstats(
+  data = mpsz19_shp_3414,
+  x = `PreSch Density`,
+  y = `PreSch Count`,
+  type = 'parametric'
+)
+```
+
+# **Prepare a data frame using the population data**
 
 ```{r}
 popdata2023 = popdata2023 %>% 
@@ -103,15 +171,27 @@ popdata2023 = popdata2023 %>%
 str(popdata2023)
 ```
 
-> Note: age ranges are not in sequential order
+> Note: **age ranges are not in sequential order**
 
 ```{r}
 colnames(popdata2023)
 ```
 
-> Note: index starts from 1
+> Note: **index starts from 1**
 
 **Fix the data table (override the previous)**
+
+Write a code chunk to derive a tibble data.framewith the following fields PA, SZ, YOUNG, ECONOMY ACTIVE, AGED, TOTAL, DEPENDENCY where by:
+
+-   YOUNG: age group 0 to 4 until age groyup 20 to 24,
+
+-   ECONOMY ACTIVE: age group 25-29 until age group 60-64,
+
+-   AGED: age group 65 and above,
+
+-   TOTAL: all age group, and
+
+-   DEPENDENCY: the ratio between young and aged against economy active group.
 
 ```{r}
 popdata2023 = popdata2023 %>% 
@@ -122,38 +202,55 @@ popdata2023 = popdata2023 %>%
   mutate(`TOTAL`=rowSums(.[3:21])) %>%                              # CREATES new col `TOTAL`
   mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)/`ECONOMY ACTIVE`) %>%   # CREATES new col `DEPENDENCY` to calculate dependency ratio
   select(`PA`, `SZ`, `YOUNG`, `ECONOMY ACTIVE`, `AGED`, `TOTAL`, `DEPENDENCY`) # determines column order and contents in OUTPUT DATASET
-
 ```
 
-**Because R is case sensitive, convert everything into the same upper/lowercase in all the datasets**
+Because **R is case sensitive**, convert into all same uppercase or lowercase in the datasets.
 
 ```{r}
 popdata2023 = popdata2023 %>% 
-  mutate_at(.vars = vars(PA,SZ),.funs = list(toupper))
+  mutate_at(
+    .vars = vars(PA,SZ),
+    .funs = list(toupper)
+    )
 ```
 
-**Combine**
+Perform **left-join** whereby the join fields are `SUBZONE_N` from the `mpsz19_shp` sf data.frame and `SZ` from the `popdata2023` data.frame.
 
 ```{r}
-popdata2023 = left_join(popdata2023,mpsz19_shp, by = c('SZ'='SUBZONE_N'))
+mpsz_popdata2023 = left_join(mpsz19_shp_3414,popdata2023, by = c('SUBZONE_N'='SZ'))
 ```
 
 > Note: In the c() function, the column names' positions correspond to which data table is the left table
 
-# Transforming Coordinate System
+Plot the choropleth map.
 
 ```{r}
-mpsz19_shp = st_read(dsn = 'data/MPSZ-2019/', layer = 'MPSZ-2019') %>% # piping caches for next operation, saving memory
-  st_transform(crs = 3414)
+tmap_mode('plot')
+
+tm_shape(st_sf(mpsz_popdata2023)) +
+  tm_fill( # either a fixed color or a color palette is mapped to the variable
+    'DEPENDENCY',
+    style = 'quantile',
+    palette = 'Blues',
+    title = 'Dependency ratio'
+  ) +
+  tm_layout(
+    main.title = "Distribution of Dependency Ratio by planning subzone",
+    main.title.position = "center",
+    main.title.size = 1,
+    legend.title.size = 1,
+    legend.height = 0.45, 
+    legend.width = 0.35,
+    bg.color = "#E4D5C9",
+    frame = F
+  ) +
+  
+  tm_borders(alpha = 0.5) +
+  tm_compass(type="8star", size = 1.5) +
+  tm_scale_bar() +
+  tm_grid(alpha =0.2) +
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics (DOS)", 
+             position = c("left", "bottom"))
 ```
 
-```{r}
-preschool = st_read('data/PreSchoolsLocation.kml') %>% 
-  st_transform(crs = 3414)
-```
-
-**Checking CRS**
-
-```{r}
-st_crs(mpsz19_shp)
-```
+</details>
