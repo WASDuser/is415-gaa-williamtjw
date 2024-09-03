@@ -71,14 +71,21 @@ execute:
 
 -   [Point Pattern Analysis: Nearest Neighbor Statistics](https://is415-ay2024-25t1.netlify.app/outline/%E2%80%A2%20Point%20Pattern%20Analysis:%20Nearest%20Neighbor%20Statistics)
 
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Terminology             | Detail                                                                                                                                                     |
-|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
++=========================+============================================================================================================================================================+
 | Event                   | Actual observed location of an occurrence                                                                                                                  |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Point                   | Reference points, which may not coincide with event locations                                                                                              |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Event-to-Event Distance | Distance between two event points.                                                                                                                         |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Point-to-Event Distance | Distance from a reference point to the nearest event                                                                                                       |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Edge Corrections        | adjustments made to account for boundary effects, where the points near the edges of a study area might have neighboring events outside the study boundary |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Envelopes               | simulations are used to create a reference distribution under CSR                                                                                          |
++-------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 -   [Point Pattern Analysis: Quadrat Counts](https://www.youtube.com/watch?v=Ww95WKxUoZk)
 
@@ -786,7 +793,7 @@ clarkevans.test(childcareSG_ppp,
                 alternative=c("clustered"), # type of alternative for the hypothesis test
                 nsim=99                     # Number of Monte Carlo simulations to perform                                                 independent simulation of events
   )
-clark
+
 # clarkevans test is a crude measure of clustering or ordering of a point pattern.
 
 # This very small p-value (and <0.05) indicates strong evidence against Ho, suggesting that the spatial pattern childcareSG_ppps is significantly different from CSR.
