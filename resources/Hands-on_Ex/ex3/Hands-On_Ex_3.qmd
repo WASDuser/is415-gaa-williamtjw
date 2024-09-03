@@ -15,15 +15,15 @@ execute:
 
 <details>
 
-![~Distribution of Crime Incidents~](data/img/distribution-of-crime-with-vacant-properties.jpg){fig-align="center"}
+![Distribution of Crime Incidents](img/distribution-of-crime-with-vacant-properties.jpg){fig-align="center"}
 
 -   **Point pattern analysis** (PPA) is the study of the spatial arrangements of points in (usually 2D) space to find out if the pattern is random or the result of something.
 
-    ![](data/img/spatial-ppa.jpg)
+    ![](img/spatial-ppa.jpg)
 
 -   Spatial PPA Methods
 
-    ![](data/img/spatial-ppa-methods.jpg)
+    ![](img/spatial-ppa-methods.jpg)
 
     -   1^st^ order
 
