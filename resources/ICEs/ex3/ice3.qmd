@@ -1,5 +1,5 @@
 ---
-title: "ICE 3"
+title: "ICE 3: SPPA: spatstat methods"
 author: "William"
 date: "September 2, 2024"
 date-modified: "last-modified"
@@ -29,9 +29,9 @@ install.packages('maptools', repos = 'https://packagemanager.posit.co/cran/2023-
 
 In sf package, there are 2 functions that allow the combining of multiple sf into one sf:
 
--   st_combine() and
+-   `st_combine()` and
 
--   st_union()
+-   `st_union()` - Combines several feature geometries into one, without unioning or resolving internal boundaries
 
 ``` r
 # derive coastal outline of tibble data.frame
@@ -49,21 +49,160 @@ sg_sf <- mpsz_sf %>% st_union()
 # 2. sf::st_union(.)
 ```
 
-![](images/clipboard-1747220469.png)
-
 > Note: straight convert to sf for consistency
 >
 > [Reference for enrichment](https://r-spatial.github.io/sf/reference/st_as_sf.html?q=ppp#ref-usage)
 
+# Intro to `spatstat` package
+
+-   for 2D SPPA, including multi-type or marked points
+
+-   **sub-packages:**
+
+```{r}
+# spatstat.data    - datasets
+
+# spatstat.utils   - util functions
+
+# spatstat.univar  - est. & manipulate prob. distr. of 1-d random vars
+
+# spatstat.sparse  - manipulate sparse arrays & perform linear algebra
+
+# spatstat.geom    - define spatial objs & perform geometrical ops 
+
+# spatstat.random  - rng of spatial pattern & model sims
+# spatstat.explore - EDA & nonparametric analysis of spatial data.
+
+# spatstat.model   - model-fitting, model diagnostics, and formal inference.
+
+# spatstat.linnet  - defines spatial data on a linear network, and performs geometrical operations and statistical analysis on such data.
+```
+
+### Creating `ppp` object from sf `data.frame`
+
+Instead of using the 2-step approaches discussed in Hands-on Exercise 3 to create the **ppp** objects, use `as.ppp()` from **`spatstat.geom`** to dervice a `ppp` object layer from sf tibble `data.frame`
+
+```{r}
+childcare_ppp_ice3 <- as.ppp(childcare_sf)
+plot(childcare_ppp_ice3)
+```
+
+View `childcare_ppp_ice3`
+
+```{r}
+summary(childcare_ppp_ice3)
+```
+
+### Creating **`owin`** object from sf `data.frame`
+
+Create an `owin` object class from polygon sf tibble `data.frame`
+
+```{r}
+sg_owin <- as.owin(sg_sf)
+plot(sg_owin)
+```
+
+```{r}
+summary(sg_owin)
+```
+
+# Combining `point events` object and `owin` object
+
+```{r}
+# childcare_sg_ppp <- left_join()
+
+childcare_sg_ppp_ice3 <- ppp(
+  x = childcare_ppp_ice3$x,
+  y = childcare_ppp_ice3$y,
+  window = sg_owin
+  )
+```
+
+```{r}
+plot(childcare_sg_ppp_ice3)
+```
+
+Alternatively,
+
+```{r}
+childcare_sg_ppp_ice3_1 <- childcare_ppp_ice3[sg_owin]
+```
+
+```{r}
+plot(childcare_sg_ppp_ice3_1)
+```
+
+# Kernel Density Estimation of Spatial Point Event
+
+The code chunk below re-scale the unit of measurement from metre to kilometre before performing KDE.
+
+```{r}
+childcare_sg_ppp_km_ice3 <- rescale(childcare_sg_ppp_ice3,1000,'km')
+
+# Computes an adaptive estimate of the intensity function of a point pattern.
+kde_childcare_sg_adaptive <- adaptive.density(
+  childcare_sg_ppp_km_ice3,
+  method = 'kernel'
+)
+
+plot(kde_childcare_sg_adaptive)
+```
+
 # KDE - converting output into grid object
 
-[Reference](https://piazza.com/class/lz7t191n3cp723/post/14_f2)
+::: panel-tabset
+## maptools method
 
--   maptools method: **as.SpatialGridDataFrame.im(x)**
+```{r}
+gridded_kde_childcare_sg_adaptive <- maptools::as.SpatialGridDataFrame.im(
+  kde_childcare_sg_adaptive)
+plot(gridded_kde_childcare_sg_adaptive)
+```
 
-In hands-on exercise 3, there will be an error if the above syntax is used, but can be resolved if maptools package is loaded in initially or if the following method is used.
+```{r}
+spplot(gridded_kde_childcare_sg_adaptive)
+```
 
--   spatstat.geom method: **as(x, 'SpatialGridDataFrame')**
+> **Note: plot() v. spplot()**
+>
+> -   **`plot()`**: Best for basic, quick visualizations using base graphics.
+>
+> -   **`spplot()`**: Ideal for advanced spatial plotting with thematic elements using lattice graphics.
+
+## spatstat.geom method
+
+```{r}
+gridded_kde_childcare_sg_adaptive_1 <- as(
+  kde_childcare_sg_adaptive,
+  'SpatialGridDataFrame')
+# same output map as maptools method
+# spplot(gridded_kde_childcare_sg_adaptive_1) 
+```
+:::
+
+**Plotting an output raster using `tmap`**
+
+```{r}
+tm_shape(kde_childcareSG_bw_raster) + 
+  tm_raster(palette = "viridis") +
+  tm_layout(legend.position = c("right", "bottom"), 
+            frame = FALSE,
+            bg.color = "#E4D5C9")
+```
+
+# Extract and create an ppp object showing child care services and within Punggol Planning Area
+
+```{r}
+punggol_owin <- mpsz_sf3414 %>% 
+  filter(PLN_AREA_N=='PUNGGOL') %>% 
+  as.owin()
+plot(punggol_owin)
+```
+
+```{r}
+punggol_childcare_ppp <- childcare_ppp_ice3[punggol_owin]
+plot(punggol_childcare_ppp)
+```
 
 # Take-Home Exercise 1: Geospatial Analysis for Social Good: Myanmar Armmed Conflict Case Study
 
@@ -80,7 +219,7 @@ acled_Myanmar_sf <- read_csv("data/ACLED_Myanmar.csv") %>%
 # dmy: As long as the order of formats is correct, these functions will parse dates correctly even when the input vectors contain differently formatted dates.
 ```
 
-``` R
+``` r
 tmap_mode('view')
 acled_Myanmar_sf %>% 
   filter(year==2023 | event_type=='Political violence') %>% 
