@@ -47,33 +47,71 @@ acled <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
 
 ## Metadata
 
-```         
-'event_id_cnty':                                    unique alphanumeric ID by number & country acronym
-'event_date':                                       day-month-year of event
-'year':                                             self-explanatory
-'time_precison':                                    numeric code for level of precison of data records
-'disorder_type':                                    i.e. 'Demonstrations','Political violence','Political violence; Demonstrations','Strategic developments'
-'event_type':                                       nature of event
-'sub_event_type':                                   provides further classification to event_type
-'actor1','assoc_actor_1','actor2','assoc_actor_2':  involved actors along with their respective affiliates
-'inter1','inter2':                                  numeric code between 0 and 8 encoding different actors
-'interaction':                                      indicates the 2 actor types interacting in the event (using inter1 & inter2 codes)
-'civilian_targeting':                               'true' value="Civilian Targeting"; otherwise NULL
-'iso':                                              unique 3-digit numeric code assigned to each country or territory according to ISO 3166
-'region':                                           region of the world where the event took place
-'country':                                          self-explanatory
-'admin1','admin2','admin3':                         national administrative regions where the event took place (admin1 being the largest)
-'location':                                         self-explanatory
-'latitude':                                         self-explanatory
-'longitude':                                        self-explanatory
-'geo_precision':                                    numeric code for level of precison of event location
-'source':                                           source of event report
-'source_scale':                                     scale (e.g. local, international) of the source
-'notes':                                            description of the event
-'fatalities':                                       number of reported fatalities in the event
-'tags':                                             targets (type and estimate counts)
-'time':                                             Unix Timestamp of event
-```
++----------------------+----------------------------------------------------------------------------------------------------------+
+| Variable             | Description                                                                                              |
++======================+==========================================================================================================+
+| 'event_id_cnty'      | unique alphanumeric ID by number & country acronym                                                       |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'event_date'         | day-month-year of event                                                                                  |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'year'               | self-explanatory                                                                                         |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'time_precison'      | numeric code for level of precison of data records                                                       |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'disorder_type'      | i.e. 'Demonstrations','Political violence','Political violence; Demonstrations','Strategic developments' |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'event_type'         | nature of event                                                                                          |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'sub_event_type'     | provides further classification to event_type                                                            |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'actor1'             | involved actors along with their respective affiliates                                                   |
+|                      |                                                                                                          |
+| 'assoc_actor_1'      |                                                                                                          |
+|                      |                                                                                                          |
+| 'actor2'             |                                                                                                          |
+|                      |                                                                                                          |
+| 'assoc_actor_2'      |                                                                                                          |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'inter1'             | numeric code between 0 and 8 encoding different actors\                                                  |
+|                      |                                                                                                          |
+| 'inter2'             |                                                                                                          |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'interaction'        | indicates the 2 actor types interacting in the event (using inter1 & inter2 codes)                       |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'civilian_targeting' | indicates whether the event involved civilian targeting (e.g. null if false)                             |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'iso'                | unique 3-digit numeric code assigned to each country or territory according to ISO 3166                  |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'region'             | region of the world where the event took place                                                           |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'country'            | self-explanatory                                                                                         |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'admin1'             | national administrative regions where the event took place (admin1 being the largest)                    |
+|                      |                                                                                                          |
+| 'admin2'             |                                                                                                          |
+|                      |                                                                                                          |
+| 'admin3'             |                                                                                                          |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'location'           | self-explanatory                                                                                         |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'latitude'           | self-explanatory                                                                                         |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'longitude'          | self-explanatory                                                                                         |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'geo_precision'      | numeric code for level of precison of event location                                                     |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'source'             | source of event report                                                                                   |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'source_scale'       | scale (e.g. local, international) of the source                                                          |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'notes'              | description of the event                                                                                 |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'fatalities'         | number of reported fatalities in the event                                                               |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'tags'               | targets (type and estimate counts)                                                                       |
++----------------------+----------------------------------------------------------------------------------------------------------+
+| 'time'               | Unix Timestamp of event                                                                                  |
++----------------------+----------------------------------------------------------------------------------------------------------+
 
 ```{r}
 unique(acled['tags'])

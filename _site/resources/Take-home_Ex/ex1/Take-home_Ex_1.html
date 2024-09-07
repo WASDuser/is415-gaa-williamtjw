@@ -296,33 +296,129 @@ dbl (11): year, time_precision, inter1, inter2, interaction, iso, latitude, ...
 </section>
 <section id="metadata" class="level2">
 <h2 class="anchored" data-anchor-id="metadata">Metadata</h2>
-<pre><code>'event_id_cnty':                                    unique alphanumeric ID by number &amp; country acronym
-'event_date':                                       day-month-year of event
-'year':                                             self-explanatory
-'time_precison':                                    numeric code for level of precison of data records
-'disorder_type':                                    i.e. 'Demonstrations','Political violence','Political violence; Demonstrations','Strategic developments'
-'event_type':                                       nature of event
-'sub_event_type':                                   provides further classification to event_type
-'actor1','assoc_actor_1','actor2','assoc_actor_2':  involved actors along with their respective affiliates
-'inter1','inter2':                                  numeric code between 0 and 8 encoding different actors
-'interaction':                                      indicates the 2 actor types interacting in the event (using inter1 &amp; inter2 codes)
-'civilian_targeting':                               'true' value="Civilian Targeting"; otherwise NULL
-'iso':                                              unique 3-digit numeric code assigned to each country or territory according to ISO 3166
-'region':                                           region of the world where the event took place
-'country':                                          self-explanatory
-'admin1','admin2','admin3':                         national administrative regions where the event took place (admin1 being the largest)
-'location':                                         self-explanatory
-'latitude':                                         self-explanatory
-'longitude':                                        self-explanatory
-'geo_precision':                                    numeric code for level of precison of event location
-'source':                                           source of event report
-'source_scale':                                     scale (e.g. local, international) of the source
-'notes':                                            description of the event
-'fatalities':                                       number of reported fatalities in the event
-'tags':                                             targets (type and estimate counts)
-'time':                                             Unix Timestamp of event</code></pre>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 82%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>‘event_id_cnty’</td>
+<td>unique alphanumeric ID by number &amp; country acronym</td>
+</tr>
+<tr class="even">
+<td>‘event_date’</td>
+<td>day-month-year of event</td>
+</tr>
+<tr class="odd">
+<td>‘year’</td>
+<td>self-explanatory</td>
+</tr>
+<tr class="even">
+<td>‘time_precison’</td>
+<td>numeric code for level of precison of data records</td>
+</tr>
+<tr class="odd">
+<td>‘disorder_type’</td>
+<td>i.e.&nbsp;‘Demonstrations’,‘Political violence’,‘Political violence; Demonstrations’,‘Strategic developments’</td>
+</tr>
+<tr class="even">
+<td>‘event_type’</td>
+<td>nature of event</td>
+</tr>
+<tr class="odd">
+<td>‘sub_event_type’</td>
+<td>provides further classification to event_type</td>
+</tr>
+<tr class="even">
+<td><p>‘actor1’</p>
+<p>‘assoc_actor_1’</p>
+<p>‘actor2’</p>
+<p>‘assoc_actor_2’</p></td>
+<td>involved actors along with their respective affiliates</td>
+</tr>
+<tr class="odd">
+<td><p>‘inter1’</p>
+<p>‘inter2’</p></td>
+<td>numeric code between 0 and 8 encoding different actors<br>
+</td>
+</tr>
+<tr class="even">
+<td>‘interaction’</td>
+<td>indicates the 2 actor types interacting in the event (using inter1 &amp; inter2 codes)</td>
+</tr>
+<tr class="odd">
+<td>‘civilian_targeting’</td>
+<td>indicates whether the event involved civilian targeting (e.g.&nbsp;null if false)</td>
+</tr>
+<tr class="even">
+<td>‘iso’</td>
+<td>unique 3-digit numeric code assigned to each country or territory according to ISO 3166</td>
+</tr>
+<tr class="odd">
+<td>‘region’</td>
+<td>region of the world where the event took place</td>
+</tr>
+<tr class="even">
+<td>‘country’</td>
+<td>self-explanatory</td>
+</tr>
+<tr class="odd">
+<td><p>‘admin1’</p>
+<p>‘admin2’</p>
+<p>‘admin3’</p></td>
+<td>national administrative regions where the event took place (admin1 being the largest)</td>
+</tr>
+<tr class="even">
+<td>‘location’</td>
+<td>self-explanatory</td>
+</tr>
+<tr class="odd">
+<td>‘latitude’</td>
+<td>self-explanatory</td>
+</tr>
+<tr class="even">
+<td>‘longitude’</td>
+<td>self-explanatory</td>
+</tr>
+<tr class="odd">
+<td>‘geo_precision’</td>
+<td>numeric code for level of precison of event location</td>
+</tr>
+<tr class="even">
+<td>‘source’</td>
+<td>source of event report</td>
+</tr>
+<tr class="odd">
+<td>‘source_scale’</td>
+<td>scale (e.g.&nbsp;local, international) of the source</td>
+</tr>
+<tr class="even">
+<td>‘notes’</td>
+<td>description of the event</td>
+</tr>
+<tr class="odd">
+<td>‘fatalities’</td>
+<td>number of reported fatalities in the event</td>
+</tr>
+<tr class="even">
+<td>‘tags’</td>
+<td>targets (type and estimate counts)</td>
+</tr>
+<tr class="odd">
+<td>‘time’</td>
+<td>Unix Timestamp of event</td>
+</tr>
+</tbody>
+</table>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled[<span class="st">'tags'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled[<span class="st">'tags'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 311 × 1
    tags                   
