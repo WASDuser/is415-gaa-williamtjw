@@ -1,0 +1,82 @@
+---
+title: "Take-Home Exercise 1: Application of Spatial and Spatio-temporal Point Patterns Analysis to discover the geographical distribution of Armed Conflict in Myanmar"
+author: "William"
+date: "September 7, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Objectives
+
+I will be using armed conflict [data](https://acleddata.com/data-export-tool/) of Myanmar from January 2021 to June 2024, aka Armed Conflict Location & Event Data (ACLED).
+
+I will be focusing on thsese main event types:
+
+-   Battles,
+
+-   Explosion/Remote violence,
+
+-   Strategic developments, and
+
+-   Violence against civilians.
+
+# Data
+
+## Loading packages
+
+These R packages will be used:
+
+-   **sf** for importing, managing, and processing geospatial data, and
+
+-   **tidyverse** for performing data science tasks such as importing, wrangling and visualising data.
+
+-   ...
+
+```{r}
+pacman:::p_load(sf,tidyverse) # more to be added
+```
+
+## **Load the ACLED**
+
+```{r}
+acled <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
+```
+
+## Metadata
+
+```         
+'event_id_cnty':                                    unique alphanumeric ID by number & country acronym
+'event_date':                                       day-month-year of event
+'year':                                             self-explanatory
+'time_precison':                                    numeric code for level of precison of data records
+'disorder_type':                                    i.e. 'Demonstrations','Political violence','Political violence; Demonstrations','Strategic developments'
+'event_type':                                       nature of event
+'sub_event_type':                                   provides further classification to event_type
+'actor1','assoc_actor_1','actor2','assoc_actor_2':  involved actors along with their respective affiliates
+'inter1','inter2':                                  numeric code between 0 and 8 encoding different actors
+'interaction':                                      indicates the 2 actor types interacting in the event (using inter1 & inter2 codes)
+'civilian_targeting':                               'true' value="Civilian Targeting"; otherwise NULL
+'iso':                                              unique 3-digit numeric code assigned to each country or territory according to ISO 3166
+'region':                                           region of the world where the event took place
+'country':                                          self-explanatory
+'admin1','admin2','admin3':                         national administrative regions where the event took place (admin1 being the largest)
+'location':                                         self-explanatory
+'latitude':                                         self-explanatory
+'longitude':                                        self-explanatory
+'geo_precision':                                    numeric code for level of precison of event location
+'source':                                           source of event report
+'source_scale':                                     scale (e.g. local, international) of the source
+'notes':                                            description of the event
+'fatalities':                                       number of reported fatalities in the event
+'tags':                                             targets (type and estimate counts)
+'time':                                             Unix Timestamp of event
+```
+
+```{r}
+unique(acled['tags'])
+```
+
+For other data export instructions, visit the link [here](https://acleddata.com/data-export-tool/).
