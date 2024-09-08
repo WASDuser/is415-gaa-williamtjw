@@ -25,21 +25,37 @@ I will be focusing on thsese main event types:
 
 # Data
 
-## Loading packages
+## Packages
 
 These R packages will be used:
 
--   **sf** for importing, managing, and processing geospatial data, and
+-   **sf**: importing, managing, and processing geospatial data, and
 
--   **tidyverse** for performing data science tasks such as importing, wrangling and visualising data.
+-   **tidyverse**: performing data science tasks such as importing, wrangling and visualising data.
 
--   ...
+-   **readr**
+
+    -   `read_csv()`: reading ACLED csv data
+
+-   **janitor**: data cleaning
+
+-   **Extra (TBD):**
+
+    -   lubridate - to format dates
+
+    -   cowplot - add-on to ggplot for higher quality figures
+
+    -   [htmlwidgets](https://www.htmlwidgets.org/showcase_leaflet.html) for R - interactive visualisations (could be used for visual analytics)
+
+        -   leaflet - geo-spatial mapping
+
+    -   
 
 ```{r}
-pacman:::p_load(sf,tidyverse) # more to be added
+pacman:::p_load(sf,tidyverse,janitor) # more to be added
 ```
 
-## **Load the ACLED**
+## Load the ACLED
 
 ```{r}
 acled <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
@@ -47,9 +63,11 @@ acled <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
 
 ## Metadata
 
+Click to expand –\> <details>
+
 +----------------------+----------------------------------------------------------------------------------------------------------+
 | Variable             | Description                                                                                              |
-+======================+==========================================================================================================+
++======================+:=========================================================================================================+
 | 'event_id_cnty'      | unique alphanumeric ID by number & country acronym                                                       |
 +----------------------+----------------------------------------------------------------------------------------------------------+
 | 'event_date'         | day-month-year of event                                                                                  |
@@ -112,5 +130,59 @@ acled <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
 +----------------------+----------------------------------------------------------------------------------------------------------+
 | 'time'               | Unix Timestamp of event                                                                                  |
 +----------------------+----------------------------------------------------------------------------------------------------------+
+
+</details>
+
+# Data Wrangling
+
+In this section, I will be doing basic data cleaning and formatting across the ACLED columns so that I can derive appropriate variables needed for analysis.
+
+**Inspecting ACLED**
+
+```{r}
+head(acled, n=10)
+```
+
+**Check ACLED structure**
+
+```{r}
+str(acled)
+```
+
+**Check for missing data**
+
+```{r}
+sum(is.na(acled))
+```
+
+Clearly, this doesn't provide much insight to the state of the ACLED **columns**. Hence I consulted Uncle Google for an alternative:
+
+```{r}
+missing_data <- acled %>% 
+  summarise(across(everything(), ~ sum(is.na(.))))
+missing_data 
+```
+
+For a more compact view, I will use `pivot_longer()` to transpose the table and `filter()` to rid off the columns with no missing data
+
+```{r}
+missing_data %>% 
+  pivot_longer(everything(), names_to = "column", values_to = "missing_count") %>%
+  filter(missing_count > 0)
+```
+
+# `event_type` Exploratory Analysis
+
+## Battles
+
+## Explosions/Remote violence
+
+## Protests
+
+## Riots
+
+## Strategic developments
+
+## Violence against civilians
 
 For other data export instructions, visit the link [here](https://acleddata.com/data-export-tool/).
