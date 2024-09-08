@@ -1,0 +1,10 @@
+---
+title: "ICE 4: Spatio-Temporal Point Patterns Analysis"
+author: "William"
+date: "September 8, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
