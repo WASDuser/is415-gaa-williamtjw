@@ -28,7 +28,7 @@ website:
     - text: "Take-home Exercise (THE)"
       menu:
         - text: "Take-home Exercise 1"
-          href: "resources/Take-home_Ex/ex1/Take-Home_Ex_1.qmd"
+          href: "resources/Take-home_Ex/ex1/Take-home_Ex_1.qmd"
           
     right: 
       - href: index.qmd
