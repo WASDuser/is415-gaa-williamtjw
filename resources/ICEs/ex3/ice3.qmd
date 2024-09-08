@@ -217,10 +217,11 @@ acled_Myanmar_sf <- read_csv("data/ACLED_Myanmar.csv") %>%
 
 # note that myanmar cuts thru 2 different UTMs(a PCS)
 # dmy: As long as the order of formats is correct, these functions will parse dates correctly even when the input vectors contain differently formatted dates.
+
 ```
 
-``` r
-tmap_mode('view')
+```{r}
+tmap_mode('plot')
 acled_Myanmar_sf %>% 
   filter(year==2023 | event_type=='Political violence') %>% 
   tm_shape()+
@@ -230,7 +231,3 @@ acled_Myanmar_sf %>%
 ![](images/clipboard-2520272258.png)
 
 > Could not render the site after many attempts at fixing because of an unknown cause. Next best option was to take a screenshot of the output to see if it was because of processing.
-
-```{r}
-tmap_mode('plot')
-```
