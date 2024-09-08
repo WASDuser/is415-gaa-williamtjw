@@ -83,7 +83,8 @@ sg_sf <- mpsz_sf %>% st_union()
 Instead of using the 2-step approaches discussed in Hands-on Exercise 3 to create the **ppp** objects, use `as.ppp()` from **`spatstat.geom`** to dervice a `ppp` object layer from sf tibble `data.frame`
 
 ```{r}
-childcare_ppp_ice3 <- as.ppp(childcare_sf)
+childcare_sf3414 <- st_read('data/child-care-services-geojson.geojson') %>% st_transform(crs = 3414)
+childcare_ppp_ice3 <- as.ppp(childcare_sf3414)
 plot(childcare_ppp_ice3)
 ```
 
@@ -98,6 +99,7 @@ summary(childcare_ppp_ice3)
 Create an `owin` object class from polygon sf tibble `data.frame`
 
 ```{r}
+sg_sf <- st_read(dsn = 'data/', layer = 'CostalOutline')
 sg_owin <- as.owin(sg_sf)
 plot(sg_owin)
 ```
@@ -183,6 +185,14 @@ gridded_kde_childcare_sg_adaptive_1 <- as(
 **Plotting an output raster using `tmap`**
 
 ```{r}
+kde_childcareSG_bw <- density(
+  childcare_sg_ppp_km_ice3,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+kde_childcareSG_bw_raster <- raster(kde_childcareSG_bw)
+
 tm_shape(kde_childcareSG_bw_raster) + 
   tm_raster(palette = "viridis") +
   tm_layout(legend.position = c("right", "bottom"), 
@@ -193,6 +203,9 @@ tm_shape(kde_childcareSG_bw_raster) +
 # Extract and create an ppp object showing child care services and within Punggol Planning Area
 
 ```{r}
+mpsz_sf <- st_read(dsn = 'data/', layer = 'MP14_SUBZONE_WEB_PL')
+mpsz_sf3414 <- st_set_crs(mpsz_sf, 3414)
+
 punggol_owin <- mpsz_sf3414 %>% 
   filter(PLN_AREA_N=='PUNGGOL') %>% 
   as.owin()
