@@ -38,7 +38,7 @@ Background
 ```{r}
 #options(timeout = 300)
 #install.packages("sparr")
-pacman::p_load(sf, raster, spatstat, tmap, tidyverse)
+pacman::p_load(sf, raster, spatstat, tmap, tidyverse, sparr)
 ```
 
 ### **Import and Prepare Study Area**
@@ -196,6 +196,7 @@ summary(fire_month_owin)
 ### Computing STKDE
 
 ```{r}
+library(sparr)
 st_kde <- spattemp.density(fire_month_owin)
 summary(st_kde)
 
@@ -215,7 +216,7 @@ for (i in tims){
   plot(st_kde, i,
     override.par=FALSE,
     fix.range=TRUE,
-    main=paste("Monthly KDE",1)
+    main=paste("Monthly KDE",i)
   )
 }
 ```
