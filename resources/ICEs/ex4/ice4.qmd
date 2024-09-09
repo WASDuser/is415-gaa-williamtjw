@@ -77,14 +77,18 @@ class(kbb_owin)
 If using kbb with 'z', the following **error** will occur:
 
 ```{r}
-kbb_owin_error <- as.owin(kbb)
+# kbb_owin_error <- as.owin(kbb)
+
+# error:
+# Error in owinInternalPoly(xrange, yrange, ..., poly = poly, unitname = unitname) : 
+#   poly must be either a list(x,y) or a list of list(x,y)
 ```
 
 ### **Import and Prepare Forest Data**
 
 ```{r}
 fire_sf <- read_csv('data/rawdata/forestfires.csv') %>% 
-  st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>% 
+  st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>% # combines columns to convert into geospatial data
   st_transform(crs = 32748)
 ```
 
