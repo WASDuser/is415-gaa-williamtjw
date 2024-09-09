@@ -231,7 +231,7 @@ for (i in tims){
 # summary(kde_yday)
 ```
 
-# [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4)
+# [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4/reference.qmd)
 
 Jonatan A. González, et. al. (2016) [“Spatio-temporal point process statistics: A review”](https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&fr=RR-2&rr=8bfff858af196002), *Spatial Statistics*, Volume 18, Part B, November 2016, Pages 505-544.
 

@@ -222,6 +222,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#create-ppp-object" id="toc-create-ppp-object" class="nav-link" data-scroll-target="#create-ppp-object">Create <code>ppp</code> object</a></li>
   <li><a href="#verify-output" id="toc-verify-output" class="nav-link" data-scroll-target="#verify-output">Verify output</a></li>
   <li><a href="#include-owin-object" id="toc-include-owin-object" class="nav-link" data-scroll-target="#include-owin-object">Include owin object</a></li>
+  <li><a href="#computing-stkde" id="toc-computing-stkde" class="nav-link" data-scroll-target="#computing-stkde">Computing STKDE</a></li>
+  <li><a href="#plotting-stkde-object" id="toc-plotting-stkde-object" class="nav-link" data-scroll-target="#plotting-stkde-object">Plotting STKDE object</a></li>
+  <li><a href="#placeholder" id="toc-placeholder" class="nav-link" data-scroll-target="#placeholder">placeholder</a></li>
   </ul></li>
   <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><strong>Readings</strong></a></li>
   <li><a href="#about-r" id="toc-about-r" class="nav-link" data-scroll-target="#about-r"><strong>About R</strong></a></li>
@@ -294,21 +297,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Code:</h1>
 <section id="load-packages" class="level3">
 <h3 class="anchored" data-anchor-id="load-packages"><strong>Load packages</strong></h3>
+<ul>
+<li>NOTE THAT <code>sparr</code> HAS AN ANIMATING FEATURE TO SEE HOW ST PATTERNS DIFFUSE</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, raster, spatstat, sparr, tmap, tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-The downloaded binary packages are in
-    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//RtmpLXH5o2/downloaded_packages</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-sparr installed</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse): Failed to install/load:
-sparr</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#options(timeout = 300)</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("sparr")</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, raster, spatstat, tmap, tidyverse, sparr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="import-and-prepare-study-area" class="level3">
@@ -316,8 +311,8 @@ sparr</code></pre>
 <section id="import-and-remove-z" class="level4">
 <h4 class="anchored" data-anchor-id="import-and-remove-z">Import and remove ‘z’</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>kbb <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>kbb <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `Kepulauan_Bangka_Belitung' from data source 
   `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex4/data/rawdata' 
@@ -338,12 +333,12 @@ Geodetic CRS:  WGS 84</code></pre>
 </blockquote>
 <p>Revised code chunk to account for the above</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>kbb_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># addition</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">'ZM'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># --------</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>kbb_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># addition</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">'ZM'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># --------</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `Kepulauan_Bangka_Belitung' from data source 
   `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex4/data/rawdata' 
@@ -363,8 +358,8 @@ Geodetic CRS:  WGS 84</code></pre>
 <section id="convert-to-owin" class="level4">
 <h4 class="anchored" data-anchor-id="convert-to-owin"><strong>Convert to OWIN</strong></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>kbb_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(kbb_sf)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>kbb_owin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>kbb_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(kbb_sf)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>kbb_owin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>window: polygonal boundary
 enclosing rectangle: [512066.8, 705559.4] x [9655398, 9834006] units</code></pre>
@@ -374,28 +369,28 @@ enclosing rectangle: [512066.8, 705559.4] x [9655398, 9834006] units</code></pre
 <section id="confirm-class-of-output" class="level4">
 <h4 class="anchored" data-anchor-id="confirm-class-of-output">Confirm class of output</h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(kbb_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(kbb_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "owin"</code></pre>
 </div>
 </div>
 <p>If using kbb with ‘z’, the following <strong>error</strong> will occur:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kbb_owin_error &lt;- as.owin(kbb)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># error:</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Error in owinInternalPoly(xrange, yrange, ..., poly = poly, unitname = unitname) : </span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   poly must be either a list(x,y) or a list of list(x,y)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kbb_owin_error &lt;- as.owin(kbb)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># error:</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Error in owinInternalPoly(xrange, yrange, ..., poly = poly, unitname = unitname) : </span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   poly must be either a list(x,y) or a list of list(x,y)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="import-and-prepare-forest-data" class="level3">
 <h3 class="anchored" data-anchor-id="import-and-prepare-forest-data"><strong>Import and Prepare Forest Data</strong></h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'longitude'</span>, <span class="st">'latitude'</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> <span class="co"># combines columns to convert into geospatial data</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                                                <span class="co"># order must be long then lat (follows x,y)</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)                                     <span class="co"># converts to UTM 48</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'longitude'</span>, <span class="st">'latitude'</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> <span class="co"># combines columns to convert into geospatial data</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                                                <span class="co"># order must be long then lat (follows x,y)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)                                     <span class="co"># converts to UTM 48</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 741 Columns: 15
 ── Column specification ────────────────────────────────────────────────────────
@@ -414,7 +409,7 @@ date  (1): acq_date
 <li><p>If <code>st_as_sf()</code> and <code>st_transform</code> not used:</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fire <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fire <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 741 Columns: 15
 ── Column specification ────────────────────────────────────────────────────────
@@ -426,22 +421,22 @@ date  (1): acq_date
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># will output an ASPATIAL data file</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># will output an ASPATIAL data file</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </blockquote>
 <p>Because ppp object only accepts numerical or characters as mark, the code chunk below is used to convert data type of acq_date to <strong>numeric</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'DayofYear'</span> <span class="ot">=</span> <span class="fu">yday</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'Month_num'</span> <span class="ot">=</span> <span class="fu">month</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'Month_fac'</span> <span class="ot">=</span> <span class="fu">month</span>(</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    acq_date, </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="co"># display the month as a character string e.g. "January."; FALSE will display the month as a number.</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">abbr =</span> <span class="cn">FALSE</span> <span class="co"># display the month as a character string label, e.g. "January"; TRUE displays abbr version of the label, like "Jan"</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'DayofYear'</span> <span class="ot">=</span> <span class="fu">yday</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'Month_num'</span> <span class="ot">=</span> <span class="fu">month</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'Month_fac'</span> <span class="ot">=</span> <span class="fu">month</span>(</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    acq_date, </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="co"># display the month as a character string e.g. "January."; FALSE will display the month as a number.</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">abbr =</span> <span class="cn">FALSE</span> <span class="co"># display the month as a character string label, e.g. "January"; TRUE displays abbr version of the label, like "Jan"</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fire_sf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fire_sf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Simple feature collection with 741 features and 16 fields
 Geometry type: POINT
@@ -479,8 +474,8 @@ Projected CRS: WGS 84 / UTM zone 48S
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span> <span class="co"># plot polygon overview layer first</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>()    <span class="co"># plot dot layer next (otherwise dots cant be seen)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span> <span class="co"># plot polygon overview layer first</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>()    <span class="co"># plot dot layer next (otherwise dots cant be seen)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -500,12 +495,12 @@ Projected CRS: WGS 84 / UTM zone 48S
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span> </span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>(<span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_facets</span>(</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">by=</span> <span class="st">'Month_fac'</span>, <span class="co"># data variable name by which the data is split</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">free.coords =</span> <span class="cn">FALSE</span>, <span class="co"># should each map has its own coordinate ranges? if TRUE the map visual will look awkward (different zooms)</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">drop.units =</span> <span class="cn">TRUE</span>) <span class="co"># should non-selected spatial units be dropped?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>(<span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_facets</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">by=</span> <span class="st">'Month_fac'</span>, <span class="co"># data variable name by which the data is split</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">free.coords =</span> <span class="cn">FALSE</span>, <span class="co"># should each map has its own coordinate ranges? if TRUE the map visual will look awkward (different zooms)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">drop.units =</span> <span class="cn">TRUE</span>) <span class="co"># should non-selected spatial units be dropped?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -524,15 +519,15 @@ Projected CRS: WGS 84 / UTM zone 48S
 <h3 class="anchored" data-anchor-id="extract-monthly-forest-fires">Extract monthly forest fires</h3>
 <p>Remove unwanted fields from <code>fire_sf</code> dataframe because <code>as.ppp()</code> only needs the mark field and geometry field from the input sf dataframe</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fire_month <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Month_num)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fire_month <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Month_num)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="create-ppp-object" class="level3">
 <h3 class="anchored" data-anchor-id="create-ppp-object">Create <code>ppp</code> object</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fire_month_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(fire_month)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>fire_month_ppp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fire_month_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(fire_month)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>fire_month_ppp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Marked planar point pattern: 741 points
 marks are numeric, of storage type  'double'
@@ -543,7 +538,7 @@ window: rectangle = [521564.1, 695791] x [9658137, 9828767] units</code></pre>
 <section id="verify-output" class="level3">
 <h3 class="anchored" data-anchor-id="verify-output">Verify output</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Marked planar point pattern:  741 points
 Average intensity 2.49258e-08 points per square unit
@@ -561,17 +556,20 @@ Window area = 29728200000 square units</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(fire_month_ppp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(fire_month_ppp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
+<blockquote class="blockquote">
+<p>Duplicates are highly unlikely because the likelihood of a fire being detected at the exact location from outer-space sats is very low</p>
+</blockquote>
 </section>
 <section id="include-owin-object" class="level3">
 <h3 class="anchored" data-anchor-id="include-owin-object">Include owin object</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fire_month_owin <span class="ot">&lt;-</span> fire_month_ppp[kbb_owin]</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fire_month_owin <span class="ot">&lt;-</span> fire_month_ppp[kbb_owin]</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Marked planar point pattern:  741 points
 Average intensity 6.424519e-08 points per square unit
@@ -595,9 +593,77 @@ Fraction of frame area: 0.334</code></pre>
 </div>
 </div>
 </section>
+<section id="computing-stkde" class="level3">
+<h3 class="anchored" data-anchor-id="computing-stkde">Computing STKDE</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sparr)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>st_kde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(fire_month_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Calculating trivariate smooth...Done.
+Edge-correcting...Done.
+Conditioning on time...Done.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 15102.47 (spatial)
+  lambda = 0.0304 (temporal)
+
+No. of observations
+  741 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+  [1, 12]
+
+Evaluation
+  128 x 128 x 12 trivariate lattice
+  Density range: [1.233458e-27, 8.202976e-10]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Error in spattemp.density(fire_month_owin) : </span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   could not find function "spattemp.density"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plotting-stkde-object" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-stkde-object">Plotting STKDE object</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> tims){</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde, i,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">override.par=</span><span class="cn">FALSE</span>,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fix.range=</span><span class="cn">TRUE</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">main=</span><span class="fu">paste</span>(<span class="st">"Monthly KDE"</span>,i)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ice4_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="placeholder" class="level3">
+<h3 class="anchored" data-anchor-id="placeholder">placeholder</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kde_yday &lt;- spattemp.density(</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   fire_yday_owin</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(kde_yday)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 <section id="readings" class="level1">
-<h1><a href="~/is415-gaa-williamtjw/resources/ICEs/ex4"><strong>Readings</strong></a></h1>
+<h1><a href="~/is415-gaa-williamtjw/resources/ICEs/ex4/reference.qmd"><strong>Readings</strong></a></h1>
 <p>Jonatan A. González, et. al.&nbsp;(2016) <a href="https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&amp;fr=RR-2&amp;rr=8bfff858af196002">“Spatio-temporal point process statistics: A review”</a>, <em>Spatial Statistics</em>, Volume 18, Part B, November 2016, Pages 505-544.</p>
 <p>Alexander Hohl et. al.<a href="https://pages.charlotte.edu/eric-delmelle/wp-content/uploads/sites/150/2019/09/Spatiotemporal-Point-Pattern-Analysis-Using-Ripleys-K-Function.pdf">“Spatiotemporal Point Pattern Analysis Using Ripley’s K”</a> in <strong>Geospatial Data Science Techniques and Applications</strong>.</p>
 <p>Tonini, Marj et. al.&nbsp;(2017<a href="https://link-springer-com.libproxy.smu.edu.sg/article/10.1007/s11069-016-2637-x">) “Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”</a>, <em>Natural hazards</em> (Dordrecht), 2017-02, Vol.85 (3), p.1489-1510. Available at SMU eJournal.</p>
