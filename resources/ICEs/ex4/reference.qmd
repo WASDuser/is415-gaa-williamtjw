@@ -1,5 +1,5 @@
 ---
-title: "ICE 4 Readings"
+title: "ICE 4 Readings: Summarised + chatGPT-ed"
 author: "William"
 ---
 
