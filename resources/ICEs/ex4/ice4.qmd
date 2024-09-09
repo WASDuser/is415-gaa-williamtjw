@@ -33,8 +33,17 @@ Background
 
 ### **Load packages**
 
+-   NOTE THAT `sparr` HAS AN ANIMATING FEATURE TO SEE HOW ST PATTERNS DIFFUSE
+
 ```{r}
-pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse)
+options(timeout = 300)
+install.packages("sparr")
+pacman::p_load(sf, raster, spatstat, tmap, tidyverse, sparr)
+```
+
+```{r}
+# install.packages('sparr',repos = "https://packagemanager.posit.co/cran/2023-10-13")
+
 ```
 
 ### **Import and Prepare Study Area**
@@ -136,7 +145,7 @@ tm_shape(kbb_sf) + tm_polygons() + # plot polygon overview layer first
 :::
 
 ::: panel-tabset
-## Task 
+## Task
 
 Using steps learned in Hands-on Exercise 2, prepare a point symbol map showing the monthly geographic distribution of forest fires in 2023.
 
@@ -168,6 +177,59 @@ fire_month <- fire_sf %>%
 ```{r}
 fire_month_ppp <- as.ppp(fire_month)
 fire_month_ppp
+```
+
+### Verify output
+
+```{r}
+summary(fire_month_ppp)
+```
+
+```{r}
+sum(duplicated(fire_month_ppp))
+```
+
+> Duplicates are highly unlikely because the likelihood of a fire being detected at the exact location from outer-space sats is very low
+
+### Include owin object
+
+```{r}
+fire_month_owin <- fire_month_ppp[kbb_owin]
+summary(fire_month_owin)
+```
+
+### Computing STKDE
+
+```{r}
+st_kde <- spattemp.density(fire_month_owin)
+summary(st_kde)
+```
+
+### Plotting STKDE object
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+tims <- c(7,8,9,10,11,12)
+par(mfcol=c(2,3))
+
+for (i in tims){
+  plot(st_kde, i,
+    override.par=FALSE,
+    fix.range=TRUE,
+    main=paste("Monthly KDE",1)
+  )
+}
+```
+
+### placeholder
+
+```{r}
+# kde_yday <- spattemp.density(
+#   fire_yday_owin
+# )
+
+# summary(kde_yday)
 ```
 
 # [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4)

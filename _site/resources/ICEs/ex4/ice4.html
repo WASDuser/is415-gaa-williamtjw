@@ -220,6 +220,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#extract-monthly-forest-fires" id="toc-extract-monthly-forest-fires" class="nav-link" data-scroll-target="#extract-monthly-forest-fires">Extract monthly forest fires</a></li>
   <li><a href="#create-ppp-object" id="toc-create-ppp-object" class="nav-link" data-scroll-target="#create-ppp-object">Create <code>ppp</code> object</a></li>
+  <li><a href="#verify-output" id="toc-verify-output" class="nav-link" data-scroll-target="#verify-output">Verify output</a></li>
+  <li><a href="#include-owin-object" id="toc-include-owin-object" class="nav-link" data-scroll-target="#include-owin-object">Include owin object</a></li>
   </ul></li>
   <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><strong>Readings</strong></a></li>
   <li><a href="#about-r" id="toc-about-r" class="nav-link" data-scroll-target="#about-r"><strong>About R</strong></a></li>
@@ -297,7 +299,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>
 The downloaded binary packages are in
-    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//RtmpOGxzx1/downloaded_packages</code></pre>
+    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//RtmpLXH5o2/downloaded_packages</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
@@ -535,6 +537,61 @@ Projected CRS: WGS 84 / UTM zone 48S
 <pre><code>Marked planar point pattern: 741 points
 marks are numeric, of storage type  'double'
 window: rectangle = [521564.1, 695791] x [9658137, 9828767] units</code></pre>
+</div>
+</div>
+</section>
+<section id="verify-output" class="level3">
+<h3 class="anchored" data-anchor-id="verify-output">Verify output</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  741 points
+Average intensity 2.49258e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.000   8.000   9.000   8.579  10.000  12.000 
+
+Window: rectangle = [521564.1, 695791] x [9658137, 9828767] units
+                    (174200 x 170600 units)
+Window area = 29728200000 square units</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(fire_month_ppp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+</section>
+<section id="include-owin-object" class="level3">
+<h3 class="anchored" data-anchor-id="include-owin-object">Include owin object</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fire_month_owin <span class="ot">&lt;-</span> fire_month_ppp[kbb_owin]</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  741 points
+Average intensity 6.424519e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.000   8.000   9.000   8.579  10.000  12.000 
+
+Window: polygonal boundary
+2 separate polygons (no holes)
+           vertices        area relative.area
+polygon 1     47493 11533600000      1.00e+00
+polygon 2       256      306427      2.66e-05
+enclosing rectangle: [512066.8, 705559.4] x [9655398, 9834006] units
+                     (193500 x 178600 units)
+Window area = 11533900000 square units
+Fraction of frame area: 0.334</code></pre>
 </div>
 </div>
 </section>
