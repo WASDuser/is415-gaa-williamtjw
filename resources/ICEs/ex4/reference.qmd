@@ -3,7 +3,7 @@ title: "ICE 4 Readings"
 author: "William"
 ---
 
-###  [“Spatio-temporal point process statistics: A review"](https://www.sciencedirect.com/science/article/abs/pii/S2211675316301130)
+### [“Spatio-temporal point process statistics: A review"](https://www.sciencedirect.com/science/article/abs/pii/S2211675316301130)
 
 **Types of Spatio-Temporal Point Patterns**
 
@@ -119,7 +119,7 @@ The authors applied four spatio-temporal statistical methods to explore the data
 
 The results help identify vulnerable areas and time periods where fire hazard is more likely to occur, which is crucial information for fire prevention and management strategies.
 
-###  “Pinpointing spatio-temporal interactions in wildfire patterns”, *Stochastic environmental research and risk assessment*
+### “Pinpointing spatio-temporal interactions in wildfire patterns”, *Stochastic environmental research and risk assessment*
 
 **Introduction**
 
