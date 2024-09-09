@@ -107,9 +107,9 @@ Because ppp object only accepts numerical or characters as mark, the code chunk 
 
 ```{r}
 fire_sf <- fire_sf %>%
-  mutate(DayofYear = yday(acq_date)) %>% 
-  mutate(Month_num = month(acq_date)) %>% 
-  mutate(Month_fac = month(
+  mutate('DayofYear' = yday(acq_date)) %>% 
+  mutate('Month_num' = month(acq_date)) %>% 
+  mutate('Month_fac' = month(
     acq_date, 
     label = TRUE, # display the month as a character string e.g. "January."; FALSE will display the month as a number.
     abbr = FALSE # display the month as a character string label, e.g. "January"; TRUE displays abbr version of the label, like "Jan"
@@ -130,10 +130,45 @@ Prepare a point symbol map showing the distribution of fire points
 ## Code
 
 ```{r}
-tm_shape(kbb_sf) + tm_polygons() +
-  tm_shape(fire_sf) + tm_dots()
+tm_shape(kbb_sf) + tm_polygons() + # plot polygon overview layer first
+  tm_shape(fire_sf) + tm_dots()    # plot dot layer next (otherwise dots cant be seen)
 ```
 :::
+
+::: panel-tabset
+## Task 
+
+Using steps learned in Hands-on Exercise 2, prepare a point symbol map showing the monthly geographic distribution of forest fires in 2023.
+
+## Code
+
+```{r}
+tm_shape(kbb_sf) + tm_polygons() + 
+  tm_shape(fire_sf) + tm_dots(size = 0.1) +
+tm_facets(
+  by= 'Month_fac', # data variable name by which the data is split
+  free.coords = FALSE, # should each map has its own coordinate ranges? if TRUE the map visual will look awkward (different zooms)
+  drop.units = TRUE) # should non-selected spatial units be dropped?
+```
+:::
+
+# Computing Monthly STKDE
+
+### Extract monthly forest fires
+
+Remove unwanted fields from `fire_sf` dataframe because `as.ppp()` only needs the mark field and geometry field from the input sf dataframe
+
+```{r}
+fire_month <- fire_sf %>% 
+  select(Month_num)
+```
+
+### Create `ppp` object
+
+```{r}
+fire_month_ppp <- as.ppp(fire_month)
+fire_month_ppp
+```
 
 # [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4)
 

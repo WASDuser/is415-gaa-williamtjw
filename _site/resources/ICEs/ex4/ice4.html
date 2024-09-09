@@ -216,6 +216,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#import-and-prepare-forest-data" id="toc-import-and-prepare-forest-data" class="nav-link" data-scroll-target="#import-and-prepare-forest-data"><strong>Import and Prepare Forest Data</strong></a></li>
   </ul></li>
   <li><a href="#fire-points-visualisation" id="toc-fire-points-visualisation" class="nav-link" data-scroll-target="#fire-points-visualisation">Fire points Visualisation</a></li>
+  <li><a href="#computing-monthly-stkde" id="toc-computing-monthly-stkde" class="nav-link" data-scroll-target="#computing-monthly-stkde">Computing Monthly STKDE</a>
+  <ul class="collapse">
+  <li><a href="#extract-monthly-forest-fires" id="toc-extract-monthly-forest-fires" class="nav-link" data-scroll-target="#extract-monthly-forest-fires">Extract monthly forest fires</a></li>
+  <li><a href="#create-ppp-object" id="toc-create-ppp-object" class="nav-link" data-scroll-target="#create-ppp-object">Create <code>ppp</code> object</a></li>
+  </ul></li>
   <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><strong>Readings</strong></a></li>
   <li><a href="#about-r" id="toc-about-r" class="nav-link" data-scroll-target="#about-r"><strong>About R</strong></a></li>
   </ul>
@@ -292,7 +297,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output cell-output-stdout">
 <pre><code>
 The downloaded binary packages are in
-    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//Rtmph9vCns/downloaded_packages</code></pre>
+    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//RtmpOGxzx1/downloaded_packages</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
@@ -425,9 +430,9 @@ date  (1): acq_date
 <p>Because ppp object only accepts numerical or characters as mark, the code chunk below is used to convert data type of acq_date to <strong>numeric</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DayofYear =</span> <span class="fu">yday</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month_num =</span> <span class="fu">month</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month_fac =</span> <span class="fu">month</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'DayofYear'</span> <span class="ot">=</span> <span class="fu">yday</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'Month_num'</span> <span class="ot">=</span> <span class="fu">month</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">'Month_fac'</span> <span class="ot">=</span> <span class="fu">month</span>(</span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    acq_date, </span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="co"># display the month as a character string e.g. "January."; FALSE will display the month as a number.</span></span>
 <span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">abbr =</span> <span class="cn">FALSE</span> <span class="co"># display the month as a character string label, e.g. "January"; TRUE displays abbr version of the label, like "Jan"</span></span>
@@ -472,8 +477,8 @@ Projected CRS: WGS 84 / UTM zone 48S
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span> <span class="co"># plot polygon overview layer first</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>()    <span class="co"># plot dot layer next (otherwise dots cant be seen)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -485,6 +490,54 @@ Projected CRS: WGS 84 / UTM zone 48S
 </div>
 </div>
 </div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">Task</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Code</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<p>Using steps learned in Hands-on Exercise 2, prepare a point symbol map showing the monthly geographic distribution of forest fires in 2023.</p>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>(<span class="at">size =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_facets</span>(</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">by=</span> <span class="st">'Month_fac'</span>, <span class="co"># data variable name by which the data is split</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">free.coords =</span> <span class="cn">FALSE</span>, <span class="co"># should each map has its own coordinate ranges? if TRUE the map visual will look awkward (different zooms)</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">drop.units =</span> <span class="cn">TRUE</span>) <span class="co"># should non-selected spatial units be dropped?</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ice4_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="computing-monthly-stkde" class="level1">
+<h1>Computing Monthly STKDE</h1>
+<section id="extract-monthly-forest-fires" class="level3">
+<h3 class="anchored" data-anchor-id="extract-monthly-forest-fires">Extract monthly forest fires</h3>
+<p>Remove unwanted fields from <code>fire_sf</code> dataframe because <code>as.ppp()</code> only needs the mark field and geometry field from the input sf dataframe</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fire_month <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Month_num)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-ppp-object" class="level3">
+<h3 class="anchored" data-anchor-id="create-ppp-object">Create <code>ppp</code> object</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fire_month_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(fire_month)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>fire_month_ppp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern: 741 points
+marks are numeric, of storage type  'double'
+window: rectangle = [521564.1, 695791] x [9658137, 9828767] units</code></pre>
+</div>
+</div>
+</section>
 </section>
 <section id="readings" class="level1">
 <h1><a href="~/is415-gaa-williamtjw/resources/ICEs/ex4"><strong>Readings</strong></a></h1>
