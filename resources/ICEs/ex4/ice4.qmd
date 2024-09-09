@@ -31,18 +31,64 @@ Background
 
 # Code:
 
-**Load packages**
+### **Load packages**
 
 ```{r}
 pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse)
 ```
 
-**Import and Prepare Study Area**
+### **Import and Prepare Study Area**
+
+#### Import and remove 'z' 
 
 ```{r eval=FALSE}
 kbb <- st_read(dsn = 'data/rawdata/', layer = 'Kepulauan_Bangka_Belitung') %>% 
   st_transform(crs = 32748)
 ```
+
+> -   "desolve" 'z' boundaries before preparing study area
+>
+> -   kbb contains a new geometry type: polygonz, denoting as height — **drop 'z'** otherwise will incur an error when converting to ppp object class
+
+Revised code chunk to account for the above
+
+```{r}
+kbb_sf <- st_read(dsn = 'data/rawdata/', layer = 'Kepulauan_Bangka_Belitung') %>% 
+  # addition
+  st_union() %>% 
+  st_zm(drop = TRUE, what = 'ZM') %>% 
+  # --------
+  st_transform(crs = 32748)
+```
+
+#### **Convert to OWIN**
+
+```{r}
+kbb_owin <- as.owin(kbb_sf)
+kbb_owin
+```
+
+#### Confirm class of output
+
+```{r}
+class(kbb_owin)
+```
+
+If using kbb with 'z', the following **error** will occur:
+
+```{r}
+kbb_owin_error <- as.owin(kbb)
+```
+
+### **Import and Prepare Forest Data**
+
+```{r}
+fire_sf <- read_csv('data/rawdata/forestfires.csv') %>% 
+  st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>% 
+  st_transform(crs = 32748)
+```
+
+Because ppp object only accepts numerical or characters as mark, the code chunk below is used
 
 # [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4)
 
