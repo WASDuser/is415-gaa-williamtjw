@@ -23,6 +23,8 @@ I will be focusing on thsese main event types:
 
 -   Violence against civilians.
 
+Along the way, I will be exploring the use of different functions to obtain more aesthetically pleasing outputs for fun.
+
 # Data
 
 ## Packages
@@ -39,9 +41,17 @@ These R packages will be used:
 
 -   **janitor**: data cleaning
 
+-   **lubridate**: date formatting
+
 -   **Extra (TBD):**
 
-    -   lubridate - to format dates
+    -   **janitor**: data cleaning
+
+    -   **lubridate**: date formatting
+
+    -   **skimr**: provide summary statistics
+
+    -   **scrutiny**: data wrangling
 
     -   cowplot - add-on to ggplot for higher quality figures
 
@@ -52,7 +62,7 @@ These R packages will be used:
     -   
 
 ```{r}
-pacman:::p_load(sf,tidyverse,janitor) # more to be added
+pacman:::p_load(sf,tidyverse,janitor,skimr) # more to be added
 ```
 
 ## Load the ACLED
@@ -163,12 +173,43 @@ missing_data <- acled %>%
 missing_data 
 ```
 
-For a more compact view, I will use `pivot_longer()` to transpose the table and `filter()` to rid off the columns with no missing data
+For a more compact view, I will use `pivot_longer()` to transpose the table and `filter()` to rid off ACLED columns with no missing data.
+
+-   base R
 
 ```{r}
 missing_data %>% 
   pivot_longer(everything(), names_to = "column", values_to = "missing_count") %>%
   filter(missing_count > 0)
+```
+
+> '`actor`'-related columns: possible to have 1 or more actors responsible
+>
+> '`civilian_targeting`': boolean-like variable — null for no civilian targeting
+>
+> '`admin3`': location identifiers are still discernible at least 1 of the `admin` columns are filled
+>
+> '`tags`': supplementary target description
+
+-   `skim()` from `skimr` package
+
+```{r}
+skim(acled) %>%
+  tibble::as_tibble()
+```
+
+**Checking for duplicates in ACLED's unique identifier `event_id_cnty`**
+
+-   base R
+
+```{r}
+sum(duplicated(acled['event_id_cnty']))
+```
+
+**Formatting date**
+
+```{r}
+
 ```
 
 # `event_type` Exploratory Analysis
