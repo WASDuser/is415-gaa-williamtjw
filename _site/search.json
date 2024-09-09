@@ -145,5 +145,12 @@
     "title": "Take-Home Exercise 1: Application of Spatial and Spatio-temporal Point Patterns Analysis to discover the geographical distribution of Armed Conflict in Myanmar",
     "section": "Violence against civilians",
     "text": "Violence against civilians\nFor other data export instructions, visit the link here."
+  },
+  {
+    "objectID": "resources/ICEs/ex4/ice4.html",
+    "href": "resources/ICEs/ex4/ice4.html",
+    "title": "ICE 4: Spatio-Temporal Point Patterns Analysis",
+    "section": "",
+    "text": "Background\n\nSpatio-temporal point process (stpp) is a random collection of points, where each point represents the time and location of an event\nfor geographically and temporally indexed data\nContext:\n\nA real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023\n\n\n\nObjectives\n\nare the locations of forest fire in Kepulauan Bangka Belitung spatial and spatio-temporally independent?\nif the answer is NO, where and when the observed forest fire locations tend to cluster?\n\n\n\nNotes:\n\nspace-time KDE (STKDE) - bullet point 4-5 of THE1 where data is across-time, rather than the use of cross-sectional data in KDE (single-point in time) previously\n\n\n\nCode:\nLoad packages\n\npacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse)\n\n\nThe downloaded binary packages are in\n    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//RtmpAp1zRi/downloaded_packages\n\n\n\nsparr installed\n\n\nWarning in pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse): Failed to install/load:\nsparr\n\n\nImport and Prepare Study Area\n\nkbb &lt;- st_read(dsn = 'data/rawdata/', layer = 'Kepulauan_Bangka_Belitung') %&gt;% \n  st_transform(crs = 32748)\n\n\n\nReadings\nJonatan A. González, et. al. (2016) “Spatio-temporal point process statistics: A review”, Spatial Statistics, Volume 18, Part B, November 2016, Pages 505-544.\nAlexander Hohl et. al.“Spatiotemporal Point Pattern Analysis Using Ripley’s K” in Geospatial Data Science Techniques and Applications.\nTonini, Marj et. al. (2017) “Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”, Natural hazards (Dordrecht), 2017-02, Vol.85 (3), p.1489-1510. Available at SMU eJournal.\nJuan, P et. al. (2012)“Pinpointing spatio-temporal interactions in wildfire patterns”, Stochastic environmental research and risk assessment, 2012-12, Vol.26 (8), p.1131-1150. Available at SMU eJournal.\n\n\nAbout R"
   }
 ]

@@ -9,7 +9,42 @@ execute:
   freeze: true
 ---
 
-# **References**
+Background
+
+-   Spatio-temporal point process (**stpp**) is a random collection of points, where each point represents the time and location of an event
+
+-   for geographically and temporally indexed data
+
+-   Context:
+
+    -   A real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023
+
+# Objectives
+
+-   are the locations of forest fire in Kepulauan Bangka Belitung spatial and spatio-temporally independent?
+
+-   if the answer is NO, where and when the observed forest fire locations tend to cluster?
+
+# Notes:
+
+-   space-time KDE (**STKDE**) - bullet point 4-5 of THE1 where data is **across-time**, rather than the use of cross-sectional data in KDE (single-point in time) previously
+
+# Code:
+
+**Load packages**
+
+```{r}
+pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse)
+```
+
+**Import and Prepare Study Area**
+
+```{r eval=FALSE}
+kbb <- st_read(dsn = 'data/rawdata/', layer = 'Kepulauan_Bangka_Belitung') %>% 
+  st_transform(crs = 32748)
+```
+
+# [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4)
 
 Jonatan A. González, et. al. (2016) [“Spatio-temporal point process statistics: A review”](https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&fr=RR-2&rr=8bfff858af196002), *Spatial Statistics*, Volume 18, Part B, November 2016, Pages 505-544.
 

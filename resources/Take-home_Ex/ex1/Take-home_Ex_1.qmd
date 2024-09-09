@@ -104,7 +104,7 @@ Click to expand –\> <details>
 |                      |                                                                                                          |
 | 'inter2'             |                                                                                                          |
 +----------------------+----------------------------------------------------------------------------------------------------------+
-| 'interaction'        | indicates the 2 actor types interacting in the event (using inter1 & inter2 codes)                       |
+| 'interaction'        | indicates the 2 actor types interacting in the event (encoded inter1 & inter2 by concatenation)          |
 +----------------------+----------------------------------------------------------------------------------------------------------+
 | 'civilian_targeting' | indicates whether the event involved civilian targeting (e.g. null if false)                             |
 +----------------------+----------------------------------------------------------------------------------------------------------+

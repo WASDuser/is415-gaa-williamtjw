@@ -22,6 +22,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -168,8 +202,18 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#objectives" id="toc-objectives" class="nav-link active" data-scroll-target="#objectives">Objectives</a></li>
+  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes:</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code:</a></li>
+  <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><strong>Readings</strong></a></li>
+  <li><a href="#about-r" id="toc-about-r" class="nav-link" data-scroll-target="#about-r"><strong>About R</strong></a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -200,7 +244,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 8, 2024</p>
+      <p class="date-modified">September 9, 2024</p>
     </div>
   </div>
     
@@ -211,8 +255,65 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p>Background</p>
+<ul>
+<li><p>Spatio-temporal point process (<strong>stpp</strong>) is a random collection of points, where each point represents the time and location of an event</p></li>
+<li><p>for geographically and temporally indexed data</p></li>
+<li><p>Context:</p>
+<ul>
+<li>A real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023</li>
+</ul></li>
+</ul>
+<section id="objectives" class="level1">
+<h1>Objectives</h1>
+<ul>
+<li><p>are the locations of forest fire in Kepulauan Bangka Belitung spatial and spatio-temporally independent?</p></li>
+<li><p>if the answer is NO, where and when the observed forest fire locations tend to cluster?</p></li>
+</ul>
+</section>
+<section id="notes" class="level1">
+<h1>Notes:</h1>
+<ul>
+<li>space-time KDE (<strong>STKDE</strong>) - bullet point 4-5 of THE1 where data is <strong>across-time</strong>, rather than the use of cross-sectional data in KDE (single-point in time) previously</li>
+</ul>
+</section>
+<section id="code" class="level1">
+<h1>Code:</h1>
+<p><strong>Load packages</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, raster, spatstat, sparr, tmap, tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+The downloaded binary packages are in
+    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//RtmpAp1zRi/downloaded_packages</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+sparr installed</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse): Failed to install/load:
+sparr</code></pre>
+</div>
+</div>
+<p><strong>Import and Prepare Study Area</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>kbb <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="readings" class="level1">
+<h1><a href="~/is415-gaa-williamtjw/resources/ICEs/ex4"><strong>Readings</strong></a></h1>
+<p>Jonatan A. González, et. al.&nbsp;(2016) <a href="https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&amp;fr=RR-2&amp;rr=8bfff858af196002">“Spatio-temporal point process statistics: A review”</a>, <em>Spatial Statistics</em>, Volume 18, Part B, November 2016, Pages 505-544.</p>
+<p>Alexander Hohl et. al.<a href="https://pages.charlotte.edu/eric-delmelle/wp-content/uploads/sites/150/2019/09/Spatiotemporal-Point-Pattern-Analysis-Using-Ripleys-K-Function.pdf">“Spatiotemporal Point Pattern Analysis Using Ripley’s K”</a> in <strong>Geospatial Data Science Techniques and Applications</strong>.</p>
+<p>Tonini, Marj et. al.&nbsp;(2017<a href="https://link-springer-com.libproxy.smu.edu.sg/article/10.1007/s11069-016-2637-x">) “Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”</a>, <em>Natural hazards</em> (Dordrecht), 2017-02, Vol.85 (3), p.1489-1510. Available at SMU eJournal.</p>
+<p>Juan, P et. al.&nbsp;(2012)<a href="https://link-springer-com.libproxy.smu.edu.sg/article/10.1007/s00477-012-0568-y">“Pinpointing spatio-temporal interactions in wildfire patterns”</a>, <em>Stochastic environmental research and risk assessment</em>, 2012-12, Vol.26 (8), p.1131-1150. Available at SMU eJournal.</p>
+</section>
+<section id="about-r" class="level1">
+<h1><strong>About R</strong></h1>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
