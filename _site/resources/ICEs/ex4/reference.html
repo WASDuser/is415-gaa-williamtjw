@@ -7,9 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="William">
-<meta name="dcterms.date" content="2024-09-08">
 
-<title>ICE 4: Spatio-Temporal Point Patterns Analysis – IS415</title>
+<title>ICE 4 Readings – IS415</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -207,17 +172,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#objectives" id="toc-objectives" class="nav-link active" data-scroll-target="#objectives">Objectives</a></li>
-  <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes:</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code:</a>
-  <ul class="collapse">
-  <li><a href="#load-packages" id="toc-load-packages" class="nav-link" data-scroll-target="#load-packages"><strong>Load packages</strong></a></li>
-  <li><a href="#import-and-prepare-study-area" id="toc-import-and-prepare-study-area" class="nav-link" data-scroll-target="#import-and-prepare-study-area"><strong>Import and Prepare Study Area</strong></a></li>
-  <li><a href="#import-and-prepare-forest-data" id="toc-import-and-prepare-forest-data" class="nav-link" data-scroll-target="#import-and-prepare-forest-data"><strong>Import and Prepare Forest Data</strong></a></li>
-  </ul></li>
-  <li><a href="#fire-points-visualisation" id="toc-fire-points-visualisation" class="nav-link" data-scroll-target="#fire-points-visualisation">Fire points Visualisation</a></li>
-  <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><strong>Readings</strong></a></li>
-  <li><a href="#about-r" id="toc-about-r" class="nav-link" data-scroll-target="#about-r"><strong>About R</strong></a></li>
+  <li><a href="#spatio-temporal-point-process-statistics-a-review" id="toc-spatio-temporal-point-process-statistics-a-review" class="nav-link active" data-scroll-target="#spatio-temporal-point-process-statistics-a-review">“Spatio-temporal point process statistics: A review”</a></li>
+  <li><a href="#spatiotemporal-point-pattern-analysis-using-ripleys-k" id="toc-spatiotemporal-point-pattern-analysis-using-ripleys-k" class="nav-link" data-scroll-target="#spatiotemporal-point-pattern-analysis-using-ripleys-k">“Spatiotemporal Point Pattern Analysis Using Ripley’s K”</a></li>
+  <li><a href="#evolution-of-forest-fires-in-portugal-from-spatio-temporal-point-events-to-smoothed-density-maps-natural-hazards-dordrecht" id="toc-evolution-of-forest-fires-in-portugal-from-spatio-temporal-point-events-to-smoothed-density-maps-natural-hazards-dordrecht" class="nav-link" data-scroll-target="#evolution-of-forest-fires-in-portugal-from-spatio-temporal-point-events-to-smoothed-density-maps-natural-hazards-dordrecht">“Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”, <em>Natural hazards</em> (Dordrecht)</a></li>
+  <li><a href="#pinpointing-spatio-temporal-interactions-in-wildfire-patterns-stochastic-environmental-research-and-risk-assessment" id="toc-pinpointing-spatio-temporal-interactions-in-wildfire-patterns-stochastic-environmental-research-and-risk-assessment" class="nav-link" data-scroll-target="#pinpointing-spatio-temporal-interactions-in-wildfire-patterns-stochastic-environmental-research-and-risk-assessment">“Pinpointing spatio-temporal interactions in wildfire patterns”, <em>Stochastic environmental research and risk assessment</em></a></li>
   </ul>
 </nav>
     </div>
@@ -226,7 +184,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">ICE 4: Spatio-Temporal Point Patterns Analysis</h1>
+<h1 class="title">ICE 4 Readings</h1>
 </div>
 
 
@@ -240,19 +198,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           </div>
   </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">September 8, 2024</p>
-    </div>
-  </div>
   
-    <div>
-    <div class="quarto-title-meta-heading">Modified</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 9, 2024</p>
-    </div>
-  </div>
     
   </div>
   
@@ -261,240 +207,100 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Background</p>
+<section id="spatio-temporal-point-process-statistics-a-review" class="level3">
+<h3 class="anchored" data-anchor-id="spatio-temporal-point-process-statistics-a-review"><a href="https://www.sciencedirect.com/science/article/abs/pii/S2211675316301130">“Spatio-temporal point process statistics: A review”</a></h3>
+<p><strong>Types of Spatio-Temporal Point Patterns</strong></p>
+<p>The paper categorizes spatio-temporal point patterns into three main types:</p>
+<ol type="1">
+<li><p><strong>Instantaneous events</strong>: Data are treated as a collection of instantaneous events, each occurring at a given spatial location and time point. Examples include earthquakes and disease outbreaks.</p></li>
+<li><p><strong>Points that arrive, obtain a location, and stay for a period</strong>: During the study period, points arrive at some time, obtain a spatial location, and stay for a given period before being removed. Examples include modeling forest stands where each tree has a birth time and lifetime.</p></li>
+<li><p><strong>Continuously moving objects sampled at discrete times</strong>: Objects move continuously through space and form paths, which are sampled at discrete time points. Examples include analyzing animal movement patterns.</p></li>
+</ol>
+<p><strong>Statistical Characteristics</strong></p>
+<p>The paper discusses important characteristics of spatio-temporal point processes, including:</p>
 <ul>
-<li><p>Spatio-temporal point process (<strong>stpp</strong>) is a random collection of points, where each point represents the time and location of an event</p></li>
-<li><p>for geographically and temporally indexed data</p></li>
-<li><p>Context:</p>
-<ul>
-<li>A real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023</li>
-</ul></li>
+<li><p><strong>Product densities</strong>: Generalize the concept of intensity functions to higher orders.</p></li>
+<li><p><strong>Intensity functions</strong>: Describe the expected number of events per unit space and time. Separability into spatial and temporal components is an important property.</p></li>
+<li><p><strong>Conditional intensity functions</strong>: Uniquely characterize certain spatio-temporal point processes and govern the expected number of future events given the history of the process.</p></li>
+<li><p><strong>Second-order summary statistics</strong>: Such as the pair correlation function, K-function, and J-function, can be used to quantify spatial and temporal interactions.</p></li>
 </ul>
-<section id="objectives" class="level1">
-<h1>Objectives</h1>
+<p><strong>Empirical Models</strong></p>
+<p>Various empirical models for spatio-temporal point processes are reviewed, including:</p>
 <ul>
-<li><p>are the locations of forest fire in Kepulauan Bangka Belitung spatial and spatio-temporally independent?</p></li>
-<li><p>if the answer is NO, where and when the observed forest fire locations tend to cluster?</p></li>
+<li><p><strong>Homogeneous and inhomogeneous Poisson processes</strong></p></li>
+<li><p><strong>Neyman-Scott processes</strong></p></li>
+<li><p><strong>Geometric anisotropic Poisson cluster processes</strong></p></li>
+<li><p><strong>Inhibition processes</strong></p></li>
+<li><p><strong>Strauss processes</strong></p></li>
+<li><p><strong>Cox processes</strong></p></li>
+<li><p><strong>Log-Gaussian Cox processes</strong></p></li>
 </ul>
+<p>These models can be fitted to data using likelihood-based inference methods.</p>
+<p><strong>Mechanistic Models</strong></p>
+<p>Conditional intensity-based models, referred to as mechanistic models, treat the spatial locations as marks of a temporal point process. The conditional intensity function governs the expected number of future events given the history. Mechanistic models are commonly used for analyzing earthquake data and other applications.</p>
+<p><strong>Inference Methods</strong></p>
+<p>The paper covers likelihood inference and partial likelihood methods for parameter estimation. Graphical tools like residual plots and Q-Q plots are discussed for assessing goodness-of-fit.</p>
+<p><strong>Real-World Applications</strong></p>
+<p>Three motivating examples are analyzed throughout the paper to illustrate the application of the discussed techniques to real data:</p>
+<ol type="1">
+<li><p><strong>Human outbreaks of Ebola</strong></p></li>
+<li><p><strong>Euphausia glacialis</strong> (a type of krill)</p></li>
+<li><p><strong>Tornadoes in South Carolina</strong></p></li>
+</ol>
+<p>These examples highlight the growing availability of spatio-temporal data and the importance of understanding the mechanisms governing event occurrences in space and time across various scientific fields.</p>
 </section>
-<section id="notes" class="level1">
-<h1>Notes:</h1>
+<section id="spatiotemporal-point-pattern-analysis-using-ripleys-k" class="level3">
+<h3 class="anchored" data-anchor-id="spatiotemporal-point-pattern-analysis-using-ripleys-k"><a href="https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https://pages.charlotte.edu/eric-delmelle/wp-content/uploads/sites/150/2019/09/Spatiotemporal-Point-Pattern-Analysis-Using-Ripleys-K-Function.pdf&amp;ved=2ahUKEwiL24W_8qyIAxXzXGwGHe2RL8wQFnoECDAQAQ&amp;usg=AOvVaw18Au9kh6LfNH_RJpPglq2J">“Spatiotemporal Point Pattern Analysis Using Ripley’s K”</a></h3>
+<p><strong>Global Ripley’s K Function for Spatiotemporal Point Patterns</strong></p>
 <ul>
-<li>space-time KDE (<strong>STKDE</strong>) - bullet point 4-5 of THE1 where data is <strong>across-time</strong>, rather than the use of cross-sectional data in KDE (single-point in time) previously</li>
+<li><p>The global space-time Ripley’s K function evaluates the spatiotemporal characteristics of a point pattern at the aggregated level using the entire dataset</p></li>
+<li><p>It is calculated by dividing the number of events expected to fall within a given spatial distance d and temporal distance t by the intensity λ of the point events</p></li>
+<li><p>The global space-time K function is the cumulative distribution of observed point events with increasing space and time distance</p></li>
+<li><p>It can indicate clustering, randomness, or regularity in the spatiotemporal point pattern</p></li>
 </ul>
-</section>
-<section id="code" class="level1">
-<h1>Code:</h1>
-<section id="load-packages" class="level3">
-<h3 class="anchored" data-anchor-id="load-packages"><strong>Load packages</strong></h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, raster, spatstat, sparr, tmap, tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-The downloaded binary packages are in
-    /var/folders/hr/515_qffn5p571k2ycn8v3n9h0000gn/T//Rtmph9vCns/downloaded_packages</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-sparr installed</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse): Failed to install/load:
-sparr</code></pre>
-</div>
-</div>
-</section>
-<section id="import-and-prepare-study-area" class="level3">
-<h3 class="anchored" data-anchor-id="import-and-prepare-study-area"><strong>Import and Prepare Study Area</strong></h3>
-<section id="import-and-remove-z" class="level4">
-<h4 class="anchored" data-anchor-id="import-and-remove-z">Import and remove ‘z’</h4>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>kbb <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `Kepulauan_Bangka_Belitung' from data source 
-  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex4/data/rawdata' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 298 features and 27 fields
-Geometry type: POLYGON
-Dimension:     XYZ
-Bounding box:  xmin: 105.1085 ymin: -3.116593 xmax: 106.8488 ymax: -1.501603
-z_range:       zmin: 0 zmax: 0
-Geodetic CRS:  WGS 84</code></pre>
-</div>
-</div>
-<blockquote class="blockquote">
+<p><strong>Local Ripley’s K Function for Spatiotemporal Point Patterns</strong></p>
 <ul>
-<li><p>“desolve” ‘z’ boundaries before preparing study area</p></li>
-<li><p>kbb contains a new geometry type: polygonz, denoting as height — <strong>drop ‘z’</strong> otherwise will incur an error when converting to ppp object class</p></li>
+<li><p>The local form of Ripley’s K function quantifies the characteristics of the point pattern and its deviation from expected patterns locally</p></li>
+<li><p>It provides insights into the spatiotemporal dynamics of the point process at a more granular level compared to the global K function</p></li>
 </ul>
-</blockquote>
-<p>Revised code chunk to account for the above</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>kbb_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/rawdata/'</span>, <span class="at">layer =</span> <span class="st">'Kepulauan_Bangka_Belitung'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># addition</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">'ZM'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># --------</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `Kepulauan_Bangka_Belitung' from data source 
-  `/Users/williamtjw/is415-gaa-williamtjw/resources/ICEs/ex4/data/rawdata' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 298 features and 27 fields
-Geometry type: POLYGON
-Dimension:     XYZ
-Bounding box:  xmin: 105.1085 ymin: -3.116593 xmax: 106.8488 ymax: -1.501603
-z_range:       zmin: 0 zmax: 0
-Geodetic CRS:  WGS 84</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>st_as_s2(): dropping Z and/or M coordinate</code></pre>
-</div>
-</div>
-</section>
-<section id="convert-to-owin" class="level4">
-<h4 class="anchored" data-anchor-id="convert-to-owin"><strong>Convert to OWIN</strong></h4>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>kbb_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(kbb_sf)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>kbb_owin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>window: polygonal boundary
-enclosing rectangle: [512066.8, 705559.4] x [9655398, 9834006] units</code></pre>
-</div>
-</div>
-</section>
-<section id="confirm-class-of-output" class="level4">
-<h4 class="anchored" data-anchor-id="confirm-class-of-output">Confirm class of output</h4>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(kbb_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "owin"</code></pre>
-</div>
-</div>
-<p>If using kbb with ‘z’, the following <strong>error</strong> will occur:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kbb_owin_error &lt;- as.owin(kbb)</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># error:</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Error in owinInternalPoly(xrange, yrange, ..., poly = poly, unitname = unitname) : </span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   poly must be either a list(x,y) or a list of list(x,y)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-</section>
-<section id="import-and-prepare-forest-data" class="level3">
-<h3 class="anchored" data-anchor-id="import-and-prepare-forest-data"><strong>Import and Prepare Forest Data</strong></h3>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'longitude'</span>, <span class="st">'latitude'</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> <span class="co"># combines columns to convert into geospatial data</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                                                                <span class="co"># order must be long then lat (follows x,y)</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)                                     <span class="co"># converts to UTM 48</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 741 Columns: 15
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr   (3): satellite, instrument, daynight
-dbl  (11): latitude, longitude, brightness, scan, track, acq_time, confidenc...
-date  (1): acq_date
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-</div>
-<blockquote class="blockquote">
+<p><strong>Case Study: Dengue Fever in Cali, Colombia</strong></p>
 <ul>
-<li><p>Note that ‘longitude’ and ‘latitude’ combined to form ‘geometry’ in UTM48 from WGS84</p></li>
-<li><p>If <code>st_as_sf()</code> and <code>st_transform</code> not used:</p></li>
+<li><p>The authors applied global and local forms of Ripley’s K function to study the spatiotemporal patterns of dengue fever in Cali, Colombia</p></li>
+<li><p>The case study illustrates the benefits of using the combined global and local Ripley’s K function approach for analyzing dynamic geospatial phenomena</p></li>
 </ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fire <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 741 Columns: 15
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr   (3): satellite, instrument, daynight
-dbl  (11): latitude, longitude, brightness, scan, track, acq_time, confidenc...
-date  (1): acq_date
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># will output an ASPATIAL data file</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</blockquote>
-<p>Because ppp object only accepts numerical or characters as mark, the code chunk below is used to convert data type of acq_date to <strong>numeric</strong></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DayofYear =</span> <span class="fu">yday</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month_num =</span> <span class="fu">month</span>(acq_date)) <span class="sc">%&gt;%</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Month_fac =</span> <span class="fu">month</span>(</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    acq_date, </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="co"># display the month as a character string e.g. "January."; FALSE will display the month as a number.</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">abbr =</span> <span class="cn">FALSE</span> <span class="co"># display the month as a character string label, e.g. "January"; TRUE displays abbr version of the label, like "Jan"</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fire_sf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Simple feature collection with 741 features and 16 fields
-Geometry type: POINT
-Dimension:     XY
-Bounding box:  xmin: 521564.1 ymin: 9658137 xmax: 695791 ymax: 9828767
-Projected CRS: WGS 84 / UTM zone 48S
-# A tibble: 741 × 17
-   brightness  scan track acq_date   acq_time satellite instrument confidence
- *      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;        &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;           &lt;dbl&gt;
- 1       312.   1.3   1.1 2023-01-10      629 Aqua      MODIS              67
- 2       314.   1.2   1.1 2023-01-10      629 Aqua      MODIS              70
- 3       315.   1.2   1.1 2023-01-10      629 Aqua      MODIS              71
- 4       309.   1.2   1.1 2023-01-10      629 Aqua      MODIS              54
- 5       308.   1.2   1.1 2023-01-10      629 Aqua      MODIS              33
- 6       322.   1.3   1.1 2023-01-10      629 Aqua      MODIS              72
- 7       318.   1.2   1.1 2023-01-10      629 Aqua      MODIS              71
- 8       318.   1.2   1.1 2023-01-10      629 Aqua      MODIS              75
- 9       327.   2     1.4 2023-01-12      616 Aqua      MODIS              73
-10       321.   2     1.4 2023-01-12      616 Aqua      MODIS              75
-# ℹ 731 more rows
-# ℹ 9 more variables: version &lt;dbl&gt;, bright_t31 &lt;dbl&gt;, frp &lt;dbl&gt;,
-#   daynight &lt;chr&gt;, type &lt;dbl&gt;, geometry &lt;POINT [m]&gt;, DayofYear &lt;dbl&gt;,
-#   Month_num &lt;dbl&gt;, Month_fac &lt;ord&gt;</code></pre>
-</div>
-</div>
+<p>In conclusion, the article demonstrates the capability of Ripley’s K function, both in its global and local forms, for studying spatiotemporal point patterns The case study on dengue fever highlights the insights that can be gained by applying this methodology to real-world geospatial data</p>
 </section>
+<section id="evolution-of-forest-fires-in-portugal-from-spatio-temporal-point-events-to-smoothed-density-maps-natural-hazards-dordrecht" class="level3">
+<h3 class="anchored" data-anchor-id="evolution-of-forest-fires-in-portugal-from-spatio-temporal-point-events-to-smoothed-density-maps-natural-hazards-dordrecht">“Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”, <em>Natural hazards</em> (Dordrecht)</h3>
+<p>This article analyzes the spatial and temporal distribution of forest fires in Portugal from 1990 to 2013 using spatio-temporal statistical methods. The authors used the Portuguese National Mapping Burnt Areas (NMBA) dataset, which contains 27,273 fire events with a burned area greater than 5 hectares</p>
+<p>Key findings:</p>
+<ul>
+<li><p>The northern half of Portugal is much more affected by forest fires than the southern half, with 25,322 and 1,951 events respectively</p></li>
+<li><p>Fires were categorized into small (5-15 ha), medium (15-100 ha), and large (&gt;100 ha) based on burned area. Medium fires tend to aggregate around small fires, while large fires aggregate at larger distances and longer times</p></li>
+<li><p>Density maps show hot spots are present almost every year in the northern region, with higher concentrations, while the southern half has lower densities mainly in the 2000-2007 period</p></li>
+<li><p>The largest total annual burned areas occurred in 2003 and 2005, despite not having the highest number of events in those years. The years with the most fires were 1998, 2001, and 2002 with around 1,850 events each</p></li>
+</ul>
+<p>The authors applied four spatio-temporal statistical methods to explore the data:</p>
+<ol type="1">
+<li><p><strong>Geographically weighted summary statistics</strong> to examine how average burned area varies locally</p></li>
+<li><p><strong>Bivariate K function</strong> to test space-time interaction and spatial attraction/independence between fires of different sizes</p></li>
+<li><p><strong>Space-time K function</strong> to test the interaction between space and time</p></li>
+<li><p><strong>Space-time kernel density</strong> to create smoothed density surfaces representing over-densities of fires</p></li>
+</ol>
+<p>The results help identify vulnerable areas and time periods where fire hazard is more likely to occur, which is crucial information for fire prevention and management strategies.</p>
 </section>
-<section id="fire-points-visualisation" class="level1">
-<h1>Fire points Visualisation</h1>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Task</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Code</a></li></ul>
-<div class="tab-content">
-<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<p>Prepare a point symbol map showing the distribution of fire points</p>
-</div>
-<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf) <span class="sc">+</span> <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(fire_sf) <span class="sc">+</span> <span class="fu">tm_dots</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="ice4_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="readings" class="level1">
-<h1><a href="~/is415-gaa-williamtjw/resources/ICEs/ex4"><strong>Readings</strong></a></h1>
-<p>Jonatan A. González, et. al.&nbsp;(2016) <a href="https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&amp;fr=RR-2&amp;rr=8bfff858af196002">“Spatio-temporal point process statistics: A review”</a>, <em>Spatial Statistics</em>, Volume 18, Part B, November 2016, Pages 505-544.</p>
-<p>Alexander Hohl et. al.<a href="https://pages.charlotte.edu/eric-delmelle/wp-content/uploads/sites/150/2019/09/Spatiotemporal-Point-Pattern-Analysis-Using-Ripleys-K-Function.pdf">“Spatiotemporal Point Pattern Analysis Using Ripley’s K”</a> in <strong>Geospatial Data Science Techniques and Applications</strong>.</p>
-<p>Tonini, Marj et. al.&nbsp;(2017<a href="https://link-springer-com.libproxy.smu.edu.sg/article/10.1007/s11069-016-2637-x">) “Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”</a>, <em>Natural hazards</em> (Dordrecht), 2017-02, Vol.85 (3), p.1489-1510. Available at SMU eJournal.</p>
-<p>Juan, P et. al.&nbsp;(2012)<a href="https://link-springer-com.libproxy.smu.edu.sg/article/10.1007/s00477-012-0568-y">“Pinpointing spatio-temporal interactions in wildfire patterns”</a>, <em>Stochastic environmental research and risk assessment</em>, 2012-12, Vol.26 (8), p.1131-1150. Available at SMU eJournal.</p>
-</section>
-<section id="about-r" class="level1">
-<h1><strong>About R</strong></h1>
+<section id="pinpointing-spatio-temporal-interactions-in-wildfire-patterns-stochastic-environmental-research-and-risk-assessment" class="level3">
+<h3 class="anchored" data-anchor-id="pinpointing-spatio-temporal-interactions-in-wildfire-patterns-stochastic-environmental-research-and-risk-assessment">“Pinpointing spatio-temporal interactions in wildfire patterns”, <em>Stochastic environmental research and risk assessment</em></h3>
+<p><strong>Introduction</strong></p>
+<p>The introduction defines wildfires as uncontrolled fires in vegetation, emphasizing their unique characteristics, such as rapid spread and potential for unexpected direction changes. It highlights the Mediterranean region’s high fire risk due to climatic conditions and landscape dynamics, particularly in Catalonia, where afforestation and rural abandonment have increased vulnerability to fires. The authors argue that understanding the spatial and temporal patterns of wildfires is crucial for effective management and prevention.</p>
+<p><strong>Data and Methodology</strong></p>
+<p>The study focuses on a dataset of 3,083 wildfires recorded in Catalonia during the specified period. The authors categorize the causes of these wildfires into natural, negligence, intentional (arson), and unknown. They also analyze spatial covariates such as slope, aspect, hill shade, and land use, utilizing the CORINE land cover database.The authors employ point process models to evaluate the spatial distribution of wildfires and assess clustering patterns. They utilize statistical methods to test for deviations from complete spatial randomness (CSR), which helps identify whether wildfires are randomly distributed or exhibit clustering.</p>
+<p><strong>Results</strong></p>
+<p>The analysis reveals that negligence is the most common cause of wildfires, followed by intentional and unknown causes. The study notes a significant increase in wildfires from 2004 to 2005, followed by a decrease in subsequent years, with 2008 recording the lowest number of incidents.Spatially, the distribution of wildfires varies by cause, with intentional and unknown causes displaying similar patterns. The paper discusses the implications of these findings for wildfire management, suggesting that understanding clustering can aid in resource allocation and risk assessment.</p>
+<p><strong>Statistical Analysis</strong></p>
+<p>The authors delve into functional summary statistics and the mathematical theory of point processes, explaining how these tools can model the irregular distribution of wildfire events. They emphasize the importance of testing CSR to classify observed patterns as regular, random, or aggregated, which informs further modeling efforts.</p>
+<p><strong>Conclusion</strong></p>
+<p>The paper concludes by reiterating the significance of spatio-temporal analysis in understanding wildfire dynamics. The authors advocate for the use of advanced statistical modeling techniques to improve wildfire management strategies, emphasizing the need for ongoing research in this area.Overall, the study provides valuable insights into the factors influencing wildfire patterns in Catalonia, highlighting the interplay between environmental variables and human activities.</p>
 
 
 </section>

@@ -39,9 +39,9 @@ pacman::p_load(sf, raster, spatstat, sparr, tmap, tidyverse)
 
 ### **Import and Prepare Study Area**
 
-#### Import and remove 'z' 
+#### Import and remove 'z'
 
-```{r eval=FALSE}
+```{r}
 kbb <- st_read(dsn = 'data/rawdata/', layer = 'Kepulauan_Bangka_Belitung') %>% 
   st_transform(crs = 32748)
 ```
@@ -89,10 +89,51 @@ If using kbb with 'z', the following **error** will occur:
 ```{r}
 fire_sf <- read_csv('data/rawdata/forestfires.csv') %>% 
   st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>% # combines columns to convert into geospatial data
-  st_transform(crs = 32748)
+                                                                # order must be long then lat (follows x,y)
+  st_transform(crs = 32748)                                     # converts to UTM 48
 ```
 
-Because ppp object only accepts numerical or characters as mark, the code chunk below is used
+> -   Note that 'longitude' and 'latitude' combined to form 'geometry' in UTM48 from WGS84
+>
+> -   If `st_as_sf()` and `st_transform` not used:
+>
+> ```{r}
+> fire <- read_csv('data/rawdata/forestfires.csv')
+> >
+> # will output an ASPATIAL data file
+> ```
+
+Because ppp object only accepts numerical or characters as mark, the code chunk below is used to convert data type of acq_date to **numeric**
+
+```{r}
+fire_sf <- fire_sf %>%
+  mutate(DayofYear = yday(acq_date)) %>% 
+  mutate(Month_num = month(acq_date)) %>% 
+  mutate(Month_fac = month(
+    acq_date, 
+    label = TRUE, # display the month as a character string e.g. "January."; FALSE will display the month as a number.
+    abbr = FALSE # display the month as a character string label, e.g. "January"; TRUE displays abbr version of the label, like "Jan"
+    ))
+```
+
+```{r}
+fire_sf
+```
+
+# Fire points Visualisation
+
+::: panel-tabset
+## Task
+
+Prepare a point symbol map showing the distribution of fire points
+
+## Code
+
+```{r}
+tm_shape(kbb_sf) + tm_polygons() +
+  tm_shape(fire_sf) + tm_dots()
+```
+:::
 
 # [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4)
 
