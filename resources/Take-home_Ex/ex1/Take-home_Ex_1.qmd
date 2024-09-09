@@ -62,7 +62,7 @@ These R packages will be used:
     -   
 
 ```{r}
-pacman:::p_load(sf,tidyverse,janitor,skimr) # more to be added
+pacman:::p_load(sf,tidyverse,janitor,skimr,lubridate) # more to be added
 ```
 
 ## Load the ACLED
@@ -167,7 +167,9 @@ str(acled)
 sum(is.na(acled))
 ```
 
-Clearly, this doesn't provide much insight to the state of the ACLED **columns**. Hence I consulted Uncle Google for an alternative:
+Clearly, this doesn't provide much insight to the state of the ACLED **columns**. Hence I consulted Uncle Google for alternatives:
+
+-   base R
 
 ```{r}
 missing_data <- acled %>% 
@@ -176,8 +178,6 @@ missing_data
 ```
 
 For a more compact view, I will use `pivot_longer()` to transpose the table and `filter()` to rid off ACLED columns with no missing data.
-
--   base R
 
 ```{r}
 missing_data %>% 
@@ -208,10 +208,16 @@ skim(acled) %>%
 sum(duplicated(acled['event_id_cnty']))
 ```
 
-**Formatting date**
+**Formatting date using `dmy()` from `lubridate` package**
 
 ```{r}
+acled$event_date <- dmy(acled$event_date)
+```
 
+Verify,
+
+```{r}
+head(acled$event_date)
 ```
 
 # `event_type` Exploratory Analysis

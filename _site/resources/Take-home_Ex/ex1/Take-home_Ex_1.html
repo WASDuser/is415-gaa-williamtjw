@@ -277,6 +277,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p>Strategic developments, and</p></li>
 <li><p>Violence against civilians.</p></li>
 </ul>
+<p>Along the way, I will be exploring the use of different functions to obtain more aesthetically pleasing outputs for fun.</p>
 </section>
 <section id="data" class="level1">
 <h1>Data</h1>
@@ -291,9 +292,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>read_csv()</code>: reading ACLED csv data</li>
 </ul></li>
 <li><p><strong>janitor</strong>: data cleaning</p></li>
+<li><p><strong>lubridate</strong>: date formatting</p></li>
 <li><p><strong>Extra (TBD):</strong></p>
 <ul>
-<li><p>lubridate - to format dates</p></li>
+<li><p><strong>janitor</strong>: data cleaning</p></li>
+<li><p><strong>lubridate</strong>: date formatting</p></li>
+<li><p><strong>skimr</strong>: provide summary statistics</p></li>
+<li><p><strong>scrutiny</strong>: data wrangling</p></li>
 <li><p>cowplot - add-on to ggplot for higher quality figures</p></li>
 <li><p><a href="https://www.htmlwidgets.org/showcase_leaflet.html">htmlwidgets</a> for R - interactive visualisations (could be used for visual analytics)</p>
 <ul>
@@ -303,7 +308,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,janitor) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,janitor,skimr,lubridate) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="load-the-acled" class="level2">
@@ -324,7 +329,7 @@ dbl (11): year, time_precision, inter1, inter2, interaction, iso, latitude, ...
 </section>
 <section id="metadata" class="level2">
 <h2 class="anchored" data-anchor-id="metadata">Metadata</h2>
-Click to expand –&gt;
+<p>Click to expand –&gt;</p>
 <details>
 <table class="caption-top table">
 <colgroup>
@@ -381,7 +386,7 @@ Click to expand –&gt;
 </tr>
 <tr class="even">
 <td>‘interaction’</td>
-<td style="text-align: left;">indicates the 2 actor types interacting in the event (using inter1 &amp; inter2 codes)</td>
+<td style="text-align: left;">indicates the 2 actor types interacting in the event (encoded inter1 &amp; inter2 by concatenation)</td>
 </tr>
 <tr class="odd">
 <td>‘civilian_targeting’</td>
@@ -559,138 +564,100 @@ Click to expand –&gt;
 <pre><code>[1] 179468</code></pre>
 </div>
 </div>
-<p>Clearly, this doesn’t provide much insight to the state of the ACLED <strong>columns</strong>. Hence I consulted Uncle Google for some alternatives:</p>
+<p>Clearly, this doesn’t provide much insight to the state of the ACLED <strong>columns</strong>. Hence I consulted Uncle Google for an alternative:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>missing_data <span class="ot">&lt;-</span> acled <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.))))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>missing_data </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 31
+  event_id_cnty event_date  year time_precision disorder_type event_type
+          &lt;int&gt;      &lt;int&gt; &lt;int&gt;          &lt;int&gt;         &lt;int&gt;      &lt;int&gt;
+1             0          0     0              0             0          0
+# ℹ 25 more variables: sub_event_type &lt;int&gt;, actor1 &lt;int&gt;, assoc_actor_1 &lt;int&gt;,
+#   inter1 &lt;int&gt;, actor2 &lt;int&gt;, assoc_actor_2 &lt;int&gt;, inter2 &lt;int&gt;,
+#   interaction &lt;int&gt;, civilian_targeting &lt;int&gt;, iso &lt;int&gt;, region &lt;int&gt;,
+#   country &lt;int&gt;, admin1 &lt;int&gt;, admin2 &lt;int&gt;, admin3 &lt;int&gt;, location &lt;int&gt;,
+#   latitude &lt;int&gt;, longitude &lt;int&gt;, geo_precision &lt;int&gt;, source &lt;int&gt;,
+#   source_scale &lt;int&gt;, notes &lt;int&gt;, fatalities &lt;int&gt;, tags &lt;int&gt;,
+#   timestamp &lt;int&gt;</code></pre>
+</div>
+</div>
+<p>For a more compact view, I will use <code>pivot_longer()</code> to transpose the table and <code>filter()</code> to rid off ACLED columns with no missing data.</p>
 <ul>
-<li>base R functions:</li>
+<li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Count missing values in each column</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>missing_counts <span class="ot">&lt;-</span> <span class="fu">lapply</span>(acled, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x)))</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Print the results</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>missing_counts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>missing_data <span class="sc">%&gt;%</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>$event_id_cnty
-[1] 0
-
-$event_date
-[1] 0
-
-$year
-[1] 0
-
-$time_precision
-[1] 0
-
-$disorder_type
-[1] 0
-
-$event_type
-[1] 0
-
-$sub_event_type
-[1] 0
-
-$actor1
-[1] 0
-
-$assoc_actor_1
-[1] 39191
-
-$inter1
-[1] 0
-
-$actor2
-[1] 15363
-
-$assoc_actor_2
-[1] 41011
-
-$inter2
-[1] 0
-
-$interaction
-[1] 0
-
-$civilian_targeting
-[1] 41852
-
-$iso
-[1] 0
-
-$region
-[1] 0
-
-$country
-[1] 0
-
-$admin1
-[1] 0
-
-$admin2
-[1] 0
-
-$admin3
-[1] 917
-
-$location
-[1] 0
-
-$latitude
-[1] 0
-
-$longitude
-[1] 0
-
-$geo_precision
-[1] 0
-
-$source
-[1] 0
-
-$source_scale
-[1] 0
-
-$notes
-[1] 0
-
-$fatalities
-[1] 0
-
-$tags
-[1] 41134
-
-$timestamp
-[1] 0</code></pre>
+<pre><code># A tibble: 6 × 2
+  column             missing_count
+  &lt;chr&gt;                      &lt;int&gt;
+1 assoc_actor_1              39191
+2 actor2                     15363
+3 assoc_actor_2              41011
+4 civilian_targeting         41852
+5 admin3                       917
+6 tags                       41134</code></pre>
 </div>
 </div>
-<p>For fun, here’s other methods:</p>
+<blockquote class="blockquote">
+<p>‘<code>actor</code>’-related columns: possible to have 1 or more actors responsible</p>
+<p>‘<code>civilian_targeting</code>’: boolean-like variable — null for no civilian targeting</p>
+<p>‘<code>admin3</code>’: location identifiers are still discernible at least 1 of the <code>admin</code> columns are filled</p>
+<p>‘<code>tags</code>’: supplementary target description</p>
+</blockquote>
 <ul>
-<li><p>R package <code>janitor</code>, <code>summarise()</code> and <code>across()</code></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize missing values in each column</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>acled <span class="sc">%&gt;%</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">adorn_totals</span>(<span class="st">"row"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> event_id_cnty event_date year time_precision disorder_type event_type
-             0          0    0              0             0          0
-         Total          0    0              0             0          0
- sub_event_type actor1 assoc_actor_1 inter1 actor2 assoc_actor_2 inter2
-              0      0         39191      0  15363         41011      0
-              0      0         39191      0  15363         41011      0
- interaction civilian_targeting iso region country admin1 admin2 admin3
-           0              41852   0      0       0      0      0    917
-           0              41852   0      0       0      0      0    917
- location latitude longitude geo_precision source source_scale notes fatalities
-        0        0         0             0      0            0     0          0
-        0        0         0             0      0            0     0          0
-  tags timestamp
- 41134         0
- 41134         0</code></pre>
-</div>
-</div></li>
+<li><code>skim()</code> from <code>skimr</code> package</li>
 </ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled) <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 31 × 17
+   skim_type skim_variable   n_missing complete_rate character.min character.max
+   &lt;chr&gt;     &lt;chr&gt;               &lt;int&gt;         &lt;dbl&gt;         &lt;int&gt;         &lt;int&gt;
+ 1 character event_id_cnty           0         1                 8             8
+ 2 character event_date              0         1                11            17
+ 3 character disorder_type           0         1                14            34
+ 4 character event_type              0         1                 5            26
+ 5 character sub_event_type          0         1                 5            35
+ 6 character actor1                  0         1                 3           214
+ 7 character assoc_actor_1       39191         0.240             2          1085
+ 8 character actor2              15363         0.702            10           124
+ 9 character assoc_actor_2       41011         0.205             8           971
+10 character civilian_targe…     41852         0.189            18            18
+# ℹ 21 more rows
+# ℹ 11 more variables: character.empty &lt;int&gt;, character.n_unique &lt;int&gt;,
+#   character.whitespace &lt;int&gt;, numeric.mean &lt;dbl&gt;, numeric.sd &lt;dbl&gt;,
+#   numeric.p0 &lt;dbl&gt;, numeric.p25 &lt;dbl&gt;, numeric.p50 &lt;dbl&gt;, numeric.p75 &lt;dbl&gt;,
+#   numeric.p100 &lt;dbl&gt;, numeric.hist &lt;chr&gt;</code></pre>
+</div>
+</div>
+<p><strong>Checking for duplicates in ACLED’s unique identifier <code>event_id_cnty</code></strong></p>
+<ul>
+<li>base R</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled[<span class="st">'event_id_cnty'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p><strong>Formatting date using <code>dmy()</code> from <code>lubridate</code> package</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>acled<span class="sc">$</span>event_date <span class="ot">&lt;-</span> <span class="fu">dmy</span>(acled<span class="sc">$</span>event_date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Verify,</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled<span class="sc">$</span>event_date)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "2024-07-01" "2024-07-01" "2024-07-01" "2024-07-01" "2024-07-01"
+[6] "2024-07-01"</code></pre>
+</div>
+</div>
 </section>
 <section id="event_type-exploratory-analysis" class="level1">
 <h1><code>event_type</code> Exploratory Analysis</h1>
