@@ -9,7 +9,7 @@ execute:
   freeze: true
 ---
 
-Background
+# Background
 
 -   Spatio-temporal point process (**stpp**) is a random collection of points, where each point represents the time and location of an event
 
@@ -36,8 +36,6 @@ Background
 -   NOTE THAT `sparr` HAS AN ANIMATING FEATURE TO SEE HOW ST PATTERNS DIFFUSE
 
 ```{r}
-#options(timeout = 300)
-#install.packages("sparr")
 pacman::p_load(sf, raster, spatstat, tmap, tidyverse, sparr)
 ```
 
@@ -100,12 +98,11 @@ fire_sf <- read_csv('data/rawdata/forestfires.csv') %>%
 > -   Note that 'longitude' and 'latitude' combined to form 'geometry' in UTM48 from WGS84
 >
 > -   If `st_as_sf()` and `st_transform` not used:
->
-> ```{r}
-> fire <- read_csv('data/rawdata/forestfires.csv')
-> >
-> # will output an ASPATIAL data file
-> ```
+
+```{r}
+fire <- read_csv('data/rawdata/forestfires.csv')
+# will output an ASPATIAL data file
+```
 
 Because ppp object only accepts numerical or characters as mark, the code chunk below is used to convert data type of acq_date to **numeric**
 
@@ -204,7 +201,7 @@ summary(st_kde)
 #   could not find function "spattemp.density"
 ```
 
-### Plotting STKDE object
+### **Plotting STKDE object**
 
 ```{r}
 #| fig-width: 12
@@ -221,17 +218,74 @@ for (i in tims){
 }
 ```
 
-### placeholder
+# Computing STKDE by Year
+
+### Creating ppp object
 
 ```{r}
-# kde_yday <- spattemp.density(
-#   fire_yday_owin
-# )
-
-# summary(kde_yday)
+head(fire_sf)
 ```
 
-# [**Readings**](~/is415-gaa-williamtjw/resources/ICEs/ex4/reference.qmd)
+```{r}
+fire_yday_ppp <- fire_sf %>% 
+  select(DayofYear) %>% 
+  as.ppp()
+```
+
+### Include owin object
+
+```{r}
+fire_yday_owin <- fire_yday_ppp[kbb_owin]
+summary(fire_yday_owin)
+```
+
+### Compute STKDE 
+
+```{r}
+kde_yday <- spattemp.density(
+  fire_yday_owin
+)
+
+summary(kde_yday)
+```
+
+### **Plotting STKDE object**
+
+```{r}
+# plot(kde_yday)
+```
+
+# **Computing STKDE by Day of Year: Improved method**
+
+### Determine both the spatial bandwidth and the scalar temporal bandwidth using `BOOT.spattemp()`
+
+```{r}
+set.seed(1234) # for reproducible result
+BOOT.spattemp(fire_yday_owin)
+# TLDR:
+# allows computing of kernel density over time and space together
+# allows the kernel bandwidth to vary in both space and time
+# computes densities across three dimensions (two spatial, one temporal), which is essential for realistic spatio-temporal modeling
+# flexibility in the choice of kernel
+```
+
+### Computing STKDE object
+
+```{r}
+kde_yday <- spattemp.density(
+  fire_yday_owin,
+  h = 9000, # radius around each data point over which influence is spread: bigger BW, more smoothin, less sens to small-scale variation; ROUNDED DOWN b/c balanced between noise and smoother aesthetics
+  lambda = 19) # same concept as spatial BW; marginal change + smooth out short-term fluctuations or noise and emphasize longer-term trends
+summary(kde_yday)
+```
+
+### Plotting STKDE object
+
+```{r}
+# plot(kde_yday)
+```
+
+# **Readings**
 
 Jonatan A. González, et. al. (2016) [“Spatio-temporal point process statistics: A review”](https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&fr=RR-2&rr=8bfff858af196002), *Spatial Statistics*, Volume 18, Part B, November 2016, Pages 505-544.
 

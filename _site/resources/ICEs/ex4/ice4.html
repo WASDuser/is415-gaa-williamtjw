@@ -207,7 +207,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#objectives" id="toc-objectives" class="nav-link active" data-scroll-target="#objectives">Objectives</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#objectives" id="toc-objectives" class="nav-link" data-scroll-target="#objectives">Objectives</a></li>
   <li><a href="#notes" id="toc-notes" class="nav-link" data-scroll-target="#notes">Notes:</a></li>
   <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code:</a>
   <ul class="collapse">
@@ -223,8 +224,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#verify-output" id="toc-verify-output" class="nav-link" data-scroll-target="#verify-output">Verify output</a></li>
   <li><a href="#include-owin-object" id="toc-include-owin-object" class="nav-link" data-scroll-target="#include-owin-object">Include owin object</a></li>
   <li><a href="#computing-stkde" id="toc-computing-stkde" class="nav-link" data-scroll-target="#computing-stkde">Computing STKDE</a></li>
-  <li><a href="#plotting-stkde-object" id="toc-plotting-stkde-object" class="nav-link" data-scroll-target="#plotting-stkde-object">Plotting STKDE object</a></li>
-  <li><a href="#placeholder" id="toc-placeholder" class="nav-link" data-scroll-target="#placeholder">placeholder</a></li>
+  <li><a href="#plotting-stkde-object" id="toc-plotting-stkde-object" class="nav-link" data-scroll-target="#plotting-stkde-object"><strong>Plotting STKDE object</strong></a></li>
+  </ul></li>
+  <li><a href="#computing-stkde-by-year" id="toc-computing-stkde-by-year" class="nav-link" data-scroll-target="#computing-stkde-by-year">Computing STKDE by Year</a>
+  <ul class="collapse">
+  <li><a href="#creating-ppp-object" id="toc-creating-ppp-object" class="nav-link" data-scroll-target="#creating-ppp-object">Creating ppp object</a></li>
+  <li><a href="#include-owin-object-1" id="toc-include-owin-object-1" class="nav-link" data-scroll-target="#include-owin-object-1">Include owin object</a></li>
+  <li><a href="#compute-stkde" id="toc-compute-stkde" class="nav-link" data-scroll-target="#compute-stkde">Compute STKDE</a></li>
+  <li><a href="#plotting-stkde-object-1" id="toc-plotting-stkde-object-1" class="nav-link" data-scroll-target="#plotting-stkde-object-1"><strong>Plotting STKDE object</strong></a></li>
+  </ul></li>
+  <li><a href="#computing-stkde-by-day-of-year-improved-method" id="toc-computing-stkde-by-day-of-year-improved-method" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year-improved-method"><strong>Computing STKDE by Day of Year: Improved method</strong></a>
+  <ul class="collapse">
+  <li><a href="#determine-both-the-spatial-bandwidth-and-the-scalar-temporal-bandwidth-using-boot.spattemp" id="toc-determine-both-the-spatial-bandwidth-and-the-scalar-temporal-bandwidth-using-boot.spattemp" class="nav-link" data-scroll-target="#determine-both-the-spatial-bandwidth-and-the-scalar-temporal-bandwidth-using-boot.spattemp">Determine both the spatial bandwidth and the scalar temporal bandwidth using <code>BOOT.spattemp()</code></a></li>
+  <li><a href="#computing-stkde-object" id="toc-computing-stkde-object" class="nav-link" data-scroll-target="#computing-stkde-object">Computing STKDE object</a></li>
+  <li><a href="#plotting-stkde-object-2" id="toc-plotting-stkde-object-2" class="nav-link" data-scroll-target="#plotting-stkde-object-2">Plotting STKDE object</a></li>
   </ul></li>
   <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><strong>Readings</strong></a></li>
   <li><a href="#about-r" id="toc-about-r" class="nav-link" data-scroll-target="#about-r"><strong>About R</strong></a></li>
@@ -260,7 +273,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 9, 2024</p>
+      <p class="date-modified">September 11, 2024</p>
     </div>
   </div>
     
@@ -271,7 +284,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Background</p>
+<section id="background" class="level1">
+<h1>Background</h1>
 <ul>
 <li><p>Spatio-temporal point process (<strong>stpp</strong>) is a random collection of points, where each point represents the time and location of an event</p></li>
 <li><p>for geographically and temporally indexed data</p></li>
@@ -280,6 +294,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>A real world forest fire events in Kepulauan Bangka Belitung, Indonesia from 1st January 2023 to 31st December 2023</li>
 </ul></li>
 </ul>
+</section>
 <section id="objectives" class="level1">
 <h1>Objectives</h1>
 <ul>
@@ -301,9 +316,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>NOTE THAT <code>sparr</code> HAS AN ANIMATING FEATURE TO SEE HOW ST PATTERNS DIFFUSE</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#options(timeout = 300)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("sparr")</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, raster, spatstat, tmap, tidyverse, sparr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, raster, spatstat, tmap, tidyverse, sparr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="import-and-prepare-study-area" class="level3">
@@ -408,6 +421,7 @@ date  (1): acq_date
 <li><p>Note that ‘longitude’ and ‘latitude’ combined to form ‘geometry’ in UTM48 from WGS84</p></li>
 <li><p>If <code>st_as_sf()</code> and <code>st_transform</code> not used:</p></li>
 </ul>
+</blockquote>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fire <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/rawdata/forestfires.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -423,7 +437,6 @@ date  (1): acq_date
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># will output an ASPATIAL data file</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</blockquote>
 <p>Because ppp object only accepts numerical or characters as mark, the code chunk below is used to convert data type of acq_date to <strong>numeric</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
@@ -630,7 +643,7 @@ Evaluation
 </div>
 </section>
 <section id="plotting-stkde-object" class="level3">
-<h3 class="anchored" data-anchor-id="plotting-stkde-object">Plotting STKDE object</h3>
+<h3 class="anchored" data-anchor-id="plotting-stkde-object"><strong>Plotting STKDE object</strong></h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>)</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
@@ -651,19 +664,209 @@ Evaluation
 </div>
 </div>
 </section>
-<section id="placeholder" class="level3">
-<h3 class="anchored" data-anchor-id="placeholder">placeholder</h3>
+</section>
+<section id="computing-stkde-by-year" class="level1">
+<h1>Computing STKDE by Year</h1>
+<section id="creating-ppp-object" class="level3">
+<h3 class="anchored" data-anchor-id="creating-ppp-object">Creating ppp object</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># kde_yday &lt;- spattemp.density(</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   fire_yday_owin</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(kde_yday)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fire_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 16 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 606178.8 ymin: 9682757 xmax: 669933.6 ymax: 9703062
+Projected CRS: WGS 84 / UTM zone 48S
+# A tibble: 6 × 17
+  brightness  scan track acq_date   acq_time satellite instrument confidence
+       &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;date&gt;        &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;           &lt;dbl&gt;
+1       312.   1.3   1.1 2023-01-10      629 Aqua      MODIS              67
+2       314.   1.2   1.1 2023-01-10      629 Aqua      MODIS              70
+3       315.   1.2   1.1 2023-01-10      629 Aqua      MODIS              71
+4       309.   1.2   1.1 2023-01-10      629 Aqua      MODIS              54
+5       308.   1.2   1.1 2023-01-10      629 Aqua      MODIS              33
+6       322.   1.3   1.1 2023-01-10      629 Aqua      MODIS              72
+# ℹ 9 more variables: version &lt;dbl&gt;, bright_t31 &lt;dbl&gt;, frp &lt;dbl&gt;,
+#   daynight &lt;chr&gt;, type &lt;dbl&gt;, geometry &lt;POINT [m]&gt;, DayofYear &lt;dbl&gt;,
+#   Month_num &lt;dbl&gt;, Month_fac &lt;ord&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fire_yday_ppp <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(DayofYear) <span class="sc">%&gt;%</span> </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.ppp</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="include-owin-object-1" class="level3">
+<h3 class="anchored" data-anchor-id="include-owin-object-1">Include owin object</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>fire_yday_owin <span class="ot">&lt;-</span> fire_yday_ppp[kbb_owin]</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_yday_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  741 points
+Average intensity 6.424519e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   10.0   213.0   258.0   245.9   287.0   352.0 
+
+Window: polygonal boundary
+2 separate polygons (no holes)
+           vertices        area relative.area
+polygon 1     47493 11533600000      1.00e+00
+polygon 2       256      306427      2.66e-05
+enclosing rectangle: [512066.8, 705559.4] x [9655398, 9834006] units
+                     (193500 x 178600 units)
+Window area = 11533900000 square units
+Fraction of frame area: 0.334</code></pre>
+</div>
+</div>
+</section>
+<section id="compute-stkde" class="level3">
+<h3 class="anchored" data-anchor-id="compute-stkde">Compute STKDE</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  fire_yday_owin</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Calculating trivariate smooth...Done.
+Edge-correcting...Done.
+Conditioning on time...Done.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 15102.47 (spatial)
+  lambda = 6.3198 (temporal)
+
+No. of observations
+  741 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+  [10, 352]
+
+Evaluation
+  128 x 128 x 343 trivariate lattice
+  Density range: [3.959516e-27, 2.751287e-12]</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-stkde-object-1" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-stkde-object-1"><strong>Plotting STKDE object</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(kde_yday)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="computing-stkde-by-day-of-year-improved-method" class="level1">
+<h1><strong>Computing STKDE by Day of Year: Improved method</strong></h1>
+<section id="determine-both-the-spatial-bandwidth-and-the-scalar-temporal-bandwidth-using-boot.spattemp" class="level3">
+<h3 class="anchored" data-anchor-id="determine-both-the-spatial-bandwidth-and-the-scalar-temporal-bandwidth-using-boot.spattemp">Determine both the spatial bandwidth and the scalar temporal bandwidth using <code>BOOT.spattemp()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>) <span class="co"># for reproducible result</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">BOOT.spattemp</span>(fire_yday_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Initialising...Done.
+Optimising...
+h = 15102.47 ; lambda = 16.84806 
+h = 16612.72 ; lambda = 16.84806 
+h = 15102.47 ; lambda = 1527.095 
+h = 15480.03 ; lambda = 771.9715 
+h = 15668.81 ; lambda = 394.4098 
+h = 15763.2 ; lambda = 205.6289 
+h = 15810.4 ; lambda = 111.2385 
+h = 15833.99 ; lambda = 64.04328 
+h = 15845.79 ; lambda = 40.44567 
+h = 15851.69 ; lambda = 28.64687 
+h = 15863.49 ; lambda = 5.049258 
+h = 15854.64 ; lambda = 22.74746 
+h = 15860.54 ; lambda = 10.94866 
+h = 15859.07 ; lambda = 13.89836 
+h = 14348.82 ; lambda = 13.89836 
+h = 13216.87 ; lambda = 12.42351 
+h = 12460.27 ; lambda = 15.37321 
+h = 10760.88 ; lambda = 16.11064 
+h = 8875.282 ; lambda = 11.68608 
+h = 10432.08 ; lambda = 12.97658 
+h = 7976.084 ; lambda = 16.66371 
+h = 9286.281 ; lambda = 15.60366 
+h = 9615.08 ; lambda = 18.73771 
+h = 9206.581 ; lambda = 21.61828 
+h = 8140.483 ; lambda = 18.23073 
+h = 8795.582 ; lambda = 17.70071 
+h = 9124.381 ; lambda = 20.83477 
+h = 9164.856 ; lambda = 19.52699 
+h = 8345.358 ; lambda = 18.48998 
+h = 9297.65 ; lambda = 18.67578 
+h = 8928.375 ; lambda = 16.8495 
+h = 9105.736 ; lambda = 18.85762 
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         h     lambda 
+9105.73611   18.85762 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># TLDR:</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="co"># allows computing of kernel density over time and space together</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="co"># allows the kernel bandwidth to vary in both space and time</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co"># computes densities across three dimensions (two spatial, one temporal), which is essential for realistic spatio-temporal modeling</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># flexibility in the choice of kernel</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="computing-stkde-object" class="level3">
+<h3 class="anchored" data-anchor-id="computing-stkde-object">Computing STKDE object</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  fire_yday_owin,</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">h =</span> <span class="dv">9000</span>, <span class="co"># radius around each data point over which influence is spread: bigger BW, more smoothin, less sens to small-scale variation; ROUNDED DOWN b/c balanced between noise and smoother aesthetics</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lambda =</span> <span class="dv">19</span>) <span class="co"># same concept as spatial BW; marginal change + smooth out short-term fluctuations or noise and emphasize longer-term trends</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Calculating trivariate smooth...Done.
+Edge-correcting...Done.
+Conditioning on time...Done.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 9000 (spatial)
+  lambda = 19 (temporal)
+
+No. of observations
+  741 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+  [10, 352]
+
+Evaluation
+  128 x 128 x 343 trivariate lattice
+  Density range: [2.001642e-19, 2.445724e-12]</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-stkde-object-2" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-stkde-object-2">Plotting STKDE object</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(kde_yday)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="readings" class="level1">
-<h1><a href="~/is415-gaa-williamtjw/resources/ICEs/ex4/reference.qmd"><strong>Readings</strong></a></h1>
+<h1><strong>Readings</strong></h1>
 <p>Jonatan A. González, et. al.&nbsp;(2016) <a href="https://www.sciencedirect.com/science/article/pii/S2211675316301130?ref=pdf_download&amp;fr=RR-2&amp;rr=8bfff858af196002">“Spatio-temporal point process statistics: A review”</a>, <em>Spatial Statistics</em>, Volume 18, Part B, November 2016, Pages 505-544.</p>
 <p>Alexander Hohl et. al.<a href="https://pages.charlotte.edu/eric-delmelle/wp-content/uploads/sites/150/2019/09/Spatiotemporal-Point-Pattern-Analysis-Using-Ripleys-K-Function.pdf">“Spatiotemporal Point Pattern Analysis Using Ripley’s K”</a> in <strong>Geospatial Data Science Techniques and Applications</strong>.</p>
 <p>Tonini, Marj et. al.&nbsp;(2017<a href="https://link-springer-com.libproxy.smu.edu.sg/article/10.1007/s11069-016-2637-x">) “Evolution of forest fires in Portugal: from spatio-temporal point events to smoothed density maps”</a>, <em>Natural hazards</em> (Dordrecht), 2017-02, Vol.85 (3), p.1489-1510. Available at SMU eJournal.</p>
