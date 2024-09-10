@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 4:"
+title: "Hands-on Exercise 4: Refer to ICE 4"
 author: "William"
 date: "September 2, 2024"
 date-modified: "last-modified"
