@@ -65,10 +65,10 @@ These R packages will be used:
 pacman:::p_load(sf,tidyverse,janitor,skimr,lubridate) # more to be added
 ```
 
-## Load the ACLED
+## ACLED
 
 ```{r}
-acled <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
+acled_sf <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
 ```
 
 ## Metadata
@@ -145,6 +145,78 @@ Click to expand –\>
 
 </details>
 
+# Myammar's Administrative Boundary data
+
+**Approach:**
+
+1.  In the working file directory, group the shapefiles according to admin classification (admin0, admin1, etc.)
+
+2.  Load
+
+3.  Check structure or whatever
+
+4.  Merge
+
+::: panel-tabset
+## admin 0 
+
+```{r}
+the1_mymr_shp4326_admin0 <- st_read(dsn = 'data/gadm41_MMR_0/', layer = 'gadm41_MMR_0')
+```
+
+```{r}
+str(the1_mymr_shp4326_admin0)
+
+# geometry: "XY" "MULTIPOLYGON"
+```
+
+```{r}
+plot(the1_mymr_shp4326_admin0$geometry)
+```
+
+## admin 1
+
+```{r}
+the1_mymr_shp4326_admin1 <- st_read(dsn = 'data/gadm41_MMR_1/', layer = 'gadm41_MMR_1')
+```
+
+```{r}
+str(the1_mymr_shp4326_admin1)
+```
+
+```{r}
+plot(the1_mymr_shp4326_admin1$geometry)
+```
+
+## admin 2
+
+```{r}
+the1_mymr_shp4326_admin2 <- st_read(dsn = 'data/gadm41_MMR_2/', layer = 'gadm41_MMR_2')
+```
+
+```{r}
+str(the1_mymr_shp4326_admin2)
+```
+
+```{r}
+plot(the1_mymr_shp4326_admin2$geometry)
+```
+
+## admin 3
+
+```{r}
+the1_mymr_shp4326_admin3 <- st_read(dsn = 'data/gadm41_MMR_3/', layer = 'gadm41_MMR_3')
+```
+
+```{r}
+str(the1_mymr_shp4326_admin3)
+```
+
+```{r}
+plot(the1_mymr_shp4326_admin3$geometry)
+```
+:::
+
 # Data Wrangling
 
 In this section, I will be doing basic data cleaning and formatting across the ACLED columns so that I can derive appropriate variables needed for analysis.
@@ -152,19 +224,23 @@ In this section, I will be doing basic data cleaning and formatting across the A
 **Inspecting ACLED**
 
 ```{r}
-head(acled, n=10)
+head(acled_sf, n=5)
 ```
 
 **Check ACLED structure**
 
 ```{r}
-str(acled)
+str(acled_sf)
+```
+
+```{r}
+unique(acled_sf$event_type)
 ```
 
 **Check for missing data**
 
 ```{r}
-sum(is.na(acled))
+sum(is.na(acled_sf))
 ```
 
 Clearly, this doesn't provide much insight to the state of the ACLED **columns**. Hence I consulted Uncle Google for alternatives:
@@ -172,16 +248,13 @@ Clearly, this doesn't provide much insight to the state of the ACLED **columns**
 -   base R
 
 ```{r}
-missing_data <- acled %>% 
-  summarise(across(everything(), ~ sum(is.na(.))))
-missing_data 
-```
-
-For a more compact view, I will use `pivot_longer()` to transpose the table and `filter()` to rid off ACLED columns with no missing data.
-
-```{r}
-missing_data %>% 
+acled_sf %>% 
+  summarise(across(everything(), ~ sum(is.na(.)))) %>% 
+  
+  # pivot_longer() to transpose the table for a more compact output
   pivot_longer(everything(), names_to = "column", values_to = "missing_count") %>%
+  
+  # filter() to rid off ACLED columns with no missing data.
   filter(missing_count > 0)
 ```
 
@@ -191,12 +264,12 @@ missing_data %>%
 >
 > '`admin3`': location identifiers are still discernible at least 1 of the `admin` columns are filled
 >
-> '`tags`': supplementary target description
+> '`tags`': supplementary target description information
 
 -   `skim()` from `skimr` package
 
 ```{r}
-skim(acled) %>%
+skim(acled_sf) %>%
   tibble::as_tibble()
 ```
 
@@ -205,20 +278,45 @@ skim(acled) %>%
 -   base R
 
 ```{r}
-sum(duplicated(acled['event_id_cnty']))
+sum(duplicated(acled_sf['event_id_cnty']))
 ```
 
-**Formatting date using `dmy()` from `lubridate` package**
+## Wrangling
+
+#### **Date formatting**  
+
+-   `lubridate` package
+
+    -   `as_datetime()`: converts UNIX time-stamps into workable date-time object
+
+    -   `quarter()`: extracts quarter info
 
 ```{r}
-acled$event_date <- dmy(acled$event_date)
+# to-do: assign variable; mix in geospatial data too
+acled_sf %>% 
+  mutate(
+    datetime = as_datetime(timestamp),
+    quarter_num = quarter(datetime),
+    quarter_period = paste(year,'Q', quarter_num, sep = '')
+  ) %>% 
+  group_by(event_id_cnty) %>% 
+  arrange(quarter_period) %>% 
+  summarise(event_id_cnty,quarter_period, event_type,) %>% 
+  ungroup()
 ```
 
 Verify,
 
 ```{r}
-head(acled$event_date)
+head(acled_sf$timestamp,n=5)
 ```
+
+Convert Unix time-stamp into `date` object
+
+```{r}
+```
+
+> Note: Unix timestamps count the number of seconds since the Unix epoch (January 1st, 1970 at UTC)
 
 # `event_type` Exploratory Analysis
 
