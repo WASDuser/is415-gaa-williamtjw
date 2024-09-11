@@ -213,8 +213,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#packages" id="toc-packages" class="nav-link" data-scroll-target="#packages">Packages</a></li>
   <li><a href="#acled" id="toc-acled" class="nav-link" data-scroll-target="#acled">ACLED</a></li>
   <li><a href="#metadata" id="toc-metadata" class="nav-link" data-scroll-target="#metadata">Metadata</a></li>
+  <li><a href="#myammars-administrative-boundary-data" id="toc-myammars-administrative-boundary-data" class="nav-link" data-scroll-target="#myammars-administrative-boundary-data">Myammar’s Administrative Boundary data</a>
+  <ul class="collapse">
+  <li><a href="#study-area" id="toc-study-area" class="nav-link" data-scroll-target="#study-area">Study Area</a></li>
   </ul></li>
-  <li><a href="#myammars-administrative-boundary-data" id="toc-myammars-administrative-boundary-data" class="nav-link" data-scroll-target="#myammars-administrative-boundary-data">Myammar’s Administrative Boundary data</a></li>
+  </ul></li>
   <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">Data Wrangling</a>
   <ul class="collapse">
   <li><a href="#wrangling" id="toc-wrangling" class="nav-link" data-scroll-target="#wrangling">Wrangling</a></li>
@@ -312,7 +315,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,janitor,skimr,lubridate) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,janitor,skimr,lubridate,tmap) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="acled" class="level2">
@@ -458,15 +461,20 @@ dbl (11): year, time_precision, inter1, inter2, interaction, iso, latitude, ...
 </table>
 </details>
 </section>
-</section>
-<section id="myammars-administrative-boundary-data" class="level1">
-<h1>Myammar’s Administrative Boundary data</h1>
+<section id="myammars-administrative-boundary-data" class="level2">
+<h2 class="anchored" data-anchor-id="myammars-administrative-boundary-data">Myammar’s Administrative Boundary data</h2>
+<p><strong>Background:</strong></p>
+<ul>
+<li><p>admin 0: country boundary (full overview)</p></li>
+<li><p>1: state/region</p></li>
+<li><p>2: district-level</p></li>
+<li><p>3: township (greatest resolution)</p></li>
+</ul>
 <p><strong>Approach:</strong></p>
 <ol type="1">
 <li><p>In the working file directory, group the shapefiles according to admin classification (admin0, admin1, etc.)</p></li>
 <li><p>Load</p></li>
 <li><p>Check structure or whatever</p></li>
-<li><p>Merge</p></li>
 </ol>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">admin 0</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">admin 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">admin 2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">admin 3</a></li></ul>
@@ -1069,13 +1077,53 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
 </div>
+<section id="study-area" class="level3">
+<h3 class="anchored" data-anchor-id="study-area">Study Area</h3>
+<p>To balance spatial detail and computational efficiency, I think using <code>the1_mymr_shp4326_admin1</code> (state/region) boundary data will be the best fit. While looking at district-/township-level provides fine granularity for analysis, for potato machines like my macbook, <code>the1_mymr_shp4326_admin1</code> provides the best compromise.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>tmap mode set to plotting</code></pre>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">admin1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">admin3</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(the1_mymr_shp4326_admin3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
 </section>
 <section id="data-wrangling" class="level1">
 <h1>Data Wrangling</h1>
 <p>In this section, I will be doing basic data cleaning and formatting across the ACLED columns so that I can derive appropriate variables needed for analysis.</p>
 <p><strong>Inspecting ACLED</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 31
   event_id_cnty event_date    year time_precision disorder_type       event_type
@@ -1096,7 +1144,7 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 <p><strong>Check ACLED structure</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>spc_tbl_ [51,576 × 31] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
  $ event_id_cnty     : chr [1:51576] "MMR64334" "MMR64335" "MMR64336" "MMR64338" ...
@@ -1167,8 +1215,9 @@ Geodetic CRS:  WGS 84</code></pre>
  - attr(*, "problems")=&lt;externalptr&gt; </code></pre>
 </div>
 </div>
+<p>Check <code>event_type</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled_sf<span class="sc">$</span>event_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled_sf<span class="sc">$</span>event_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Strategic developments"     "Explosions/Remote violence"
 [3] "Battles"                    "Protests"                  
@@ -1177,7 +1226,7 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 <p><strong>Check for missing data</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(acled_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(acled_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 179468</code></pre>
 </div>
@@ -1187,14 +1236,14 @@ Geodetic CRS:  WGS 84</code></pre>
 <li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span> </span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot_longer() to transpose the table for a more compact output</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter() to rid off ACLED columns with no missing data.</span></span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span> </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot_longer() to transpose the table for a more compact output</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter() to rid off ACLED columns with no missing data.</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
   column             missing_count
@@ -1217,8 +1266,8 @@ Geodetic CRS:  WGS 84</code></pre>
 <li><code>skim()</code> from <code>skimr</code> package</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled_sf) <span class="sc">%&gt;%</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled_sf) <span class="sc">%&gt;%</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 31 × 17
    skim_type skim_variable   n_missing complete_rate character.min character.max
@@ -1245,7 +1294,7 @@ Geodetic CRS:  WGS 84</code></pre>
 <li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_sf[<span class="st">'event_id_cnty'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_sf[<span class="st">'event_id_cnty'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
@@ -1262,17 +1311,17 @@ Geodetic CRS:  WGS 84</code></pre>
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to-do: assign variable; mix in geospatial data too</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as_datetime</span>(timestamp),</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_num =</span> <span class="fu">quarter</span>(datetime),</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_period =</span> <span class="fu">paste</span>(year,<span class="st">'Q'</span>, quarter_num, <span class="at">sep =</span> <span class="st">''</span>)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(event_id_cnty) <span class="sc">%&gt;%</span> </span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(quarter_period) <span class="sc">%&gt;%</span> </span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(event_id_cnty,quarter_period, event_type,) <span class="sc">%&gt;%</span> </span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to-do: assign variable; mix in geospatial data too</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as_datetime</span>(timestamp),</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_num =</span> <span class="fu">quarter</span>(datetime),</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_period =</span> <span class="fu">paste</span>(year,<span class="st">'Q'</span>, quarter_num, <span class="at">sep =</span> <span class="st">''</span>)</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(event_id_cnty) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(quarter_period) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(event_id_cnty,quarter_period, event_type,) <span class="sc">%&gt;%</span> </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 51,576 × 3
    event_id_cnty quarter_period event_type                
@@ -1292,9 +1341,23 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 <p>Verify,</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf<span class="sc">$</span>timestamp,<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf,<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 1720552468 1720552468 1720552468 1720552468 1720552468</code></pre>
+<pre><code># A tibble: 5 × 31
+  event_id_cnty event_date    year time_precision disorder_type       event_type
+  &lt;chr&gt;         &lt;chr&gt;        &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;               &lt;chr&gt;     
+1 MMR64334      01 July 2024  2024              1 Strategic developm… Strategic…
+2 MMR64335      01 July 2024  2024              1 Political violence  Explosion…
+3 MMR64336      01 July 2024  2024              1 Political violence  Battles   
+4 MMR64338      01 July 2024  2024              1 Political violence  Battles   
+5 MMR64339      01 July 2024  2024              1 Strategic developm… Strategic…
+# ℹ 25 more variables: sub_event_type &lt;chr&gt;, actor1 &lt;chr&gt;, assoc_actor_1 &lt;chr&gt;,
+#   inter1 &lt;dbl&gt;, actor2 &lt;chr&gt;, assoc_actor_2 &lt;chr&gt;, inter2 &lt;dbl&gt;,
+#   interaction &lt;dbl&gt;, civilian_targeting &lt;chr&gt;, iso &lt;dbl&gt;, region &lt;chr&gt;,
+#   country &lt;chr&gt;, admin1 &lt;chr&gt;, admin2 &lt;chr&gt;, admin3 &lt;chr&gt;, location &lt;chr&gt;,
+#   latitude &lt;dbl&gt;, longitude &lt;dbl&gt;, geo_precision &lt;dbl&gt;, source &lt;chr&gt;,
+#   source_scale &lt;chr&gt;, notes &lt;chr&gt;, fatalities &lt;dbl&gt;, tags &lt;chr&gt;,
+#   timestamp &lt;dbl&gt;</code></pre>
 </div>
 </div>
 <p>Convert Unix time-stamp into <code>date</code> object</p>

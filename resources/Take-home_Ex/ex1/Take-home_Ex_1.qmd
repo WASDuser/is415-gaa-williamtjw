@@ -62,7 +62,7 @@ These R packages will be used:
     -   
 
 ```{r}
-pacman:::p_load(sf,tidyverse,janitor,skimr,lubridate) # more to be added
+pacman:::p_load(sf,tidyverse,janitor,skimr,lubridate,tmap) # more to be added
 ```
 
 ## ACLED
@@ -145,7 +145,17 @@ Click to expand –\>
 
 </details>
 
-# Myammar's Administrative Boundary data
+## Myammar's Administrative Boundary data
+
+**Background:**
+
+-   admin 0: country boundary (full overview)
+
+-   1: state/region
+
+-   2: district-level
+
+-   3: township (greatest resolution)
 
 **Approach:**
 
@@ -155,10 +165,8 @@ Click to expand –\>
 
 3.  Check structure or whatever
 
-4.  Merge
-
 ::: panel-tabset
-## admin 0 
+### admin 0 
 
 ```{r}
 the1_mymr_shp4326_admin0 <- st_read(dsn = 'data/gadm41_MMR_0/', layer = 'gadm41_MMR_0')
@@ -174,7 +182,7 @@ str(the1_mymr_shp4326_admin0)
 plot(the1_mymr_shp4326_admin0$geometry)
 ```
 
-## admin 1
+### admin 1
 
 ```{r}
 the1_mymr_shp4326_admin1 <- st_read(dsn = 'data/gadm41_MMR_1/', layer = 'gadm41_MMR_1')
@@ -188,7 +196,7 @@ str(the1_mymr_shp4326_admin1)
 plot(the1_mymr_shp4326_admin1$geometry)
 ```
 
-## admin 2
+### admin 2
 
 ```{r}
 the1_mymr_shp4326_admin2 <- st_read(dsn = 'data/gadm41_MMR_2/', layer = 'gadm41_MMR_2')
@@ -202,7 +210,7 @@ str(the1_mymr_shp4326_admin2)
 plot(the1_mymr_shp4326_admin2$geometry)
 ```
 
-## admin 3
+### admin 3
 
 ```{r}
 the1_mymr_shp4326_admin3 <- st_read(dsn = 'data/gadm41_MMR_3/', layer = 'gadm41_MMR_3')
@@ -214,6 +222,28 @@ str(the1_mymr_shp4326_admin3)
 
 ```{r}
 plot(the1_mymr_shp4326_admin3$geometry)
+```
+:::
+
+### Study Area
+
+To balance spatial detail and computational efficiency, I think using `the1_mymr_shp4326_admin1` (state/region) boundary data will be the best fit. While looking at district-/township-level provides fine granularity for analysis, for potato machines like my macbook, `the1_mymr_shp4326_admin1` provides the best compromise.
+
+```{r}
+tmap_mode('plot')
+```
+
+::: panel-tabset
+#### admin1
+
+```{r}
+qtm(the1_mymr_shp4326_admin1)
+```
+
+#### admin3
+
+```{r}
+qtm(the1_mymr_shp4326_admin3)
 ```
 :::
 
@@ -232,6 +262,8 @@ head(acled_sf, n=5)
 ```{r}
 str(acled_sf)
 ```
+
+Check `event_type`
 
 ```{r}
 unique(acled_sf$event_type)
@@ -308,7 +340,7 @@ acled_sf %>%
 Verify,
 
 ```{r}
-head(acled_sf$timestamp,n=5)
+head(acled_sf,n=5)
 ```
 
 Convert Unix time-stamp into `date` object
