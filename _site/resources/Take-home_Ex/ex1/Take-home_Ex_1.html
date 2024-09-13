@@ -215,14 +215,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#metadata" id="toc-metadata" class="nav-link" data-scroll-target="#metadata">Metadata</a></li>
   <li><a href="#myammars-administrative-boundary-data" id="toc-myammars-administrative-boundary-data" class="nav-link" data-scroll-target="#myammars-administrative-boundary-data">Myammar’s Administrative Boundary data</a>
   <ul class="collapse">
-  <li><a href="#study-area" id="toc-study-area" class="nav-link" data-scroll-target="#study-area">Study Area</a></li>
+  <li><a href="#deciding-on-which-boundary" id="toc-deciding-on-which-boundary" class="nav-link" data-scroll-target="#deciding-on-which-boundary">Deciding on which Boundary</a></li>
   </ul></li>
   </ul></li>
   <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">Data Wrangling</a>
   <ul class="collapse">
   <li><a href="#wrangling" id="toc-wrangling" class="nav-link" data-scroll-target="#wrangling">Wrangling</a></li>
   </ul></li>
-  <li><a href="#event_type-exploratory-analysis" id="toc-event_type-exploratory-analysis" class="nav-link" data-scroll-target="#event_type-exploratory-analysis"><code>event_type</code> Exploratory Analysis</a>
+  <li><a href="#event_type-exploratory-analysis-by-quarter" id="toc-event_type-exploratory-analysis-by-quarter" class="nav-link" data-scroll-target="#event_type-exploratory-analysis-by-quarter"><code>event_type</code> Exploratory Analysis by Quarter</a>
   <ul class="collapse">
   <li><a href="#battles" id="toc-battles" class="nav-link" data-scroll-target="#battles">Battles</a></li>
   <li><a href="#explosionsremote-violence" id="toc-explosionsremote-violence" class="nav-link" data-scroll-target="#explosionsremote-violence">Explosions/Remote violence</a></li>
@@ -263,7 +263,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 11, 2024</p>
+      <p class="date-modified">September 13, 2024</p>
     </div>
   </div>
     
@@ -1077,8 +1077,8 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
 </div>
-<section id="study-area" class="level3">
-<h3 class="anchored" data-anchor-id="study-area">Study Area</h3>
+<section id="deciding-on-which-boundary" class="level3">
+<h3 class="anchored" data-anchor-id="deciding-on-which-boundary">Deciding on which Boundary</h3>
 <p>To balance spatial detail and computational efficiency, I think using <code>the1_mymr_shp4326_admin1</code> (state/region) boundary data will be the best fit. While looking at district-/township-level provides fine granularity for analysis, for potato machines like my macbook, <code>the1_mymr_shp4326_admin1</code> provides the best compromise.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1115,6 +1115,68 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    GID_1              GID_0             COUNTRY             NAME_1         
+ Length:15          Length:15          Length:15          Length:15         
+ Class :character   Class :character   Class :character   Class :character  
+ Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+  VARNAME_1          NL_NAME_1            TYPE_1           ENGTYPE_1        
+ Length:15          Length:15          Length:15          Length:15         
+ Class :character   Class :character   Class :character   Class :character  
+ Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+     CC_1              HASC_1             ISO_1                    geometry 
+ Length:15          Length:15          Length:15          MULTIPOLYGON :15  
+ Class :character   Class :character   Class :character   epsg:4326    : 0  
+ Mode  :character   Mode  :character   Mode  :character   +proj=long...: 0  </code></pre>
+</div>
+</div>
+<p><strong>Transform for more precise analysis</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_transform</span>(the1_mymr_shp4326_admin1, <span class="at">crs =</span> <span class="dv">32646</span>) <span class="co"># WGS 84 / UTM zone 46N</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 15 features and 11 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 414101 ymin: 978844.6 xmax: 1348458 ymax: 3165949
+Projected CRS: WGS 84 / UTM zone 46N
+First 10 features:
+      GID_1 GID_0 COUNTRY     NAME_1                        VARNAME_1 NL_NAME_1
+1   MMR.1_1   MMR Myanmar Ayeyarwady Irrawaddy|Ayeyarwaddy|Ayeyawady|        NA
+2   MMR.2_1   MMR Myanmar       Bago                       Pégou|Pegu        NA
+3   MMR.3_1   MMR Myanmar       Chin                       Chin Hills        NA
+4   MMR.4_1   MMR Myanmar     Kachin                 Jingphaw Mungdaw        NA
+5   MMR.5_1   MMR Myanmar      Kayah                          Karenni        NA
+6   MMR.6_1   MMR Myanmar      Kayin Kawthulei|Karen|Karin|Kawthoolei        NA
+7   MMR.7_1   MMR Myanmar     Magway                      Magwe|Minbu        NA
+8   MMR.8_1   MMR Myanmar   Mandalay                               NA        NA
+9   MMR.9_1   MMR Myanmar        Mon                              Mun        NA
+10 MMR.10_1   MMR Myanmar  Naypyitaw            Naypyidaw|Nay Pyi Taw        NA
+            TYPE_1       ENGTYPE_1 CC_1 HASC_1 ISO_1
+1              Yin        Division   NA  MM.AY MM-07
+2              Yin        Division   NA  MM.BA MM-02
+3            Pyine           State   NA  MM.CH    NA
+4            Pyine           State   NA  MM.KC MM-11
+5            Pyine           State   NA  MM.KH MM-12
+6            Pyine           State   NA  MM.KN MM-13
+7              Yin        Division   NA  MM.MG MM-03
+8              Yin        Division   NA  MM.MD MM-04
+9            Pyine           State   NA  MM.MO MM-15
+10 Union territory Union territory   NA  MM.NY    NA
+                         geometry
+1  MULTIPOLYGON (((676171.4 17...
+2  MULTIPOLYGON (((916141.6 18...
+3  MULTIPOLYGON (((465603.4 23...
+4  MULTIPOLYGON (((903011.7 26...
+5  MULTIPOLYGON (((959987.5 20...
+6  MULTIPOLYGON (((1097974 178...
+7  MULTIPOLYGON (((793981.3 21...
+8  MULTIPOLYGON (((854656.9 21...
+9  MULTIPOLYGON (((1015173 165...
+10 MULTIPOLYGON (((829548.3 21...</code></pre>
+</div>
+</div>
 </section>
 </section>
 </section>
@@ -1123,7 +1185,7 @@ Geodetic CRS:  WGS 84</code></pre>
 <p>In this section, I will be doing basic data cleaning and formatting across the ACLED columns so that I can derive appropriate variables needed for analysis.</p>
 <p><strong>Inspecting ACLED</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 31
   event_id_cnty event_date    year time_precision disorder_type       event_type
@@ -1144,7 +1206,7 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 <p><strong>Check ACLED structure</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>spc_tbl_ [51,576 × 31] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
  $ event_id_cnty     : chr [1:51576] "MMR64334" "MMR64335" "MMR64336" "MMR64338" ...
@@ -1215,18 +1277,18 @@ Geodetic CRS:  WGS 84</code></pre>
  - attr(*, "problems")=&lt;externalptr&gt; </code></pre>
 </div>
 </div>
-<p>Check <code>event_type</code></p>
+<p><strong>Check <code>event_type</code> values</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled_sf<span class="sc">$</span>event_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled_sf<span class="sc">$</span>event_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Strategic developments"     "Explosions/Remote violence"
 [3] "Battles"                    "Protests"                  
 [5] "Violence against civilians" "Riots"                     </code></pre>
 </div>
 </div>
-<p><strong>Check for missing data</strong></p>
+<p><strong>Check for Missing Data</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(acled_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(acled_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 179468</code></pre>
 </div>
@@ -1236,14 +1298,14 @@ Geodetic CRS:  WGS 84</code></pre>
 <li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span> </span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot_longer() to transpose the table for a more compact output</span></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter() to rid off ACLED columns with no missing data.</span></span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span> </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot_longer() to transpose the table for a more compact output</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter() to rid off ACLED columns with no missing data.</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
   column             missing_count
@@ -1266,8 +1328,8 @@ Geodetic CRS:  WGS 84</code></pre>
 <li><code>skim()</code> from <code>skimr</code> package</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled_sf) <span class="sc">%&gt;%</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled_sf) <span class="sc">%&gt;%</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 31 × 17
    skim_type skim_variable   n_missing complete_rate character.min character.max
@@ -1294,13 +1356,79 @@ Geodetic CRS:  WGS 84</code></pre>
 <li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_sf[<span class="st">'event_id_cnty'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_sf[<span class="st">'event_id_cnty'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
 <section id="wrangling" class="level2">
 <h2 class="anchored" data-anchor-id="wrangling">Wrangling</h2>
+<section id="reference-system" class="level4">
+<h4 class="anchored" data-anchor-id="reference-system"><strong>Reference system</strong></h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System: NA</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="ot">&lt;-</span> acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'longitude'</span>,<span class="st">'latitude'</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32646</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:32646 
+  wkt:
+PROJCRS["WGS 84 / UTM zone 46N",
+    BASEGEOGCRS["WGS 84",
+        ENSEMBLE["World Geodetic System 1984 ensemble",
+            MEMBER["World Geodetic System 1984 (Transit)"],
+            MEMBER["World Geodetic System 1984 (G730)"],
+            MEMBER["World Geodetic System 1984 (G873)"],
+            MEMBER["World Geodetic System 1984 (G1150)"],
+            MEMBER["World Geodetic System 1984 (G1674)"],
+            MEMBER["World Geodetic System 1984 (G1762)"],
+            MEMBER["World Geodetic System 1984 (G2139)"],
+            ELLIPSOID["WGS 84",6378137,298.257223563,
+                LENGTHUNIT["metre",1]],
+            ENSEMBLEACCURACY[2.0]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4326]],
+    CONVERSION["UTM zone 46N",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",0,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",93,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",0.9996,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",500000,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["(E)",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["(N)",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Engineering survey, topographic mapping."],
+        AREA["Between 90°E and 96°E, northern hemisphere between equator and 84°N, onshore and offshore. Bangladesh. Bhutan. China. Indonesia. Mongolia. Myanmar (Burma). Russian Federation."],
+        BBOX[0,90,84,96]],
+    ID["EPSG",32646]]</code></pre>
+</div>
+</div>
+</section>
 <section id="date-formatting" class="level4">
 <h4 class="anchored" data-anchor-id="date-formatting"><strong>Date formatting</strong></h4>
 <ul>
@@ -1311,64 +1439,29 @@ Geodetic CRS:  WGS 84</code></pre>
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to-do: assign variable; mix in geospatial data too</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as_datetime</span>(timestamp),</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_num =</span> <span class="fu">quarter</span>(datetime),</span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_period =</span> <span class="fu">paste</span>(year,<span class="st">'Q'</span>, quarter_num, <span class="at">sep =</span> <span class="st">''</span>)</span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(event_id_cnty) <span class="sc">%&gt;%</span> </span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(quarter_period) <span class="sc">%&gt;%</span> </span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(event_id_cnty,quarter_period, event_type,) <span class="sc">%&gt;%</span> </span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 51,576 × 3
-   event_id_cnty quarter_period event_type                
-   &lt;chr&gt;         &lt;chr&gt;          &lt;chr&gt;                     
- 1 MMR10890      2021Q2         Battles                   
- 2 MMR10906      2021Q3         Battles                   
- 3 MMR10920      2021Q2         Violence against civilians
- 4 MMR10927      2021Q2         Violence against civilians
- 5 MMR10929      2021Q3         Strategic developments    
- 6 MMR10932      2021Q3         Battles                   
- 7 MMR10933      2021Q1         Battles                   
- 8 MMR10934      2021Q2         Battles                   
- 9 MMR10935      2021Q2         Battles                   
-10 MMR10936      2021Q3         Battles                   
-# ℹ 51,566 more rows</code></pre>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to-do: assign variable; mix in geospatial data too</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>acled_sf_prepped <span class="ot">&lt;-</span> acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(event_id_cnty) <span class="sc">%&gt;%</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(timestamp) <span class="sc">%&gt;%</span> </span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert UNIX timestamp into datetime object</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as_datetime</span>(timestamp, <span class="at">tz =</span> <span class="st">'Asia/Yangon'</span>),</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># extract quarter info</span></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_num =</span> <span class="fu">quarter</span>(datetime),</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># concatenate</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_period =</span> <span class="fu">paste</span>(year,<span class="st">'Q'</span>, quarter_num, <span class="at">sep =</span> <span class="st">''</span>)</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<p>Verify,</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf,<span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 31
-  event_id_cnty event_date    year time_precision disorder_type       event_type
-  &lt;chr&gt;         &lt;chr&gt;        &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;               &lt;chr&gt;     
-1 MMR64334      01 July 2024  2024              1 Strategic developm… Strategic…
-2 MMR64335      01 July 2024  2024              1 Political violence  Explosion…
-3 MMR64336      01 July 2024  2024              1 Political violence  Battles   
-4 MMR64338      01 July 2024  2024              1 Political violence  Battles   
-5 MMR64339      01 July 2024  2024              1 Strategic developm… Strategic…
-# ℹ 25 more variables: sub_event_type &lt;chr&gt;, actor1 &lt;chr&gt;, assoc_actor_1 &lt;chr&gt;,
-#   inter1 &lt;dbl&gt;, actor2 &lt;chr&gt;, assoc_actor_2 &lt;chr&gt;, inter2 &lt;dbl&gt;,
-#   interaction &lt;dbl&gt;, civilian_targeting &lt;chr&gt;, iso &lt;dbl&gt;, region &lt;chr&gt;,
-#   country &lt;chr&gt;, admin1 &lt;chr&gt;, admin2 &lt;chr&gt;, admin3 &lt;chr&gt;, location &lt;chr&gt;,
-#   latitude &lt;dbl&gt;, longitude &lt;dbl&gt;, geo_precision &lt;dbl&gt;, source &lt;chr&gt;,
-#   source_scale &lt;chr&gt;, notes &lt;chr&gt;, fatalities &lt;dbl&gt;, tags &lt;chr&gt;,
-#   timestamp &lt;dbl&gt;</code></pre>
-</div>
-</div>
-<p>Convert Unix time-stamp into <code>date</code> object</p>
 <blockquote class="blockquote">
 <p>Note: Unix timestamps count the number of seconds since the Unix epoch (January 1st, 1970 at UTC)</p>
 </blockquote>
 </section>
 </section>
 </section>
-<section id="event_type-exploratory-analysis" class="level1">
-<h1><code>event_type</code> Exploratory Analysis</h1>
+<section id="event_type-exploratory-analysis-by-quarter" class="level1">
+<h1><code>event_type</code> Exploratory Analysis by Quarter</h1>
 <section id="battles" class="level2">
 <h2 class="anchored" data-anchor-id="battles">Battles</h2>
 </section>

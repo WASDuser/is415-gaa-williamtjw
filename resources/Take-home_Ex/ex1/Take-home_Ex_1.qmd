@@ -166,7 +166,7 @@ Click to expand –\>
 3.  Check structure or whatever
 
 ::: panel-tabset
-### admin 0 
+### admin 0
 
 ```{r}
 the1_mymr_shp4326_admin0 <- st_read(dsn = 'data/gadm41_MMR_0/', layer = 'gadm41_MMR_0')
@@ -225,7 +225,7 @@ plot(the1_mymr_shp4326_admin3$geometry)
 ```
 :::
 
-### Study Area
+### Deciding on which Boundary
 
 To balance spatial detail and computational efficiency, I think using `the1_mymr_shp4326_admin1` (state/region) boundary data will be the best fit. While looking at district-/township-level provides fine granularity for analysis, for potato machines like my macbook, `the1_mymr_shp4326_admin1` provides the best compromise.
 
@@ -247,6 +247,16 @@ qtm(the1_mymr_shp4326_admin3)
 ```
 :::
 
+```{r}
+summary(the1_mymr_shp4326_admin1)
+```
+
+**Transform for more precise analysis**
+
+```{r}
+st_transform(the1_mymr_shp4326_admin1, crs = 32646) # WGS 84 / UTM zone 46N
+```
+
 # Data Wrangling
 
 In this section, I will be doing basic data cleaning and formatting across the ACLED columns so that I can derive appropriate variables needed for analysis.
@@ -263,13 +273,13 @@ head(acled_sf, n=5)
 str(acled_sf)
 ```
 
-Check `event_type`
+**Check `event_type` values**
 
 ```{r}
 unique(acled_sf$event_type)
 ```
 
-**Check for missing data**
+**Check for Missing Data**
 
 ```{r}
 sum(is.na(acled_sf))
@@ -315,7 +325,20 @@ sum(duplicated(acled_sf['event_id_cnty']))
 
 ## Wrangling
 
-#### **Date formatting**  
+#### **Reference system**
+
+```{r}
+st_crs(acled_sf)
+```
+
+```{r}
+acled_sf <- acled_sf %>% 
+  st_as_sf(coords = c('longitude','latitude'), crs = 4326) %>% 
+  st_transform(crs = 32646)
+st_crs(acled_sf)
+```
+
+#### **Date formatting**
 
 -   `lubridate` package
 
@@ -325,32 +348,24 @@ sum(duplicated(acled_sf['event_id_cnty']))
 
 ```{r}
 # to-do: assign variable; mix in geospatial data too
-acled_sf %>% 
+acled_sf_prepped <- acled_sf %>% 
+  group_by(event_id_cnty) %>%
+  arrange(timestamp) %>% 
   mutate(
-    datetime = as_datetime(timestamp),
+    # convert UNIX timestamp into datetime object
+    datetime = as_datetime(timestamp, tz = 'Asia/Yangon'),
+    
+    # extract quarter info
     quarter_num = quarter(datetime),
+    
+    # concatenate
     quarter_period = paste(year,'Q', quarter_num, sep = '')
-  ) %>% 
-  group_by(event_id_cnty) %>% 
-  arrange(quarter_period) %>% 
-  summarise(event_id_cnty,quarter_period, event_type,) %>% 
-  ungroup()
-```
-
-Verify,
-
-```{r}
-head(acled_sf,n=5)
-```
-
-Convert Unix time-stamp into `date` object
-
-```{r}
+  )
 ```
 
 > Note: Unix timestamps count the number of seconds since the Unix epoch (January 1st, 1970 at UTC)
 
-# `event_type` Exploratory Analysis
+# `event_type` Exploratory Analysis by Quarter
 
 ## Battles
 
