@@ -239,7 +239,7 @@ fire_yday_owin <- fire_yday_ppp[kbb_owin]
 summary(fire_yday_owin)
 ```
 
-### Compute STKDE 
+### Compute STKDE
 
 ```{r}
 kde_yday <- spattemp.density(
@@ -252,7 +252,7 @@ summary(kde_yday)
 ### **Plotting STKDE object**
 
 ```{r}
-# plot(kde_yday)
+plot(kde_yday)
 ```
 
 # **Computing STKDE by Day of Year: Improved method**
@@ -282,7 +282,7 @@ summary(kde_yday)
 ### Plotting STKDE object
 
 ```{r}
-# plot(kde_yday)
+plot(kde_yday)
 ```
 
 # **Readings**
