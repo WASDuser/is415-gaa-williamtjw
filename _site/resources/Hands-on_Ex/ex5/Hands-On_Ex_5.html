@@ -9,7 +9,7 @@
 <meta name="author" content="William">
 <meta name="dcterms.date" content="2024-09-13">
 
-<title>Hands-On Exercise 4: Spatial Weights &amp; Applications – IS415</title>
+<title>Hands-On Exercise 5: Spatial Weights &amp; Applications – IS415</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -223,16 +223,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#hunan_2012.csv" id="toc-hunan_2012.csv" class="nav-link" data-scroll-target="#hunan_2012.csv">Hunan_2012.csv</a></li>
   <li><a href="#combine-using-relational-join" id="toc-combine-using-relational-join" class="nav-link" data-scroll-target="#combine-using-relational-join">Combine using relational join</a></li>
   </ul></li>
-  <li><a href="#visualising-regional-development-indicator" id="toc-visualising-regional-development-indicator" class="nav-link" data-scroll-target="#visualising-regional-development-indicator"><strong>Visualising Regional Development Indicator</strong></a></li>
-  <li><a href="#contiguity-spatial-weights-matrices" id="toc-contiguity-spatial-weights-matrices" class="nav-link" data-scroll-target="#contiguity-spatial-weights-matrices"><strong>Contiguity Spatial Weights Matrices</strong></a>
+  <li><a href="#visualising-regional-development-indicator" id="toc-visualising-regional-development-indicator" class="nav-link" data-scroll-target="#visualising-regional-development-indicator">Visualising Regional Development Indicator</a></li>
+  <li><a href="#contiguity-spatial-weights-matrices" id="toc-contiguity-spatial-weights-matrices" class="nav-link" data-scroll-target="#contiguity-spatial-weights-matrices">Contiguity Spatial Weights Matrices</a>
   <ul class="collapse">
-  <li><a href="#computing-queen-contiguity-based-neighbours" id="toc-computing-queen-contiguity-based-neighbours" class="nav-link" data-scroll-target="#computing-queen-contiguity-based-neighbours"><strong>Computing (QUEEN) contiguity based neighbours</strong></a></li>
-  <li><a href="#creating-rook-contiguity-based-neighbours" id="toc-creating-rook-contiguity-based-neighbours" class="nav-link" data-scroll-target="#creating-rook-contiguity-based-neighbours"><strong>Creating (ROOK) contiguity based neighbours</strong></a></li>
-  <li><a href="#visualising-contiguity-weights" id="toc-visualising-contiguity-weights" class="nav-link" data-scroll-target="#visualising-contiguity-weights"><strong>Visualising contiguity weights</strong></a></li>
+  <li><a href="#computing-queen-contiguity-based-neighbours" id="toc-computing-queen-contiguity-based-neighbours" class="nav-link" data-scroll-target="#computing-queen-contiguity-based-neighbours">Computing (QUEEN) contiguity based neighbours</a></li>
+  <li><a href="#creating-rook-contiguity-based-neighbours" id="toc-creating-rook-contiguity-based-neighbours" class="nav-link" data-scroll-target="#creating-rook-contiguity-based-neighbours">Creating (ROOK) contiguity based neighbours</a></li>
+  <li><a href="#visualising-contiguity-weights" id="toc-visualising-contiguity-weights" class="nav-link" data-scroll-target="#visualising-contiguity-weights">Visualising contiguity weights</a></li>
   </ul></li>
-  <li><a href="#computing-distance-based-neighbours" id="toc-computing-distance-based-neighbours" class="nav-link" data-scroll-target="#computing-distance-based-neighbours"><strong>Computing distance based neighbours</strong></a>
+  <li><a href="#computing-distance-based-neighbours" id="toc-computing-distance-based-neighbours" class="nav-link" data-scroll-target="#computing-distance-based-neighbours">Computing distance based neighbours</a>
   <ul class="collapse">
-  <li><a href="#determine-the-cut-off-distance" id="toc-determine-the-cut-off-distance" class="nav-link" data-scroll-target="#determine-the-cut-off-distance"><strong>Determine the cut-off distance</strong></a></li>
+  <li><a href="#determine-the-cut-off-distance" id="toc-determine-the-cut-off-distance" class="nav-link" data-scroll-target="#determine-the-cut-off-distance">Determine the cut-off distance</a></li>
   <li><a href="#compute-fixed-distance-weight-matrix" id="toc-compute-fixed-distance-weight-matrix" class="nav-link" data-scroll-target="#compute-fixed-distance-weight-matrix"><strong>Compute fixed distance weight matrix</strong></a></li>
   <li><a href="#computing-adaptive-distance-weight-matrix" id="toc-computing-adaptive-distance-weight-matrix" class="nav-link" data-scroll-target="#computing-adaptive-distance-weight-matrix"><strong>Computing adaptive distance weight matrix</strong></a></li>
   </ul></li>
@@ -256,7 +256,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Hands-On Exercise 4: Spatial Weights &amp; Applications</h1>
+<h1 class="title">Hands-On Exercise 5: Spatial Weights &amp; Applications</h1>
 </div>
 
 
@@ -348,7 +348,7 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 </section>
 <section id="combine-using-relational-join" class="level3">
 <h3 class="anchored" data-anchor-id="combine-using-relational-join">Combine using relational join</h3>
-<p><code>left_join()</code> of <strong><code>dplyr</code></strong> package</p>
+<p><strong><code>left_join()</code> of <code>dplyr</code> package</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hunan,hunan2012)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -370,8 +370,7 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 </section>
 </section>
 <section id="visualising-regional-development-indicator" class="level1">
-<h1><strong>Visualising Regional Development Indicator</strong></h1>
-<p><strong>Prepare a basemap and a choropleth map showing the distribution of GDPPC 2012 by using <code>qtm()</code> of <code>tmap</code> package</strong></p>
+<h1>Visualising Regional Development Indicator</h1>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -381,8 +380,9 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_text</span>(<span class="st">'NAME_3'</span>, <span class="at">size=</span><span class="fl">0.5</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>gdppc <span class="ot">&lt;-</span> <span class="fu">qtm</span>(hunan, <span class="st">'GDPPC'</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(basemap, gdppc, <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># choropleth map showing the distribution of GDPPC 2012</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>gdppc <span class="ot">&lt;-</span> <span class="fu">qtm</span>(hunan, <span class="st">'GDPPC'</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(basemap, gdppc, <span class="at">asp =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -397,7 +397,10 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 </blockquote>
 </section>
 <section id="contiguity-spatial-weights-matrices" class="level1">
-<h1><strong>Contiguity Spatial Weights Matrices</strong></h1>
+<h1>Contiguity Spatial Weights Matrices</h1>
+<blockquote class="blockquote">
+<p>Note: contiguity = neighbouring but sounds fancier</p>
+</blockquote>
 <p><a href="https://r-spatial.github.io/spdep/reference/poly2nb.html"><code>poly2nb()</code></a> of <strong><code>spdep</code></strong> package to compute contiguity weight matrices for the study area</p>
 <ul>
 <li><p>builds a neighbours list based on regions with contiguous boundaries.</p>
@@ -407,14 +410,15 @@ dbl (27): avg_wage, deposite, FAI, Gov_Rev, Gov_Exp, GDP, GDPPC, GIO, Loan, ...
 </ul></li>
 </ul>
 <section id="computing-queen-contiguity-based-neighbours" class="level3">
-<h3 class="anchored" data-anchor-id="computing-queen-contiguity-based-neighbours"><strong>Computing (QUEEN) contiguity based neighbours</strong></h3>
+<h3 class="anchored" data-anchor-id="computing-queen-contiguity-based-neighbours">Computing (QUEEN) contiguity based neighbours</h3>
 <p><strong>Compute Queen contiguity weight matrix that lists all neighboring polygons</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>( <span class="co"># creates neighbours list from polygon list</span></span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  hunan,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">queen =</span> <span class="cn">TRUE</span>, <span class="co"># TRUE: 1 shared bdry pts meets the contiguity condition,                    FALSE: need &gt;1 shared pt;</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">queen =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tends to create a larger set of neighbors b/c corner adjacency is allowed</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(wm_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Neighbour list object:
 Number of regions: 88 
@@ -565,7 +569,7 @@ Link number distribution:
 </div>
 </section>
 <section id="creating-rook-contiguity-based-neighbours" class="level3">
-<h3 class="anchored" data-anchor-id="creating-rook-contiguity-based-neighbours"><strong>Creating (ROOK) contiguity based neighbours</strong></h3>
+<h3 class="anchored" data-anchor-id="creating-rook-contiguity-based-neighbours">Creating (ROOK) contiguity based neighbours</h3>
 <p><strong>Compute Rook contiguity weight matrix</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>wm_r <span class="ot">&lt;-</span> <span class="fu">poly2nb</span>(hunan, <span class="at">queen=</span><span class="cn">FALSE</span>)</span>
@@ -588,14 +592,13 @@ Link number distribution:
 </div>
 </section>
 <section id="visualising-contiguity-weights" class="level3">
-<h3 class="anchored" data-anchor-id="visualising-contiguity-weights"><strong>Visualising contiguity weights</strong></h3>
+<h3 class="anchored" data-anchor-id="visualising-contiguity-weights">Visualising contiguity weights</h3>
 <p><strong>Connectivity graph</strong></p>
 <ul>
-<li>mapping func <code>map_dbl()</code> to apply <code>st_centriod()</code> on input vector (geometry column <code>us.bound</code>)</li>
-</ul>
-<!-- -->
-<ul>
-<li><p>get lat-long coordinates using <code>cbind()</code></p>
+<li><p>mapping func <code>map_dbl()</code> to apply <code>st_centriod()</code> on input vector (geometry column <code>us.bound</code>)</p></li>
+<li><p>get lat-long coordinates using <code>cbind()</code></p></li>
+<li><p>compute polygon centroids</p></li>
+<li><p>connect centriods</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>longitude <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  hunan<span class="sc">$</span>geometry,</span>
@@ -621,8 +624,6 @@ Link number distribution:
 [6,]  111.0341 29.79863</code></pre>
 </div>
 </div></li>
-<li><p>compute polygon centroids (points)</p></li>
-<li><p>connect lines</p></li>
 </ul>
 <section id="plotting-queen-contiguity-based-neighbours-map" class="level4">
 <h4 class="anchored" data-anchor-id="plotting-queen-contiguity-based-neighbours-map">Plotting Queen contiguity based neighbours map</h4>
@@ -672,16 +673,16 @@ Link number distribution:
 </section>
 </section>
 <section id="computing-distance-based-neighbours" class="level1">
-<h1><strong>Computing distance based neighbours</strong></h1>
+<h1>Computing distance based neighbours</h1>
 <p><a href="https://r-spatial.github.io/spdep/reference/dnearneigh.html"><code>dnearneigh()</code></a> of <strong>spdep</strong> package</p>
 <blockquote class="blockquote">
 <p>If <code>x</code> is an <code>"sf"</code> object and <code>use_s2=</code> is <code>TRUE</code>, spherical distances in <strong>km</strong> are used</p>
 </blockquote>
 <section id="determine-the-cut-off-distance" class="level3">
-<h3 class="anchored" data-anchor-id="determine-the-cut-off-distance"><strong>Determine the cut-off distance</strong></h3>
+<h3 class="anchored" data-anchor-id="determine-the-cut-off-distance">Determine the cut-off distance</h3>
 <p>Determine the upper limit for distance band:</p>
 <ol type="1">
-<li><p><a href="https://r-spatial.github.io/spdep/reference/knearneigh.html"><code>knearneigh()</code></a> of <strong><code>spdep</code></strong></p></li>
+<li><p><a href="https://r-spatial.github.io/spdep/reference/knearneigh.html"><code>knearneigh()</code></a></p></li>
 <li><p><a href="https://r-spatial.github.io/spdep/reference/knn2nb.html"><code>knn2nb()</code></a></p></li>
 <li><p><a href="https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/unlist"><strong><code>unlist()</code></strong></a></p></li>
 </ol>
@@ -1102,7 +1103,7 @@ Non-symmetric neighbours list</code></pre>
 <section id="derive-spatial-weight-matrix-based-on-idw-method" class="level3">
 <h3 class="anchored" data-anchor-id="derive-spatial-weight-matrix-based-on-idw-method"><strong>Derive spatial weight matrix based on IDW method</strong></h3>
 <ul>
-<li><p><a href="https://r-spatial.github.io/spdep/reference/nbdists.html"><code>nbdists()</code></a> of <strong><code>spdep</code></strong></p>
+<li><p><a href="https://r-spatial.github.io/spdep/reference/nbdists.html"><code>nbdists()</code></a></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the distances between areas</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>dist <span class="ot">&lt;-</span> <span class="fu">nbdists</span>(</span>

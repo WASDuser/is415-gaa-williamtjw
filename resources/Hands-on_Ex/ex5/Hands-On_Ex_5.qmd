@@ -1,5 +1,5 @@
 ---
-title: "Hands-On Exercise 4: Spatial Weights & Applications"
+title: "Hands-On Exercise 5: Spatial Weights & Applications"
 author: "William"
 date: "September 13, 2024"
 date-modified: "last-modified"
@@ -50,7 +50,7 @@ hunan2012 <- read_csv('data/aspatial/Hunan_2012.csv')
 
 ### Combine using relational join
 
-`left_join()` of **`dplyr`** package
+**`left_join()` of `dplyr` package**
 
 ```{r}
 hunan <- left_join(hunan,hunan2012)
@@ -58,16 +58,16 @@ names(hunan)
 hunan <- hunan %>% select(3,7,15,36)
 ```
 
-# **Visualising Regional Development Indicator**
-
-**Prepare a basemap and a choropleth map showing the distribution of GDPPC 2012 by using `qtm()` of `tmap` package**
+# Visualising Regional Development Indicator
 
 ```{r}
 tmap_mode('plot')
+
 basemap <- tm_shape(hunan) +
   tm_polygons() +
   tm_text('NAME_3', size=0.5)
 
+# choropleth map showing the distribution of GDPPC 2012
 gdppc <- qtm(hunan, 'GDPPC')
 tmap_arrange(basemap, gdppc, asp = 1, ncol = 2)
 ```
@@ -76,7 +76,9 @@ tmap_arrange(basemap, gdppc, asp = 1, ncol = 2)
 >
 > `ncol=2` : number of columns
 
-# **Contiguity Spatial Weights Matrices**
+# Contiguity Spatial Weights Matrices
+
+> Note: contiguity = neighbouring but sounds fancier
 
 [`poly2nb()`](https://r-spatial.github.io/spdep/reference/poly2nb.html) of **`spdep`** package to compute contiguity weight matrices for the study area
 
@@ -86,14 +88,15 @@ tmap_arrange(basemap, gdppc, asp = 1, ncol = 2)
 
     -   Default = `TRUE`: returns a list of first order neighbours using the Queen criteria.
 
-### **Computing (QUEEN) contiguity based neighbours**
+### Computing (QUEEN) contiguity based neighbours
 
 **Compute Queen contiguity weight matrix that lists all neighboring polygons**
 
 ```{r}
-wm_q <- poly2nb( # creates neighbours list from polygon list
+wm_q <- poly2nb(
   hunan,
-  queen = TRUE, # TRUE: 1 shared bdry pts meets the contiguity condition,                    FALSE: need >1 shared pt;
+  queen = TRUE,
+  # tends to create a larger set of neighbors b/c corner adjacency is allowed
 )
 summary(wm_q)
 ```
@@ -127,7 +130,7 @@ nb1
 str(wm_q)
 ```
 
-### **Creating (ROOK) contiguity based neighbours**
+### Creating (ROOK) contiguity based neighbours
 
 **Compute Rook contiguity weight matrix**
 
@@ -136,15 +139,17 @@ wm_r <- poly2nb(hunan, queen=FALSE)
 summary(wm_r)
 ```
 
-### **Visualising contiguity weights**
+### Visualising contiguity weights
 
 **Connectivity graph**
 
 -   mapping func `map_dbl()` to apply `st_centriod()` on input vector (geometry column `us.bound`)
 
-<!-- -->
-
 -   get lat-long coordinates using `cbind()`
+
+-   compute polygon centroids
+
+-   connect centriods
 
     ```{r}
     longitude <- map_dbl(
@@ -164,10 +169,6 @@ summary(wm_r)
     coords <- cbind(longitude, latitude)
     head(coords)
     ```
-
--   compute polygon centroids (points)
-
--   connect lines
 
 #### Plotting Queen contiguity based neighbours map
 
@@ -194,17 +195,17 @@ plot(hunan$geometry, border="lightgrey", main="Rook Contiguity")
 plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
 
-# **Computing distance based neighbours**
+# Computing distance based neighbours
 
 [`dnearneigh()`](https://r-spatial.github.io/spdep/reference/dnearneigh.html) of **spdep** package
 
 > If `x` is an `"sf"` object and `use_s2=` is `TRUE`, spherical distances in **km** are used
 
-### **Determine the cut-off distance**
+### Determine the cut-off distance
 
 Determine the upper limit for distance band:
 
-1.  [`knearneigh()`](https://r-spatial.github.io/spdep/reference/knearneigh.html) of **`spdep`**
+1.  [`knearneigh()`](https://r-spatial.github.io/spdep/reference/knearneigh.html)
 
 2.  [`knn2nb()`](https://r-spatial.github.io/spdep/reference/knn2nb.html)
 
@@ -304,7 +305,7 @@ plot(knn6, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 
 ### **Derive spatial weight matrix based on IDW method**
 
--   [`nbdists()`](https://r-spatial.github.io/spdep/reference/nbdists.html) of **`spdep`**
+-   [`nbdists()`](https://r-spatial.github.io/spdep/reference/nbdists.html)
 
     ```{r}
     # compute the distances between areas
