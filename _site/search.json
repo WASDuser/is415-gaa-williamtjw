@@ -187,5 +187,12 @@
     "title": "Geospatial Analytics and Applications (GAA)",
     "section": "",
     "text": "This is website contains my notes, ICEs, assignments for GAA. Enjoy."
+  },
+  {
+    "objectID": "resources/ICEs/ex5/ice5.html",
+    "href": "resources/ICEs/ex5/ice5.html",
+    "title": "ICE 5: Spatial Weights and Applications",
+    "section": "",
+    "text": "Notes:\n\nFixed Weight Matrices\n\nSuitable for Uniform Data: Works well if data points are uniformly distributed. The spatial extent of each observation’s neighborhood is consistent.\n\n\n\nNo Bias in Neighborhood Size: Every point considers a similar geographical area, making comparison across regions easier in some cases.\nSkew: Dense clusters - too many neighbours; conversely if its sparsely populated, it may result in too few neighbours\n\nAdaptive Weight Matrices\n\nAdapts to spatial data variability\nComputational Complexity\n\nQUEEN contiguity usually is the default analysis to capture all spatial relations but ROOK is preferred to reduce noise if those relations are strictly edge-edge like zoning regulations\nwhen computing the centriod, take note on selecting the study area, e.g. if you want to study Jurong Island, make sure to exclude the other islands so that the placement of the centriod better represents Jurong Island"
   }
 ]

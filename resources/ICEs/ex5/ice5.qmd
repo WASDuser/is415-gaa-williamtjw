@@ -1,0 +1,35 @@
+---
+title: "ICE 5: Spatial Weights and Applications"
+author: "William"
+date: "September 16, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Notes:
+
+-   Fixed Weight Matrices
+
+    -   **Suitable for Uniform Data:** Works well if data points are uniformly distributed. The spatial extent of each observation's neighborhood is consistent.
+
+    ```{=html}
+    <!-- -->
+    ```
+    -   **No Bias in Neighborhood Size:** Every point considers a similar geographical area, making comparison across regions easier in some cases.
+
+    -   **Skew:** Dense clusters - too many neighbours; conversely if its sparsely populated, it may result in too few neighbours
+
+-   Adaptive Weight Matrices
+
+    -   Adapts to spatial data **variability**
+
+    -   Computational **Complexity**
+
+-   QUEEN contiguity usually is the default analysis to capture all spatial relations but ROOK is preferred to reduce noise if those relations are strictly edge-edge like zoning regulations
+
+-   when computing the centriod, take note on selecting the study area, e.g. if you want to study Jurong Island, make sure to exclude the other islands so that the placement of the centriod better represents Jurong Island
+
+-   
