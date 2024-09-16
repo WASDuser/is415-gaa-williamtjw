@@ -244,10 +244,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#event_type-exploratory-analysis-by-quarter" id="toc-event_type-exploratory-analysis-by-quarter" class="nav-link" data-scroll-target="#event_type-exploratory-analysis-by-quarter"><code>event_type</code> Exploratory Analysis by Quarter</a>
   <ul class="collapse">
-  <li><a href="#battles" id="toc-battles" class="nav-link" data-scroll-target="#battles">Battles</a></li>
+  <li><a href="#battles" id="toc-battles" class="nav-link" data-scroll-target="#battles">Battles</a>
+  <ul class="collapse">
+  <li><a href="#generate-kde-layers" id="toc-generate-kde-layers" class="nav-link" data-scroll-target="#generate-kde-layers">Generate KDE Layers</a></li>
+  <li><a href="#visualise-kde-layers" id="toc-visualise-kde-layers" class="nav-link" data-scroll-target="#visualise-kde-layers">Visualise KDE Layers</a></li>
+  <li><a href="#converting-kde-output-into-grid-object" id="toc-converting-kde-output-into-grid-object" class="nav-link" data-scroll-target="#converting-kde-output-into-grid-object">Converting KDE output into grid object</a></li>
+  </ul></li>
   <li><a href="#explosionsremote-violence" id="toc-explosionsremote-violence" class="nav-link" data-scroll-target="#explosionsremote-violence">Explosions/Remote violence</a></li>
   <li><a href="#protests" id="toc-protests" class="nav-link" data-scroll-target="#protests">Protests</a></li>
-  <li><a href="#riots" id="toc-riots" class="nav-link" data-scroll-target="#riots">Riots</a></li>
+  <li><a href="#riots-tbd" id="toc-riots-tbd" class="nav-link" data-scroll-target="#riots-tbd">Riots (TBD)</a></li>
   <li><a href="#strategic-developments" id="toc-strategic-developments" class="nav-link" data-scroll-target="#strategic-developments">Strategic developments</a></li>
   <li><a href="#violence-against-civilians" id="toc-violence-against-civilians" class="nav-link" data-scroll-target="#violence-against-civilians">Violence against civilians</a></li>
   </ul></li>
@@ -283,7 +288,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 16, 2024</p>
+      <p class="date-modified">September 17, 2024</p>
     </div>
   </div>
     
@@ -331,11 +336,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>leaflet - geo-spatial mapping</li>
 </ul></li>
-<li></li>
+<li><p>raster: <code>raster()</code></p></li>
+<li><p>terra: <code>writeRaster()</code></p></li>
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,spatstat,janitor,skimr,lubridate,tmap) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,spatstat,raster,janitor,skimr,lubridate,tmap) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="acled" class="level2">
@@ -789,7 +795,7 @@ Window area = 1.65171e+12 square units</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>acled_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_ppp,<span class="dv">1000</span>,<span class="st">'km'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Varying admin1 geographical boundaries — hence <strong>adaptive bandwidth KDE:</strong></p>
+<p>Varying admin1 geographical boundaries — ideal adaptive bandwidth KDE, but because of <strong>computational limitation</strong>, fixed BW is used<strong>:</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>kde_acled_bw_diggle <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  acled_ppp_km,</span>
@@ -820,7 +826,7 @@ Window area = 1.65171e+12 square units</code></pre>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma=</span>bw.CvL,</span>
 <span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
 <span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>) <span class="co"># choosing this</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>))</span>
@@ -843,21 +849,1272 @@ Window area = 1.65171e+12 square units</code></pre>
 <h1><code>event_type</code> Exploratory Analysis by Quarter</h1>
 <section id="battles" class="level2">
 <h2 class="anchored" data-anchor-id="battles">Battles</h2>
+<section id="generate-kde-layers" class="level3">
+<h3 class="anchored" data-anchor-id="generate-kde-layers">Generate KDE Layers</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialise</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>quarters <span class="ot">&lt;-</span> <span class="fu">unique</span>(acled_battle_sf<span class="sc">$</span>quarter_period)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>kde_battles_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="co"># test</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a><span class="co"># acled_battle_sf %&gt;% filter(quarter_period=='2021Q1')</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> quarters) {</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter quarter</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    acled_battle_sf_qtr <span class="ot">&lt;-</span> acled_battle_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(quarter_period <span class="sc">==</span> quarter)</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create ppp object</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    acled_battle_ppp_qtr <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_battle_sf_qtr)</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create owin object</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>    acled_battle_ppp_qtr <span class="ot">&lt;-</span> acled_battle_ppp_qtr[the1_mymr_shp4326_admin1_owin]</span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rescale to KM</span></span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>    acled_battle_ppp_km_qtr <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_battle_ppp_qtr,<span class="dv">1000</span>,<span class="st">'km'</span>)</span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute KDE</span></span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>    kde_acled_battle_qtr_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>      acled_battle_ppp_km_qtr,</span>
+<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-30"><a href="#cb44-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to list</span></span>
+<span id="cb44-31"><a href="#cb44-31" aria-hidden="true" tabindex="-1"></a>    kde_battles_list[[quarter]] <span class="ot">&lt;-</span> kde_acled_battle_qtr_bw_cvl</span>
+<span id="cb44-32"><a href="#cb44-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">'qtr done!'</span>)</span>
+<span id="cb44-33"><a href="#cb44-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>kde_battles_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$`2021Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km</code></pre>
+</div>
+</div>
+</section>
+<section id="visualise-kde-layers" class="level3">
+<h3 class="anchored" data-anchor-id="visualise-kde-layers">Visualise KDE Layers</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> <span class="fu">names</span>(kde_battles_list)) {</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(kde_battles_list[[quarter]], <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE for"</span>, quarter))</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-42-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="converting-kde-output-into-grid-object" class="level3">
+<h3 class="anchored" data-anchor-id="converting-kde-output-into-grid-object">Converting KDE output into grid object</h3>
+<pre class="{# {r}"><code># for (quarter in names(kde_battles_list)) {
+#     raster_kde_battles &lt;- raster(kde_battles_list[[quarter]])
+# }
+</code></pre>
+</section>
 </section>
 <section id="explosionsremote-violence" class="level2">
 <h2 class="anchored" data-anchor-id="explosionsremote-violence">Explosions/Remote violence</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialise</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>quarters <span class="ot">&lt;-</span> <span class="fu">unique</span>(acled_explo_sf<span class="sc">$</span>quarter_period)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>kde_explo_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="co"># test</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="co"># acled_battle_sf %&gt;% filter(quarter_period=='2021Q1')</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> quarters) {</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter quarter</span></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>    acled_explo_sf_qtr <span class="ot">&lt;-</span> acled_explo_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(quarter_period <span class="sc">==</span> quarter)</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create ppp object</span></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>    acled_explo_ppp_qtr <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_explo_sf_qtr)</span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create owin object</span></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>    acled_explo_ppp_qtr <span class="ot">&lt;-</span> acled_explo_ppp_qtr[the1_mymr_shp4326_admin1_owin]</span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rescale to KM</span></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a>    acled_explo_ppp_km_qtr <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_explo_ppp_qtr,<span class="dv">1000</span>,<span class="st">'km'</span>)</span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute KDE</span></span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a>    kde_acled_explo_qtr_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a>      acled_explo_ppp_km_qtr,</span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to list</span></span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a>    kde_explo_list[[quarter]] <span class="ot">&lt;-</span> kde_acled_explo_qtr_bw_cvl</span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">'qtr done!'</span>)</span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>kde_explo_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$`2021Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> <span class="fu">names</span>(kde_explo_list)) {</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(kde_explo_list[[quarter]], <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE for"</span>, quarter))</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-44-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="protests" class="level2">
 <h2 class="anchored" data-anchor-id="protests">Protests</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialise</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>quarters <span class="ot">&lt;-</span> <span class="fu">unique</span>(acled_protest_sf<span class="sc">$</span>quarter_period)</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>kde_protest_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="co"># test</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a><span class="co"># acled_battle_sf %&gt;% filter(quarter_period=='2021Q1')</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> quarters) {</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter quarter</span></span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>    acled_protest_sf_qtr <span class="ot">&lt;-</span> acled_protest_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(quarter_period <span class="sc">==</span> quarter)</span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create ppp object</span></span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>    acled_protest_ppp_qtr <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_protest_sf_qtr)</span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create owin object</span></span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>    acled_protest_ppp_qtr <span class="ot">&lt;-</span> acled_protest_ppp_qtr[the1_mymr_shp4326_admin1_owin]</span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rescale to KM</span></span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>    acled_protest_ppp_km_qtr <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_protest_ppp_qtr,<span class="dv">1000</span>,<span class="st">'km'</span>)</span>
+<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute KDE</span></span>
+<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a>    kde_acled_protest_qtr_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a>      acled_protest_ppp_km_qtr,</span>
+<span id="cb55-25"><a href="#cb55-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb55-26"><a href="#cb55-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb55-27"><a href="#cb55-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb55-28"><a href="#cb55-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb55-29"><a href="#cb55-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb55-30"><a href="#cb55-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to list</span></span>
+<span id="cb55-31"><a href="#cb55-31" aria-hidden="true" tabindex="-1"></a>    kde_protest_list[[quarter]] <span class="ot">&lt;-</span> kde_acled_protest_qtr_bw_cvl</span>
+<span id="cb55-32"><a href="#cb55-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">'qtr done!'</span>)</span>
+<span id="cb55-33"><a href="#cb55-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>kde_protest_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$`2021Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> <span class="fu">names</span>(kde_protest_list)) {</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(kde_protest_list[[quarter]], <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE for"</span>, quarter))</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-46-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="riots" class="level2">
-<h2 class="anchored" data-anchor-id="riots">Riots</h2>
+<section id="riots-tbd" class="level2">
+<h2 class="anchored" data-anchor-id="riots-tbd">Riots (TBD)</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialise</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>quarters <span class="ot">&lt;-</span> <span class="fu">unique</span>(acled_riot_sf<span class="sc">$</span>quarter_period)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>quarters</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>kde_riot_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a><span class="co"># test</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="co"># acled_battle_sf %&gt;% filter(quarter_period=='2021Q1')</span></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> quarters) {</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter quarter</span></span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>    acled_riot_sf_qtr <span class="ot">&lt;-</span> acled_riot_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(quarter_period <span class="sc">==</span> quarter)</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create ppp object</span></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>    acled_riot_ppp_qtr <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_riot_sf_qtr)</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create owin object</span></span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>    acled_riot_ppp_qtr <span class="ot">&lt;-</span> acled_riot_ppp_qtr[the1_mymr_shp4326_admin1_owin]</span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rescale to KM</span></span>
+<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>    acled_riot_ppp_km_qtr <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_riot_ppp_qtr,<span class="dv">1000</span>,<span class="st">'km'</span>)</span>
+<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute KDE</span></span>
+<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>    kde_acled_riot_qtr_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a>      acled_riot_ppp_km_qtr,</span>
+<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to list</span></span>
+<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a>    kde_riot_list[[quarter]] <span class="ot">&lt;-</span> kde_acled_riot_qtr_bw_cvl</span>
+<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">'qtr done!'</span>)</span>
+<span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-36"><a href="#cb60-36" aria-hidden="true" tabindex="-1"></a>kde_riot_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> <span class="fu">names</span>(kde_riot_list)) {</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(kde_riot_list[[quarter]], <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE for"</span>, quarter))</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="strategic-developments" class="level2">
 <h2 class="anchored" data-anchor-id="strategic-developments">Strategic developments</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialise</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  quarters <span class="ot">&lt;-</span> <span class="fu">unique</span>(acled_stratdev_sf<span class="sc">$</span>quarter_period)</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>kde_stratdev_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="co"># test</span></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="co"># acled_battle_sf %&gt;% filter(quarter_period=='2021Q1')</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> quarters) {</span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter quarter</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>    acled_stratdev_sf_qtr <span class="ot">&lt;-</span> acled_stratdev_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(quarter_period <span class="sc">==</span> quarter)</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create ppp object</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>    acled_stratdev_ppp_qtr <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_stratdev_sf_qtr)</span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create owin object</span></span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>    acled_stratdev_ppp_qtr <span class="ot">&lt;-</span> acled_stratdev_ppp_qtr[the1_mymr_shp4326_admin1_owin]</span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rescale to KM</span></span>
+<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a>    acled_stratdev_ppp_km_qtr <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_stratdev_ppp_qtr,<span class="dv">1000</span>,<span class="st">'km'</span>)</span>
+<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb62-22"><a href="#cb62-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute KDE</span></span>
+<span id="cb62-23"><a href="#cb62-23" aria-hidden="true" tabindex="-1"></a>    kde_acled_stratdev_qtr_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb62-24"><a href="#cb62-24" aria-hidden="true" tabindex="-1"></a>      acled_stratdev_ppp_km_qtr,</span>
+<span id="cb62-25"><a href="#cb62-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb62-26"><a href="#cb62-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb62-27"><a href="#cb62-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb62-28"><a href="#cb62-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb62-29"><a href="#cb62-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb62-30"><a href="#cb62-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to list</span></span>
+<span id="cb62-31"><a href="#cb62-31" aria-hidden="true" tabindex="-1"></a>    kde_stratdev_list[[quarter]] <span class="ot">&lt;-</span> kde_acled_stratdev_qtr_bw_cvl</span>
+<span id="cb62-32"><a href="#cb62-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">'qtr done!'</span>)</span>
+<span id="cb62-33"><a href="#cb62-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>kde_stratdev_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$`2021Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> <span class="fu">names</span>(kde_stratdev_list)) {</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(kde_stratdev_list[[quarter]], <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE for"</span>, quarter))</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-50-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="violence-against-civilians" class="level2">
 <h2 class="anchored" data-anchor-id="violence-against-civilians">Violence against civilians</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="co"># initialise</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>quarters <span class="ot">&lt;-</span> <span class="fu">unique</span>(acled_civi_sf<span class="sc">$</span>quarter_period)</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>kde_civi_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a><span class="co"># test</span></span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a><span class="co"># acled_battle_sf %&gt;% filter(quarter_period=='2021Q1')</span></span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> quarters) {</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># filter quarter</span></span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>    acled_civi_sf_qtr <span class="ot">&lt;-</span> acled_civi_sf <span class="sc">%&gt;%</span> <span class="fu">filter</span>(quarter_period <span class="sc">==</span> quarter)</span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create ppp object</span></span>
+<span id="cb67-14"><a href="#cb67-14" aria-hidden="true" tabindex="-1"></a>    acled_civi_ppp_qtr <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_civi_sf_qtr)</span>
+<span id="cb67-15"><a href="#cb67-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-16"><a href="#cb67-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># create owin object</span></span>
+<span id="cb67-17"><a href="#cb67-17" aria-hidden="true" tabindex="-1"></a>    acled_civi_ppp_qtr <span class="ot">&lt;-</span> acled_civi_ppp_qtr[the1_mymr_shp4326_admin1_owin]</span>
+<span id="cb67-18"><a href="#cb67-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb67-19"><a href="#cb67-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># rescale to KM</span></span>
+<span id="cb67-20"><a href="#cb67-20" aria-hidden="true" tabindex="-1"></a>    acled_civi_ppp_km_qtr <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_civi_ppp_qtr,<span class="dv">1000</span>,<span class="st">'km'</span>)</span>
+<span id="cb67-21"><a href="#cb67-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb67-22"><a href="#cb67-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># compute KDE</span></span>
+<span id="cb67-23"><a href="#cb67-23" aria-hidden="true" tabindex="-1"></a>    kde_acled_civi_qtr_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb67-24"><a href="#cb67-24" aria-hidden="true" tabindex="-1"></a>      acled_civi_ppp_km_qtr,</span>
+<span id="cb67-25"><a href="#cb67-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb67-26"><a href="#cb67-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb67-27"><a href="#cb67-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb67-28"><a href="#cb67-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb67-29"><a href="#cb67-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb67-30"><a href="#cb67-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append to list</span></span>
+<span id="cb67-31"><a href="#cb67-31" aria-hidden="true" tabindex="-1"></a>    kde_civi_list[[quarter]] <span class="ot">&lt;-</span> kde_acled_civi_qtr_bw_cvl</span>
+<span id="cb67-32"><a href="#cb67-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">print</span>(<span class="st">'qtr done!'</span>)</span>
+<span id="cb67-33"><a href="#cb67-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"
+[1] "qtr done!"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>kde_civi_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$`2021Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2021Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2022Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2023Q4`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q1`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q2`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km
+
+$`2024Q3`
+real-valued pixel image
+128 x 128 pixel array (ny, nx)
+enclosing rectangle: [414.1, 1348.5] x [978.84, 3165.9] km</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (quarter <span class="cf">in</span> <span class="fu">names</span>(kde_civi_list)) {</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(kde_civi_list[[quarter]], <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE for"</span>, quarter))</span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-7.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-8.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-9.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-10.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-11.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-12.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-13.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-14.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-52-15.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>For other data export instructions, visit the link <a href="https://acleddata.com/data-export-tool/">here</a>.</p>
 
 

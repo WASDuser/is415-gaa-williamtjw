@@ -59,10 +59,12 @@ These R packages will be used:
 
         -   leaflet - geo-spatial mapping
 
-    -   
+    -   raster: `raster()`
+
+    -   terra: `writeRaster()`
 
 ```{r}
-pacman:::p_load(sf,tidyverse,spatstat,janitor,skimr,lubridate,tmap) # more to be added
+pacman:::p_load(sf,tidyverse,spatstat,raster,janitor,skimr,lubridate,tmap) # more to be added
 ```
 
 ## ACLED
@@ -502,7 +504,7 @@ acled_ppp <- acled_ppp[the1_mymr_shp4326_admin1_owin]
 acled_ppp_km <- rescale.ppp(acled_ppp,1000,'km')
 ```
 
-Varying admin1 geographical boundaries — hence **adaptive bandwidth KDE:**
+Varying admin1 geographical boundaries — ideal adaptive bandwidth KDE, but because of **computational limitation**, fixed BW is used**:**
 
 ```{r}
 kde_acled_bw_diggle <- density(
@@ -537,7 +539,7 @@ kde_acled_bw_cvl <- density(
   sigma=bw.CvL,
   edge=TRUE,
   kernel='gaussian'
-)
+) # choosing this
 ```
 
 ```{r}
@@ -552,14 +554,299 @@ plot(kde_acled_bw_scott)
 
 ## Battles
 
+### Generate KDE Layers
+
+```{r}
+#| warning: false
+# initialise
+quarters <- unique(acled_battle_sf$quarter_period)
+kde_battles_list <- list()
+
+# test
+# acled_battle_sf %>% filter(quarter_period=='2021Q1')
+
+for (quarter in quarters) {
+
+    # filter quarter
+    acled_battle_sf_qtr <- acled_battle_sf %>% filter(quarter_period == quarter)
+
+    # create ppp object
+    acled_battle_ppp_qtr <- as.ppp(acled_battle_sf_qtr)
+
+    # create owin object
+    acled_battle_ppp_qtr <- acled_battle_ppp_qtr[the1_mymr_shp4326_admin1_owin]
+    
+    # rescale to KM
+    acled_battle_ppp_km_qtr <- rescale.ppp(acled_battle_ppp_qtr,1000,'km')
+    
+    # compute KDE
+    kde_acled_battle_qtr_bw_cvl <- density(
+      acled_battle_ppp_km_qtr,
+      sigma=bw.CvL,
+      edge=TRUE,
+      kernel='gaussian'
+    )
+    
+    # Append to list
+    kde_battles_list[[quarter]] <- kde_acled_battle_qtr_bw_cvl
+    print('qtr done!')
+}
+
+kde_battles_list
+```
+
+### Visualise KDE Layers
+
+```{r}
+for (quarter in names(kde_battles_list)) {
+    plot(kde_battles_list[[quarter]], main = paste("KDE for", quarter))
+}
+```
+
+### Converting KDE output into grid object
+
+```{# {r}
+# for (quarter in names(kde_battles_list)) {
+#     raster_kde_battles <- raster(kde_battles_list[[quarter]])
+# }
+
+```
+
 ## Explosions/Remote violence
+
+```{r}
+#| warning: false
+# initialise
+quarters <- unique(acled_explo_sf$quarter_period)
+kde_explo_list <- list()
+
+# test
+# acled_battle_sf %>% filter(quarter_period=='2021Q1')
+
+for (quarter in quarters) {
+
+    # filter quarter
+    acled_explo_sf_qtr <- acled_explo_sf %>% filter(quarter_period == quarter)
+
+    # create ppp object
+    acled_explo_ppp_qtr <- as.ppp(acled_explo_sf_qtr)
+
+    # create owin object
+    acled_explo_ppp_qtr <- acled_explo_ppp_qtr[the1_mymr_shp4326_admin1_owin]
+    
+    # rescale to KM
+    acled_explo_ppp_km_qtr <- rescale.ppp(acled_explo_ppp_qtr,1000,'km')
+    
+    # compute KDE
+    kde_acled_explo_qtr_bw_cvl <- density(
+      acled_explo_ppp_km_qtr,
+      sigma=bw.CvL,
+      edge=TRUE,
+      kernel='gaussian'
+    )
+    
+    # Append to list
+    kde_explo_list[[quarter]] <- kde_acled_explo_qtr_bw_cvl
+    print('qtr done!')
+}
+
+kde_explo_list
+```
+
+```{r}
+for (quarter in names(kde_explo_list)) {
+    plot(kde_explo_list[[quarter]], main = paste("KDE for", quarter))
+}
+```
 
 ## Protests
 
-## Riots
+```{r}
+#| warning: false
+# initialise
+quarters <- unique(acled_protest_sf$quarter_period)
+kde_protest_list <- list()
+
+# test
+# acled_battle_sf %>% filter(quarter_period=='2021Q1')
+
+for (quarter in quarters) {
+
+    # filter quarter
+    acled_protest_sf_qtr <- acled_protest_sf %>% filter(quarter_period == quarter)
+
+    # create ppp object
+    acled_protest_ppp_qtr <- as.ppp(acled_protest_sf_qtr)
+
+    # create owin object
+    acled_protest_ppp_qtr <- acled_protest_ppp_qtr[the1_mymr_shp4326_admin1_owin]
+    
+    # rescale to KM
+    acled_protest_ppp_km_qtr <- rescale.ppp(acled_protest_ppp_qtr,1000,'km')
+    
+    # compute KDE
+    kde_acled_protest_qtr_bw_cvl <- density(
+      acled_protest_ppp_km_qtr,
+      sigma=bw.CvL,
+      edge=TRUE,
+      kernel='gaussian'
+    )
+    
+    # Append to list
+    kde_protest_list[[quarter]] <- kde_acled_protest_qtr_bw_cvl
+    print('qtr done!')
+}
+
+kde_protest_list
+```
+
+```{r}
+for (quarter in names(kde_protest_list)) {
+    plot(kde_protest_list[[quarter]], main = paste("KDE for", quarter))
+}
+```
+
+## Riots (TBD)
+
+```{r}
+#| eval: false
+# initialise
+quarters <- unique(acled_riot_sf$quarter_period)
+quarters
+kde_riot_list <- list()
+
+# test
+# acled_battle_sf %>% filter(quarter_period=='2021Q1')
+
+for (quarter in quarters) {
+
+    # filter quarter
+    acled_riot_sf_qtr <- acled_riot_sf %>% filter(quarter_period == quarter)
+
+    # create ppp object
+    acled_riot_ppp_qtr <- as.ppp(acled_riot_sf_qtr)
+
+    # create owin object
+    acled_riot_ppp_qtr <- acled_riot_ppp_qtr[the1_mymr_shp4326_admin1_owin]
+
+    # rescale to KM
+    acled_riot_ppp_km_qtr <- rescale.ppp(acled_riot_ppp_qtr,1000,'km')
+
+    # compute KDE
+    kde_acled_riot_qtr_bw_cvl <- density(
+      acled_riot_ppp_km_qtr,
+      sigma=bw.CvL,
+      edge=TRUE,
+      kernel='gaussian'
+    )
+
+    # Append to list
+    kde_riot_list[[quarter]] <- kde_acled_riot_qtr_bw_cvl
+    print('qtr done!')
+}
+
+kde_riot_list
+```
+
+```{r}
+#| eval: false
+for (quarter in names(kde_riot_list)) {
+    plot(kde_riot_list[[quarter]], main = paste("KDE for", quarter))
+}
+```
 
 ## Strategic developments
 
+```{r}
+#| warning: false
+# initialise
+  quarters <- unique(acled_stratdev_sf$quarter_period)
+kde_stratdev_list <- list()
+
+# test
+# acled_battle_sf %>% filter(quarter_period=='2021Q1')
+
+for (quarter in quarters) {
+
+    # filter quarter
+    acled_stratdev_sf_qtr <- acled_stratdev_sf %>% filter(quarter_period == quarter)
+
+    # create ppp object
+    acled_stratdev_ppp_qtr <- as.ppp(acled_stratdev_sf_qtr)
+
+    # create owin object
+    acled_stratdev_ppp_qtr <- acled_stratdev_ppp_qtr[the1_mymr_shp4326_admin1_owin]
+    
+    # rescale to KM
+    acled_stratdev_ppp_km_qtr <- rescale.ppp(acled_stratdev_ppp_qtr,1000,'km')
+    
+    # compute KDE
+    kde_acled_stratdev_qtr_bw_cvl <- density(
+      acled_stratdev_ppp_km_qtr,
+      sigma=bw.CvL,
+      edge=TRUE,
+      kernel='gaussian'
+    )
+    
+    # Append to list
+    kde_stratdev_list[[quarter]] <- kde_acled_stratdev_qtr_bw_cvl
+    print('qtr done!')
+}
+
+kde_stratdev_list
+```
+
+```{r}
+for (quarter in names(kde_stratdev_list)) {
+    plot(kde_stratdev_list[[quarter]], main = paste("KDE for", quarter))
+}
+```
+
 ## Violence against civilians
+
+```{r}
+#| warning: false
+# initialise
+quarters <- unique(acled_civi_sf$quarter_period)
+kde_civi_list <- list()
+
+# test
+# acled_battle_sf %>% filter(quarter_period=='2021Q1')
+
+for (quarter in quarters) {
+
+    # filter quarter
+    acled_civi_sf_qtr <- acled_civi_sf %>% filter(quarter_period == quarter)
+
+    # create ppp object
+    acled_civi_ppp_qtr <- as.ppp(acled_civi_sf_qtr)
+
+    # create owin object
+    acled_civi_ppp_qtr <- acled_civi_ppp_qtr[the1_mymr_shp4326_admin1_owin]
+    
+    # rescale to KM
+    acled_civi_ppp_km_qtr <- rescale.ppp(acled_civi_ppp_qtr,1000,'km')
+    
+    # compute KDE
+    kde_acled_civi_qtr_bw_cvl <- density(
+      acled_civi_ppp_km_qtr,
+      sigma=bw.CvL,
+      edge=TRUE,
+      kernel='gaussian'
+    )
+    
+    # Append to list
+    kde_civi_list[[quarter]] <- kde_acled_civi_qtr_bw_cvl
+    print('qtr done!')
+}
+
+kde_civi_list
+```
+
+```{r}
+for (quarter in names(kde_civi_list)) {
+    plot(kde_civi_list[[quarter]], main = paste("KDE for", quarter))
+}
+```
 
 For other data export instructions, visit the link [here](https://acleddata.com/data-export-tool/).
