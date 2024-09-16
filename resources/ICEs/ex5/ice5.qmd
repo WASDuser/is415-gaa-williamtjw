@@ -1,5 +1,5 @@
 ---
-title: "ICE 5: Spatial Weights and Applications"
+title: "ICE 5: Geographically Weighted Summary Statistics: GWmodel methods"
 author: "William"
 date: "September 16, 2024"
 date-modified: "last-modified"
@@ -32,4 +32,183 @@ execute:
 
 -   when computing the centriod, take note on selecting the study area, e.g. if you want to study Jurong Island, make sure to exclude the other islands so that the placement of the centriod better represents Jurong Island
 
--   
+# ICE: Geographically Weighted Summary Statistics
+
+### Load packages
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr, GWmodel)
+```
+
+### Data Preparation
+
+```{r}
+#| eval: false
+hunan_sf <- st_read(dsn = 'data/geospatial/', layer = 'Hunan')
+```
+
+```{r}
+#| eval: false
+hunan2012 <- read_csv('data/aspatial/Hunan_2012.csv')
+```
+
+```{r}
+#| eval: false
+hunan_sf <- left_join(hunan_sf,hunan2012) %>% select(1:3,7,15,16,31,32)
+hunan_sf
+```
+
+> Note: R is case-sensitive; convert everything to UPPER/LOWERCASE
+
+Save derived data into .rds file to simplify subsequent analysis and save memorys
+
+```{r}
+#| eval: false
+write_rds(hunan_sf,'data/rds/hunan_sf.rds')
+```
+
+```{r}
+#| echo: false # hides code output but runs it
+# to access saved datasets that was previously derived
+hunan_sf <- read_rds('data/rds/hunan_sf.rds')
+# set #| eval:false for all data prep code used to derive said data
+```
+
+### Mapping GDPPC
+
+Convert to `SpatialPolygon*Dataframe`
+
+```{r}
+hunan_sp <- hunan_sf %>% as_Spatial() # old fashioned way of storing in list
+```
+
+### Geographicaly Weighted Summary Statistics
+
+#### Adaptive bandwidth
+
+##### AIC
+
+```{r}
+bw_AIC <- bw.gwr(
+  GDPPC ~ 1, # as a function of GDPPC
+  data = hunan_sp,
+  approach = 'AIC', # find the model that best balances goodness of fit and complexity
+  adaptive = TRUE,
+  kernel = 'bisquare', # gives more weight to closer observations and reduces the weight of distant ones smoothly until bandwidth cutoff
+  longlat = T
+)
+```
+
+##### CV
+
+```{r}
+bw_CV <- bw.gwr(
+  GDPPC ~ 1,
+  data = hunan_sp,
+  approach = 'CV', # iteratively removing one observation, fitting the model on the remaining data, and then predicting the removed observation; bandwidth that minimizes the prediction error is chosen
+  adaptive = TRUE,
+  kernel = 'bisquare',
+  longlat = T
+)
+```
+
+##### Compare
+
+```{r}
+bw_AIC
+bw_CV
+```
+
+#### Fixed Bandwidth
+
+##### AIC
+
+```{r}
+bw_AIC_fixed <- bw.gwr(
+  GDPPC ~ 1,
+  data = hunan_sp,
+  approach = 'AIC',
+  adaptive = FALSE,
+  kernel = 'bisquare',
+  longlat = T
+)
+```
+
+##### CV
+
+```{r}
+bw_CV_fixed <- bw.gwr(
+  GDPPC ~ 1,
+  data = hunan_sp,
+  approach = 'CV',
+  adaptive = FALSE,
+  kernel = 'bisquare',
+  longlat = T
+)
+```
+
+##### Compare
+
+```{r}
+bw_AIC_fixed
+bw_CV_fixed
+```
+
+> Note:
+>
+> Akaike Information Criterion (AIC): balance between goodness of fit and model complexity; smoother, lower complexity
+>
+> Cross-Validation (CV): predictive performance (minimizes the prediction error )
+
+#### Compute GW Summary Stats.
+
+```{r}
+gwstat <- gwss(
+  data = hunan_sp,
+  vars = 'GDPPC',
+  bw = bw_AIC,
+  adaptive = TRUE, # must correspond with bw (bw must be adaptive if TRUE)
+  kernel = 'bisquare',
+  longlat = T
+)
+
+# take note of the gwstat['SDF'] data --> View(gwstat[["SDF"]]@data)
+```
+
+Prepare output data
+
+Extract SDF table and convert into `data.frame`
+
+```{r}
+gwstat_df <- as.data.frame(gwstat$SDF)
+```
+
+Append the newly derived data frame onto `hunan_sf` `data.frame` using `cbind()`
+
+```{r}
+hunan_gstat <- cbind(hunan_sf, gwstat_df)
+```
+
+> Note: Don't do any sorting before appending with `cbind()` . It combines columns from different data frames, matrices, or vectors by matching their corresponding rows **blindly**. If you sort one of the data frames before appending with `cbind()`, it **may misalign the data**.
+
+### Visualise GW Summary Stats.
+
+```{r}
+tm_shape(hunan_gstat) +
+  # tm_fill() and tm_border() better control than tm_polygon()
+  tm_fill( # to create chloropleth map, rather than empty polygon map
+    "GDPPC_LM",
+    n=5, # num of class
+    style = 'quantile'
+    ) +
+  tm_borders(alpha = 0.5) +
+  tm_layout(
+    main.title = "Distribution of GW mean",
+    main.title.position = 'center',
+    main.title.size = 2.0,
+    legend.text.size = 1.2,
+    legend.height = 1.50,
+    legend.width = 1.50,
+    frame = TRUE
+  )
+```
