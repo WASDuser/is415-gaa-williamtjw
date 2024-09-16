@@ -173,7 +173,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">ICE 4</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../../resources/ICEs/ex5/ice5.qmd">
+    <a class="dropdown-item" href="../../../resources/ICEs/ex5/ice5.html">
  <span class="dropdown-text">ICE 5</span></a>
   </li>  
     </ul>
@@ -223,12 +223,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#metadata" id="toc-metadata" class="nav-link" data-scroll-target="#metadata">Metadata</a></li>
   <li><a href="#myammars-administrative-boundary-data" id="toc-myammars-administrative-boundary-data" class="nav-link" data-scroll-target="#myammars-administrative-boundary-data">Myammar’s Administrative Boundary data</a>
   <ul class="collapse">
-  <li><a href="#deciding-on-which-boundary" id="toc-deciding-on-which-boundary" class="nav-link" data-scroll-target="#deciding-on-which-boundary">Deciding on which Boundary</a></li>
+  <li><a href="#study-area" id="toc-study-area" class="nav-link" data-scroll-target="#study-area">Study Area</a></li>
   </ul></li>
   </ul></li>
   <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">Data Wrangling</a>
   <ul class="collapse">
   <li><a href="#wrangling" id="toc-wrangling" class="nav-link" data-scroll-target="#wrangling">Wrangling</a></li>
+  <li><a href="#saving-derived-data" id="toc-saving-derived-data" class="nav-link" data-scroll-target="#saving-derived-data">Saving Derived Data</a></li>
+  </ul></li>
+  <li><a href="#rds-checkpoint" id="toc-rds-checkpoint" class="nav-link" data-scroll-target="#rds-checkpoint">RDS Checkpoint</a></li>
+  <li><a href="#kdes" id="toc-kdes" class="nav-link" data-scroll-target="#kdes">KDEs</a>
+  <ul class="collapse">
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a>
+  <ul class="collapse">
+  <li><a href="#creating-ppp-object" id="toc-creating-ppp-object" class="nav-link" data-scroll-target="#creating-ppp-object">Creating <code>ppp</code> object</a></li>
+  <li><a href="#creating-owin-object-of-admin1-boundary" id="toc-creating-owin-object-of-admin1-boundary" class="nav-link" data-scroll-target="#creating-owin-object-of-admin1-boundary">Creating <code>owin</code> object of <code>admin1</code> boundary</a></li>
+  <li><a href="#combine-ppp-and-owin" id="toc-combine-ppp-and-owin" class="nav-link" data-scroll-target="#combine-ppp-and-owin">Combine ppp and owin</a></li>
+  <li><a href="#rescale-m-to-km" id="toc-rescale-m-to-km" class="nav-link" data-scroll-target="#rescale-m-to-km">Rescale <code>m</code> to <code>km</code></a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#event_type-exploratory-analysis-by-quarter" id="toc-event_type-exploratory-analysis-by-quarter" class="nav-link" data-scroll-target="#event_type-exploratory-analysis-by-quarter"><code>event_type</code> Exploratory Analysis by Quarter</a>
   <ul class="collapse">
@@ -271,7 +283,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 13, 2024</p>
+      <p class="date-modified">September 16, 2024</p>
     </div>
   </div>
     
@@ -323,23 +335,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,janitor,skimr,lubridate,tmap) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">:::</span><span class="fu">p_load</span>(sf,tidyverse,spatstat,janitor,skimr,lubridate,tmap) <span class="co"># more to be added</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="acled" class="level2">
 <h2 class="anchored" data-anchor-id="acled">ACLED</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/2021-01-01-2024-07-01-Myanmar.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 51576 Columns: 31
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr (20): event_id_cnty, event_date, disorder_type, event_type, sub_event_ty...
-dbl (11): year, time_precision, inter1, inter2, interaction, iso, latitude, ...
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
 </div>
 </section>
 <section id="metadata" class="level2">
@@ -405,7 +407,10 @@ dbl (11): year, time_precision, inter1, inter2, interaction, iso, latitude, ...
 </tr>
 <tr class="odd">
 <td>‘civilian_targeting’</td>
-<td style="text-align: left;">indicates whether the event involved civilian targeting (e.g.&nbsp;null if false)</td>
+<td style="text-align: left;"><p>indicates whether the event involved civilian targeting (e.g.&nbsp;null if false)</p>
+<ul>
+<li><strong>Note: no data format irregularity</strong></li>
+</ul></td>
 </tr>
 <tr class="even">
 <td>‘iso’</td>
@@ -482,708 +487,65 @@ dbl (11): year, time_precision, inter1, inter2, interaction, iso, latitude, ...
 <ol type="1">
 <li><p>In the working file directory, group the shapefiles according to admin classification (admin0, admin1, etc.)</p></li>
 <li><p>Load</p></li>
-<li><p>Check structure or whatever</p></li>
+<li><p>Check structure and boundary plot</p></li>
 </ol>
+<p>For the purposes of exploring the differences in detail:</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">admin 0</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">admin 1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">admin 2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">admin 3</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin0 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_0/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_0'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `gadm41_MMR_0' from data source 
-  `/Users/williamtjw/is415-gaa-williamtjw/resources/Take-home_Ex/ex1/data/gadm41_MMR_0' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 1 feature and 2 fields
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: 92.1725 ymin: 8.824445 xmax: 101.1768 ymax: 28.54326
-Geodetic CRS:  WGS 84</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin0 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_0/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_0'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Classes 'sf' and 'data.frame':  1 obs. of  3 variables:
- $ GID_0   : chr "MMR"
- $ COUNTRY : chr "Myanmar"
- $ geometry:sfc_MULTIPOLYGON of length 1; first list element: List of 1191
-  ..$ :List of 1
-  .. ..$ : num [1:39, 1:2] 97.8 97.8 97.8 97.8 97.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:125, 1:2] 97.8 97.8 97.8 97.8 97.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:70, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:343, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:540, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:272, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:30, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:13, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:313, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:105, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:37, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:95, 1:2] 97.9 97.9 97.9 97.9 97.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:59, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:38, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:32, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:37, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:157, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:91, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:36, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:230, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:26, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:9, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:30, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:51, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:170, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:13, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:67, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:127, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:475, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:95, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:37, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:136, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:34, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:46, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:31, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:21, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:30, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:24, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:17, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:11, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:10, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:35, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:21, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:239, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:166, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:13, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:126, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:110, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:34, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:23, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:22, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:606, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:28, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:31, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:16, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:19, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:212, 1:2] 98 98 98 98 98 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:10, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:93, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:37, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:16, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:54, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:44, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:13, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:16, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:70, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:2008, 1:2] 98.3 98.3 98.3 98.3 98.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:35, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:1253, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:23, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:102, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:54, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:234, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 98.1 98.1 98.1 98.1 98.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:66, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:107, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:22, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:159, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:9, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:31, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:435, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:10, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:125, 1:2] 98.2 98.2 98.2 98.2 98.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:35, 1:2] 98.3 98.3 98.3 98.3 98.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:77, 1:2] 98.3 98.3 98.3 98.3 98.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:101, 1:2] 98.3 98.3 98.3 98.3 98.3 ...
-  .. [list output truncated]
-  ..- attr(*, "class")= chr [1:3] "XY" "MULTIPOLYGON" "sfg"
- - attr(*, "sf_column")= chr "geometry"
- - attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA
-  ..- attr(*, "names")= chr [1:2] "GID_0" "COUNTRY"</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># geometry: "XY" "MULTIPOLYGON"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin0)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># geometry: "XY" "MULTIPOLYGON"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin0<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin0<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin1 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_1/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_1'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `gadm41_MMR_1' from data source 
-  `/Users/williamtjw/is415-gaa-williamtjw/resources/Take-home_Ex/ex1/data/gadm41_MMR_1' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 15 features and 11 fields
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: 92.1725 ymin: 8.824445 xmax: 101.1768 ymax: 28.54326
-Geodetic CRS:  WGS 84</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin1 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_1/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_1'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Classes 'sf' and 'data.frame':  15 obs. of  12 variables:
- $ GID_1    : chr  "MMR.1_1" "MMR.2_1" "MMR.3_1" "MMR.4_1" ...
- $ GID_0    : chr  "MMR" "MMR" "MMR" "MMR" ...
- $ COUNTRY  : chr  "Myanmar" "Myanmar" "Myanmar" "Myanmar" ...
- $ NAME_1   : chr  "Ayeyarwady" "Bago" "Chin" "Kachin" ...
- $ VARNAME_1: chr  "Irrawaddy|Ayeyarwaddy|Ayeyawady|" "Pégou|Pegu" "Chin Hills" "Jingphaw Mungdaw" ...
- $ NL_NAME_1: chr  "NA" "NA" "NA" "NA" ...
- $ TYPE_1   : chr  "Yin" "Yin" "Pyine" "Pyine" ...
- $ ENGTYPE_1: chr  "Division" "Division" "State" "State" ...
- $ CC_1     : chr  "NA" "NA" "NA" "NA" ...
- $ HASC_1   : chr  "MM.AY" "MM.BA" "MM.CH" "MM.KC" ...
- $ ISO_1    : chr  "MM-07" "MM-02" "NA" "MM-11" ...
- $ geometry :sfc_MULTIPOLYGON of length 15; first list element: List of 65
-  ..$ :List of 1
-  .. ..$ : num [1:2777, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:153, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:233, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:78, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:46, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:272, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:30, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:34, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:80, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:19, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:122, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:8, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:8, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:39, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:16, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:92, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:35, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:752, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:77, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:30, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:70, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:35, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:356, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:27879, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:23, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:23, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:20, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:17, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:21, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:11, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:15, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:29, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:17, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:58, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:41, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:46, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:18, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:41, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:414, 1:2] 95 95 95 95 95 ...
-  ..$ :List of 1
-  .. ..$ : num [1:1977, 1:2] 95 95 95 95 95 ...
-  ..$ :List of 1
-  .. ..$ : num [1:805, 1:2] 95.1 95.1 95.1 95.1 95.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:45, 1:2] 95.1 95.1 95.1 95.1 95.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:200, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:943, 1:2] 94.8 94.8 94.8 94.8 94.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:107, 1:2] 94.8 94.8 94.8 94.8 94.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:1414, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:36, 1:2] 94.8 94.8 94.8 94.8 94.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:180, 1:2] 94.8 94.8 94.8 94.8 94.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:15, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 94.8 94.8 94.8 94.8 94.8 ...
-  ..$ :List of 1
-  .. ..$ : num [1:63, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:37, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:60, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:60, 1:2] 95.7 95.7 95.7 95.7 95.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:846, 1:2] 95.2 95.2 95.2 95.2 95.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:47, 1:2] 95.1 95.1 95.1 95.1 95.1 ...
-  ..$ :List of 1
-  .. ..$ : num [1:343, 1:2] 94.9 94.9 94.9 94.9 94.9 ...
-  ..$ :List of 1
-  .. ..$ : num [1:25, 1:2] 95.2 95.2 95.2 95.2 95.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:58, 1:2] 95 95 95 95 95 ...
-  ..$ :List of 1
-  .. ..$ : num [1:49, 1:2] 95 95 95 95 95 ...
-  ..- attr(*, "class")= chr [1:3] "XY" "MULTIPOLYGON" "sfg"
- - attr(*, "sf_column")= chr "geometry"
- - attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA NA NA NA NA NA NA ...
-  ..- attr(*, "names")= chr [1:11] "GID_1" "GID_0" "COUNTRY" "NAME_1" ...</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin1<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin1<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin2 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_2/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_2'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `gadm41_MMR_2' from data source 
-  `/Users/williamtjw/is415-gaa-williamtjw/resources/Take-home_Ex/ex1/data/gadm41_MMR_2' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 63 features and 13 fields
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: 92.1725 ymin: 8.824445 xmax: 101.1768 ymax: 28.54326
-Geodetic CRS:  WGS 84</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin2 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_2/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_2'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Classes 'sf' and 'data.frame':  63 obs. of  14 variables:
- $ GID_2    : chr  "MMR.1.1_1" "MMR.1.2_1" "MMR.1.3_1" "MMR.1.4_1" ...
- $ GID_0    : chr  "MMR" "MMR" "MMR" "MMR" ...
- $ COUNTRY  : chr  "Myanmar" "Myanmar" "Myanmar" "Myanmar" ...
- $ GID_1    : chr  "MMR.1_1" "MMR.1_1" "MMR.1_1" "MMR.1_1" ...
- $ NAME_1   : chr  "Ayeyarwady" "Ayeyarwady" "Ayeyarwady" "Ayeyarwady" ...
- $ NL_NAME_1: chr  "NA" "NA" "NA" "NA" ...
- $ NAME_2   : chr  "Bassein" "Hinthada" "Maubin" "Myoungmya" ...
- $ VARNAME_2: chr  "Pathein" "Hinthata|Henzada" "Ma-U-Pin|Manbin| Ma-oo-beng| Ma-" "NA" ...
- $ NL_NAME_2: chr  "NA" "NA" "NA" "NA" ...
- $ TYPE_2   : chr  "Kayaing" "Kayaing" "Kayaing" "Kayaing" ...
- $ ENGTYPE_2: chr  "District" "District" "District" "District" ...
- $ CC_2     : chr  "NA" "NA" "NA" "NA" ...
- $ HASC_2   : chr  "MM.AY.PT" "MM.AY.HD" "MM.AY.MU" "MM.AY.MM" ...
- $ geometry :sfc_MULTIPOLYGON of length 63; first list element: List of 33
-  ..$ :List of 1
-  .. ..$ : num [1:46, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:34, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:80, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:19, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:272, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:30, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:8, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:8, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:39, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:16, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:17, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:21, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:122, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:15, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:2777, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:153, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:92, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:23, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:752, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:356, 1:2] 94.7 94.7 94.7 94.7 94.7 ...
-  ..$ :List of 1
-  .. ..$ : num [1:7244, 1:2] 95 95 95 95 95 ...
-  ..$ :List of 1
-  .. ..$ : num [1:12, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:41, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:14, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:11, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:58, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:29, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:17, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:46, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..$ :List of 1
-  .. ..$ : num [1:41, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:18, 1:2] 94.6 94.6 94.6 94.6 94.6 ...
-  ..- attr(*, "class")= chr [1:3] "XY" "MULTIPOLYGON" "sfg"
- - attr(*, "sf_column")= chr "geometry"
- - attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA NA NA NA NA NA NA ...
-  ..- attr(*, "names")= chr [1:13] "GID_2" "GID_0" "COUNTRY" "GID_1" ...</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin2<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin2<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-4-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin3 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_3/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_3'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `gadm41_MMR_3' from data source 
-  `/Users/williamtjw/is415-gaa-williamtjw/resources/Take-home_Ex/ex1/data/gadm41_MMR_3' 
-  using driver `ESRI Shapefile'
-Simple feature collection with 286 features and 16 fields
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: 92.1725 ymin: 8.824445 xmax: 101.1768 ymax: 28.54326
-Geodetic CRS:  WGS 84</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin3 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">'data/gadm41_MMR_3/'</span>, <span class="at">layer =</span> <span class="st">'gadm41_MMR_3'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Classes 'sf' and 'data.frame':  286 obs. of  17 variables:
- $ GID_3    : chr  "MMR.1.1.1_1" "MMR.1.1.2_1" "MMR.1.1.3_1" "MMR.1.1.4_1" ...
- $ GID_0    : chr  "MMR" "MMR" "MMR" "MMR" ...
- $ COUNTRY  : chr  "Myanmar" "Myanmar" "Myanmar" "Myanmar" ...
- $ GID_1    : chr  "MMR.1_1" "MMR.1_1" "MMR.1_1" "MMR.1_1" ...
- $ NAME_1   : chr  "Ayeyarwady" "Ayeyarwady" "Ayeyarwady" "Ayeyarwady" ...
- $ NL_NAME_1: chr  "NA" "NA" "NA" "NA" ...
- $ GID_2    : chr  "MMR.1.1_1" "MMR.1.1_1" "MMR.1.1_1" "MMR.1.1_1" ...
- $ NAME_2   : chr  "Bassein" "Bassein" "Bassein" "Bassein" ...
- $ NL_NAME_2: chr  "NA" "NA" "NA" "NA" ...
- $ NAME_3   : chr  "Bassein West" "Kyaunggon" "Kyonpyaw" "Ngaputaw" ...
- $ VARNAME_3: chr  "NA" "NA" "NA" "NA" ...
- $ NL_NAME_3: chr  "NA" "NA" "NA" "NA" ...
- $ TYPE_3   : chr  "Village|Township" "Village|Township" "Village|Township" "Village|Township" ...
- $ ENGTYPE_3: chr  "Village|Township" "Village|Township" "Village|Township" "Village|Township" ...
- $ CC_3     : chr  "NA" "NA" "NA" "NA" ...
- $ HASC_3   : chr  "NA" "NA" "NA" "NA" ...
- $ geometry :sfc_MULTIPOLYGON of length 286; first list element: List of 7
-  ..$ :List of 1
-  .. ..$ : num [1:33, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:15, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:29, 1:2] 94.3 94.3 94.3 94.3 94.3 ...
-  ..$ :List of 1
-  .. ..$ : num [1:17, 1:2] 94.2 94.2 94.2 94.2 94.2 ...
-  ..$ :List of 1
-  .. ..$ : num [1:11, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..$ :List of 1
-  .. ..$ : num [1:1757, 1:2] 94.5 94.5 94.5 94.5 94.5 ...
-  ..$ :List of 1
-  .. ..$ : num [1:58, 1:2] 94.4 94.4 94.4 94.4 94.4 ...
-  ..- attr(*, "class")= chr [1:3] "XY" "MULTIPOLYGON" "sfg"
- - attr(*, "sf_column")= chr "geometry"
- - attr(*, "agr")= Factor w/ 3 levels "constant","aggregate",..: NA NA NA NA NA NA NA NA NA NA ...
-  ..- attr(*, "names")= chr [1:16] "GID_3" "GID_0" "COUNTRY" "GID_1" ...</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(the1_mymr_shp4326_admin3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin3<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(the1_mymr_shp4326_admin3<span class="sc">$</span>geometry)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
 </div>
-</div>
-</div>
-<section id="deciding-on-which-boundary" class="level3">
-<h3 class="anchored" data-anchor-id="deciding-on-which-boundary">Deciding on which Boundary</h3>
+<section id="study-area" class="level3">
+<h3 class="anchored" data-anchor-id="study-area">Study Area</h3>
 <p>To balance spatial detail and computational efficiency, I think using <code>the1_mymr_shp4326_admin1</code> (state/region) boundary data will be the best fit. While looking at district-/township-level provides fine granularity for analysis, for potato machines like my macbook, <code>the1_mymr_shp4326_admin1</code> provides the best compromise.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>tmap mode set to plotting</code></pre>
-</div>
-</div>
-<div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">admin1</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">admin3</a></li></ul>
-<div class="tab-content">
-<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
-<div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(the1_mymr_shp4326_admin3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>    GID_1              GID_0             COUNTRY             NAME_1         
- Length:15          Length:15          Length:15          Length:15         
- Class :character   Class :character   Class :character   Class :character  
- Mode  :character   Mode  :character   Mode  :character   Mode  :character  
-  VARNAME_1          NL_NAME_1            TYPE_1           ENGTYPE_1        
- Length:15          Length:15          Length:15          Length:15         
- Class :character   Class :character   Class :character   Class :character  
- Mode  :character   Mode  :character   Mode  :character   Mode  :character  
-     CC_1              HASC_1             ISO_1                    geometry 
- Length:15          Length:15          Length:15          MULTIPOLYGON :15  
- Class :character   Class :character   Class :character   epsg:4326    : 0  
- Mode  :character   Mode  :character   Mode  :character   +proj=long...: 0  </code></pre>
-</div>
-</div>
-<p><strong>Transform for more precise analysis</strong></p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_transform</span>(the1_mymr_shp4326_admin1, <span class="at">crs =</span> <span class="dv">32646</span>) <span class="co"># WGS 84 / UTM zone 46N</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Simple feature collection with 15 features and 11 fields
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: 414101 ymin: 978844.6 xmax: 1348458 ymax: 3165949
-Projected CRS: WGS 84 / UTM zone 46N
-First 10 features:
-      GID_1 GID_0 COUNTRY     NAME_1                        VARNAME_1 NL_NAME_1
-1   MMR.1_1   MMR Myanmar Ayeyarwady Irrawaddy|Ayeyarwaddy|Ayeyawady|        NA
-2   MMR.2_1   MMR Myanmar       Bago                       Pégou|Pegu        NA
-3   MMR.3_1   MMR Myanmar       Chin                       Chin Hills        NA
-4   MMR.4_1   MMR Myanmar     Kachin                 Jingphaw Mungdaw        NA
-5   MMR.5_1   MMR Myanmar      Kayah                          Karenni        NA
-6   MMR.6_1   MMR Myanmar      Kayin Kawthulei|Karen|Karin|Kawthoolei        NA
-7   MMR.7_1   MMR Myanmar     Magway                      Magwe|Minbu        NA
-8   MMR.8_1   MMR Myanmar   Mandalay                               NA        NA
-9   MMR.9_1   MMR Myanmar        Mon                              Mun        NA
-10 MMR.10_1   MMR Myanmar  Naypyitaw            Naypyidaw|Nay Pyi Taw        NA
-            TYPE_1       ENGTYPE_1 CC_1 HASC_1 ISO_1
-1              Yin        Division   NA  MM.AY MM-07
-2              Yin        Division   NA  MM.BA MM-02
-3            Pyine           State   NA  MM.CH    NA
-4            Pyine           State   NA  MM.KC MM-11
-5            Pyine           State   NA  MM.KH MM-12
-6            Pyine           State   NA  MM.KN MM-13
-7              Yin        Division   NA  MM.MG MM-03
-8              Yin        Division   NA  MM.MD MM-04
-9            Pyine           State   NA  MM.MO MM-15
-10 Union territory Union territory   NA  MM.NY    NA
-                         geometry
-1  MULTIPOLYGON (((676171.4 17...
-2  MULTIPOLYGON (((916141.6 18...
-3  MULTIPOLYGON (((465603.4 23...
-4  MULTIPOLYGON (((903011.7 26...
-5  MULTIPOLYGON (((959987.5 20...
-6  MULTIPOLYGON (((1097974 178...
-7  MULTIPOLYGON (((793981.3 21...
-8  MULTIPOLYGON (((854656.9 21...
-9  MULTIPOLYGON (((1015173 165...
-10 MULTIPOLYGON (((829548.3 21...</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(the1_mymr_shp4326_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -1193,252 +555,82 @@ First 10 features:
 <p>In this section, I will be doing basic data cleaning and formatting across the ACLED columns so that I can derive appropriate variables needed for analysis.</p>
 <p><strong>Inspecting ACLED</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 31
-  event_id_cnty event_date    year time_precision disorder_type       event_type
-  &lt;chr&gt;         &lt;chr&gt;        &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;               &lt;chr&gt;     
-1 MMR64334      01 July 2024  2024              1 Strategic developm… Strategic…
-2 MMR64335      01 July 2024  2024              1 Political violence  Explosion…
-3 MMR64336      01 July 2024  2024              1 Political violence  Battles   
-4 MMR64338      01 July 2024  2024              1 Political violence  Battles   
-5 MMR64339      01 July 2024  2024              1 Strategic developm… Strategic…
-# ℹ 25 more variables: sub_event_type &lt;chr&gt;, actor1 &lt;chr&gt;, assoc_actor_1 &lt;chr&gt;,
-#   inter1 &lt;dbl&gt;, actor2 &lt;chr&gt;, assoc_actor_2 &lt;chr&gt;, inter2 &lt;dbl&gt;,
-#   interaction &lt;dbl&gt;, civilian_targeting &lt;chr&gt;, iso &lt;dbl&gt;, region &lt;chr&gt;,
-#   country &lt;chr&gt;, admin1 &lt;chr&gt;, admin2 &lt;chr&gt;, admin3 &lt;chr&gt;, location &lt;chr&gt;,
-#   latitude &lt;dbl&gt;, longitude &lt;dbl&gt;, geo_precision &lt;dbl&gt;, source &lt;chr&gt;,
-#   source_scale &lt;chr&gt;, notes &lt;chr&gt;, fatalities &lt;dbl&gt;, tags &lt;chr&gt;,
-#   timestamp &lt;dbl&gt;</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(acled_sf, <span class="at">n=</span><span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Check ACLED structure</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>spc_tbl_ [51,576 × 31] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
- $ event_id_cnty     : chr [1:51576] "MMR64334" "MMR64335" "MMR64336" "MMR64338" ...
- $ event_date        : chr [1:51576] "01 July 2024" "01 July 2024" "01 July 2024" "01 July 2024" ...
- $ year              : num [1:51576] 2024 2024 2024 2024 2024 ...
- $ time_precision    : num [1:51576] 1 1 1 1 1 1 1 1 1 1 ...
- $ disorder_type     : chr [1:51576] "Strategic developments" "Political violence" "Political violence" "Political violence" ...
- $ event_type        : chr [1:51576] "Strategic developments" "Explosions/Remote violence" "Battles" "Battles" ...
- $ sub_event_type    : chr [1:51576] "Arrests" "Shelling/artillery/missile attack" "Armed clash" "Armed clash" ...
- $ actor1            : chr [1:51576] "Military Forces of Myanmar (2021-)" "Military Forces of Myanmar (2021-)" "Nga Pyae Ma Pyauk Kyar Tatphwe: Climbing Perch Guerilla Force" "Unidentified Armed Group (Myanmar)" ...
- $ assoc_actor_1     : chr [1:51576] NA NA "People Defense Force - Aung Lan; Yoma GBK PDF" NA ...
- $ inter1            : num [1:51576] 1 1 3 3 7 3 3 3 1 2 ...
- $ actor2            : chr [1:51576] "Civilians (Myanmar)" "Civilians (Myanmar)" "Pyu Saw Htee" "Police Forces of Myanmar (2021-)" ...
- $ assoc_actor_2     : chr [1:51576] NA NA NA NA ...
- $ inter2            : num [1:51576] 7 7 3 1 0 1 1 1 3 2 ...
- $ interaction       : num [1:51576] 17 17 33 13 70 13 13 13 13 22 ...
- $ civilian_targeting: chr [1:51576] NA "Civilian targeting" NA NA ...
- $ iso               : num [1:51576] 104 104 104 104 104 104 104 104 104 104 ...
- $ region            : chr [1:51576] "Southeast Asia" "Southeast Asia" "Southeast Asia" "Southeast Asia" ...
- $ country           : chr [1:51576] "Myanmar" "Myanmar" "Myanmar" "Myanmar" ...
- $ admin1            : chr [1:51576] "Ayeyarwady" "Bago-East" "Bago-East" "Kayin" ...
- $ admin2            : chr [1:51576] "Pyapon" "Taungoo" "Taungoo" "Myawaddy" ...
- $ admin3            : chr [1:51576] "Kyaiklat" "Taungoo" "Taungoo" "Myawaddy" ...
- $ location          : chr [1:51576] "Kyaiklat" "Naung Cho" "Taungoo" "Myawaddy" ...
- $ latitude          : num [1:51576] 16.4 19 18.9 16.7 21.6 ...
- $ longitude         : num [1:51576] 95.7 96.4 96.4 98.5 94.9 ...
- $ geo_precision     : num [1:51576] 1 1 2 1 2 1 1 1 2 2 ...
- $ source            : chr [1:51576] "Democratic Voice of Burma" "Radio Free Asia" "Democratic Voice of Burma; Khit Thit Media" "Karen Information Center News" ...
- $ source_scale      : chr [1:51576] "National" "Regional" "National" "Subnational" ...
- $ notes             : chr [1:51576] "On 1 July 2024, in Kyaiklat town (Kyaiklat township, Pyapon district, Ayeyarwady region), the Myanmar military "| __truncated__ "On 1 July 2024, in Naung Cho village (Taungoo township, Taungoo district, Bago-East region), the military from "| __truncated__ "On 1 July 2024, in Taungoo township (Taungoo district, Bago-East region), the combined troops of the Climbing P"| __truncated__ "On 1 July 2024, in Myawaddy town (Myawaddy township, Myawaddy district, Kayin state), an unknown armed group sh"| __truncated__ ...
- $ fatalities        : num [1:51576] 0 2 1 1 0 0 16 0 1 1 ...
- $ tags              : chr [1:51576] NA NA NA NA ...
- $ timestamp         : num [1:51576] 1.72e+09 1.72e+09 1.72e+09 1.72e+09 1.72e+09 ...
- - attr(*, "spec")=
-  .. cols(
-  ..   event_id_cnty = col_character(),
-  ..   event_date = col_character(),
-  ..   year = col_double(),
-  ..   time_precision = col_double(),
-  ..   disorder_type = col_character(),
-  ..   event_type = col_character(),
-  ..   sub_event_type = col_character(),
-  ..   actor1 = col_character(),
-  ..   assoc_actor_1 = col_character(),
-  ..   inter1 = col_double(),
-  ..   actor2 = col_character(),
-  ..   assoc_actor_2 = col_character(),
-  ..   inter2 = col_double(),
-  ..   interaction = col_double(),
-  ..   civilian_targeting = col_character(),
-  ..   iso = col_double(),
-  ..   region = col_character(),
-  ..   country = col_character(),
-  ..   admin1 = col_character(),
-  ..   admin2 = col_character(),
-  ..   admin3 = col_character(),
-  ..   location = col_character(),
-  ..   latitude = col_double(),
-  ..   longitude = col_double(),
-  ..   geo_precision = col_double(),
-  ..   source = col_character(),
-  ..   source_scale = col_character(),
-  ..   notes = col_character(),
-  ..   fatalities = col_double(),
-  ..   tags = col_character(),
-  ..   timestamp = col_double()
-  .. )
- - attr(*, "problems")=&lt;externalptr&gt; </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Check <code>event_type</code> values</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled_sf<span class="sc">$</span>event_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Strategic developments"     "Explosions/Remote violence"
-[3] "Battles"                    "Protests"                  
-[5] "Violence against civilians" "Riots"                     </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(acled_sf<span class="sc">$</span>event_type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Check for Missing Data</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(acled_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 179468</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(acled_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Clearly, this doesn’t provide much insight to the state of the ACLED <strong>columns</strong>. Hence I consulted Uncle Google for alternatives:</p>
 <ul>
 <li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span> </span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot_longer() to transpose the table for a more compact output</span></span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter() to rid off ACLED columns with no missing data.</span></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 2
-  column             missing_count
-  &lt;chr&gt;                      &lt;int&gt;
-1 assoc_actor_1              39191
-2 actor2                     15363
-3 assoc_actor_2              41011
-4 civilian_targeting         41852
-5 admin3                       917
-6 tags                       41134</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot_longer() to transpose the table for a more compact output</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"column"</span>, <span class="at">values_to =</span> <span class="st">"missing_count"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># filter() to rid off ACLED columns with no missing data.</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(missing_count <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <blockquote class="blockquote">
+<p>Notes from output:</p>
 <p>‘<code>actor</code>’-related columns: possible to have 1 or more actors responsible</p>
 <p>‘<code>civilian_targeting</code>’: boolean-like variable — null for no civilian targeting</p>
 <p>‘<code>admin3</code>’: location identifiers are still discernible at least 1 of the <code>admin</code> columns are filled</p>
 <p>‘<code>tags</code>’: supplementary target description information</p>
+<p>Hence, <code>missing_count</code> values can be ignored.</p>
 </blockquote>
 <ul>
 <li><code>skim()</code> from <code>skimr</code> package</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled_sf) <span class="sc">%&gt;%</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 31 × 17
-   skim_type skim_variable   n_missing complete_rate character.min character.max
-   &lt;chr&gt;     &lt;chr&gt;               &lt;int&gt;         &lt;dbl&gt;         &lt;int&gt;         &lt;int&gt;
- 1 character event_id_cnty           0         1                 8             8
- 2 character event_date              0         1                11            17
- 3 character disorder_type           0         1                14            34
- 4 character event_type              0         1                 5            26
- 5 character sub_event_type          0         1                 5            35
- 6 character actor1                  0         1                 3           214
- 7 character assoc_actor_1       39191         0.240             2          1085
- 8 character actor2              15363         0.702            10           124
- 9 character assoc_actor_2       41011         0.205             8           971
-10 character civilian_targe…     41852         0.189            18            18
-# ℹ 21 more rows
-# ℹ 11 more variables: character.empty &lt;int&gt;, character.n_unique &lt;int&gt;,
-#   character.whitespace &lt;int&gt;, numeric.mean &lt;dbl&gt;, numeric.sd &lt;dbl&gt;,
-#   numeric.p0 &lt;dbl&gt;, numeric.p25 &lt;dbl&gt;, numeric.p50 &lt;dbl&gt;, numeric.p75 &lt;dbl&gt;,
-#   numeric.p100 &lt;dbl&gt;, numeric.hist &lt;chr&gt;</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(acled_sf) <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># n_missing, character.n_unique, various summary statistics are somwhat useful; added here for extra reference</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>Checking for duplicates in ACLED’s unique identifier <code>event_id_cnty</code></strong></p>
 <ul>
 <li>base R</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_sf[<span class="st">'event_id_cnty'</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_sf[<span class="st">'event_id_cnty'</span>])) <span class="co"># no duplicates</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="wrangling" class="level2">
 <h2 class="anchored" data-anchor-id="wrangling">Wrangling</h2>
 <section id="reference-system" class="level4">
 <h4 class="anchored" data-anchor-id="reference-system"><strong>Reference system</strong></h4>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Coordinate Reference System: NA</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="ot">&lt;-</span> acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'longitude'</span>,<span class="st">'latitude'</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32646</span>)</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(acled_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Coordinate Reference System:
-  User input: EPSG:32646 
-  wkt:
-PROJCRS["WGS 84 / UTM zone 46N",
-    BASEGEOGCRS["WGS 84",
-        ENSEMBLE["World Geodetic System 1984 ensemble",
-            MEMBER["World Geodetic System 1984 (Transit)"],
-            MEMBER["World Geodetic System 1984 (G730)"],
-            MEMBER["World Geodetic System 1984 (G873)"],
-            MEMBER["World Geodetic System 1984 (G1150)"],
-            MEMBER["World Geodetic System 1984 (G1674)"],
-            MEMBER["World Geodetic System 1984 (G1762)"],
-            MEMBER["World Geodetic System 1984 (G2139)"],
-            ELLIPSOID["WGS 84",6378137,298.257223563,
-                LENGTHUNIT["metre",1]],
-            ENSEMBLEACCURACY[2.0]],
-        PRIMEM["Greenwich",0,
-            ANGLEUNIT["degree",0.0174532925199433]],
-        ID["EPSG",4326]],
-    CONVERSION["UTM zone 46N",
-        METHOD["Transverse Mercator",
-            ID["EPSG",9807]],
-        PARAMETER["Latitude of natural origin",0,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8801]],
-        PARAMETER["Longitude of natural origin",93,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8802]],
-        PARAMETER["Scale factor at natural origin",0.9996,
-            SCALEUNIT["unity",1],
-            ID["EPSG",8805]],
-        PARAMETER["False easting",500000,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8806]],
-        PARAMETER["False northing",0,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8807]]],
-    CS[Cartesian,2],
-        AXIS["(E)",east,
-            ORDER[1],
-            LENGTHUNIT["metre",1]],
-        AXIS["(N)",north,
-            ORDER[2],
-            LENGTHUNIT["metre",1]],
-    USAGE[
-        SCOPE["Engineering survey, topographic mapping."],
-        AREA["Between 90°E and 96°E, northern hemisphere between equator and 84°N, onshore and offshore. Bangladesh. Bhutan. China. Indonesia. Mongolia. Myanmar (Burma). Russian Federation."],
-        BBOX[0,90,84,96]],
-    ID["EPSG",32646]]</code></pre>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="ot">&lt;-</span> acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">'longitude'</span>,<span class="st">'latitude'</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32646</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(acled_sf) <span class="co"># last line: ID["EPSG",32646]]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(the1_mymr_shp4326_admin1) <span class="co"># last line: ID["EPSG",4326]]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp32646_admin1 <span class="ot">&lt;-</span> the1_mymr_shp4326_admin1 <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32646</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(the1_mymr_shp32646_admin1) <span class="co"># now should be: ID["EPSG",32646]]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="date-formatting" class="level4">
-<h4 class="anchored" data-anchor-id="date-formatting"><strong>Date formatting</strong></h4>
+<section id="date-format" class="level4">
+<h4 class="anchored" data-anchor-id="date-format"><strong>Date format</strong></h4>
 <ul>
 <li><p><code>lubridate</code> package</p>
 <ul>
@@ -1447,24 +639,203 @@ PROJCRS["WGS 84 / UTM zone 46N",
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to-do: assign variable; mix in geospatial data too</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>acled_sf_prepped <span class="ot">&lt;-</span> acled_sf <span class="sc">%&gt;%</span> </span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(event_id_cnty) <span class="sc">%&gt;%</span></span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(timestamp) <span class="sc">%&gt;%</span> </span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert UNIX timestamp into datetime object</span></span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as_datetime</span>(timestamp, <span class="at">tz =</span> <span class="st">'Asia/Yangon'</span>),</span>
-<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># extract quarter info</span></span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_num =</span> <span class="fu">quarter</span>(datetime),</span>
-<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># concatenate</span></span>
-<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_period =</span> <span class="fu">paste</span>(year,<span class="st">'Q'</span>, quarter_num, <span class="at">sep =</span> <span class="st">''</span>)</span>
-<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to-do: assign variable; mix in geospatial data too</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>acled_sf_prepped <span class="ot">&lt;-</span> acled_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(event_id_cnty) <span class="sc">%&gt;%</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(timestamp) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># convert UNIX timestamp into datetime object</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as_datetime</span>(timestamp, <span class="at">tz =</span> <span class="st">'Asia/Yangon'</span>),</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># extract quarter info</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_num =</span> <span class="fu">quarter</span>(datetime),</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># concatenate</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">quarter_period =</span> <span class="fu">paste</span>(year,<span class="st">'Q'</span>, quarter_num, <span class="at">sep =</span> <span class="st">''</span>)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <blockquote class="blockquote">
 <p>Note: Unix timestamps count the number of seconds since the Unix epoch (January 1st, 1970 at UTC)</p>
 </blockquote>
+</section>
+</section>
+<section id="saving-derived-data" class="level2">
+<h2 class="anchored" data-anchor-id="saving-derived-data">Saving Derived Data</h2>
+<p>Save working data files and check data structures and attributes if needed before proceeding with analysis</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">ACLED</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">Boundary shapefile</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">Derived Datasets</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>acled_sf_prepped</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp32646_admin1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># refer to previously, </span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="co"># "Strategic developments"</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># "Explosions/Remote violence"</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># "Battles"</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co"># "Protests"</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># "Violence against civilians"</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co"># "Riots"</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>acled_stratdev_sf <span class="ot">&lt;-</span> acled_sf_prepped <span class="sc">%&gt;%</span> </span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_type<span class="sc">==</span><span class="st">'Strategic developments'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">33</span>,<span class="dv">30</span>)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>acled_explo_sf <span class="ot">&lt;-</span> acled_sf_prepped <span class="sc">%&gt;%</span> </span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_type<span class="sc">==</span><span class="st">'Explosions/Remote violence'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">33</span>,<span class="dv">30</span>)</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>acled_battle_sf <span class="ot">&lt;-</span> acled_sf_prepped <span class="sc">%&gt;%</span> </span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_type<span class="sc">==</span><span class="st">'Battles'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">33</span>,<span class="dv">30</span>)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>acled_protest_sf <span class="ot">&lt;-</span> acled_sf_prepped <span class="sc">%&gt;%</span> </span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_type<span class="sc">==</span><span class="st">'Protests'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">33</span>,<span class="dv">30</span>)</span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>acled_civi_sf <span class="ot">&lt;-</span> acled_sf_prepped <span class="sc">%&gt;%</span> </span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_type<span class="sc">==</span><span class="st">'Violence against civilians'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">33</span>,<span class="dv">30</span>)</span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>acled_riot_sf <span class="ot">&lt;-</span> acled_sf_prepped <span class="sc">%&gt;%</span> </span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(event_type<span class="sc">==</span><span class="st">'Riots'</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">33</span>,<span class="dv">30</span>)</span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_stratdev_sf, <span class="st">'data/rds/acled_stratdev_sf.rds'</span>)</span>
+<span id="cb30-34"><a href="#cb30-34" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_explo_sf, <span class="st">'data/rds/acled_explo_sf.rds'</span>)</span>
+<span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_battle_sf, <span class="st">'data/rds/acled_battle_sf.rds'</span>)</span>
+<span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_protest_sf, <span class="st">'data/rds/acled_protest_sf.rds'</span>)</span>
+<span id="cb30-37"><a href="#cb30-37" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_civi_sf, <span class="st">'data/rds/acled_civi_sf.rds'</span>)</span>
+<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_riot_sf, <span class="st">'data/rds/acled_riot_sf.rds'</span>)</span>
+<span id="cb30-39"><a href="#cb30-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-40"><a href="#cb30-40" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(acled_sf_prepped, <span class="st">'data/rds/acled_sf_prepped.rds'</span>)</span>
+<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(the1_mymr_shp32646_admin1, <span class="st">'data/rds/the1_mymr_shp32646_admin1.rds'</span>)</span>
+<span id="cb30-42"><a href="#cb30-42" aria-hidden="true" tabindex="-1"></a><span class="co"># event_id_cnty,1</span></span>
+<span id="cb30-43"><a href="#cb30-43" aria-hidden="true" tabindex="-1"></a><span class="co"># quarter_period,33</span></span>
+<span id="cb30-44"><a href="#cb30-44" aria-hidden="true" tabindex="-1"></a><span class="co"># geometry,30</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="rds-checkpoint" class="level1">
+<h1>RDS Checkpoint</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>acled_sf_prepped <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_sf_prepped.rds'</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp32646_admin1 <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/the1_mymr_shp32646_admin1.rds'</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>acled_stratdev_sf <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_stratdev_sf.rds'</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>acled_explo_sf    <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_explo_sf.rds'</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>acled_battle_sf   <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_battle_sf.rds'</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>acled_protest_sf  <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_protest_sf.rds'</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>acled_civi_sf     <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_civi_sf.rds'</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>acled_riot_sf     <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/acled_riot_sf.rds'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="kdes" class="level1">
+<h1>KDEs</h1>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<section id="creating-ppp-object" class="level3">
+<h3 class="anchored" data-anchor-id="creating-ppp-object">Creating <code>ppp</code> object</h3>
+<p><strong><code>as.ppp()</code> from <code>spatstat.geom</code></strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>acled_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(acled_sf_prepped)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in as.ppp.sf(acled_sf_prepped): only first attribute column is used for
+marks</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(acled_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  51576 points
+Average intensity 3.122579e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are of type 'character'
+Summary:
+   Length     Class      Mode 
+    51576 character character 
+
+Window: rectangle = [415262.5, 1265315.1] x [1108593.6, 3051663.8] units
+                    (850100 x 1943000 units)
+Window area = 1.65171e+12 square units</code></pre>
+</div>
+</div>
+</section>
+<section id="creating-owin-object-of-admin1-boundary" class="level3">
+<h3 class="anchored" data-anchor-id="creating-owin-object-of-admin1-boundary">Creating <code>owin</code> object of <code>admin1</code> boundary</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>the1_mymr_shp4326_admin1_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(the1_mymr_shp32646_admin1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="combine-ppp-and-owin" class="level3">
+<h3 class="anchored" data-anchor-id="combine-ppp-and-owin">Combine ppp and owin</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>acled_ppp <span class="ot">&lt;-</span> acled_ppp[the1_mymr_shp4326_admin1_owin]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rescale-m-to-km" class="level3">
+<h3 class="anchored" data-anchor-id="rescale-m-to-km">Rescale <code>m</code> to <code>km</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>acled_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(acled_ppp,<span class="dv">1000</span>,<span class="st">'km'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Varying admin1 geographical boundaries — hence <strong>adaptive bandwidth KDE:</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>kde_acled_bw_diggle <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  acled_ppp_km,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma=</span>bw.diggle,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>kde_acled_bw_scott <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  acled_ppp_km,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma=</span>bw.scott,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>kde_acled_bw_ppl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  acled_ppp_km,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma=</span>bw.ppl,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>kde_acled_bw_cvl <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  acled_ppp_km,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel=</span><span class="st">'gaussian'</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>))</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_acled_bw_cvl)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_acled_bw_diggle)</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_acled_bw_ppl)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_acled_bw_scott)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_1_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 </section>
 </section>

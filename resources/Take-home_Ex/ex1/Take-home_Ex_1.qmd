@@ -62,12 +62,13 @@ These R packages will be used:
     -   
 
 ```{r}
-pacman:::p_load(sf,tidyverse,janitor,skimr,lubridate,tmap) # more to be added
+pacman:::p_load(sf,tidyverse,spatstat,janitor,skimr,lubridate,tmap) # more to be added
 ```
 
 ## ACLED
 
 ```{r}
+#| eval: false
 acled_sf <- read_csv('data/2021-01-01-2024-07-01-Myanmar.csv')
 ```
 
@@ -109,6 +110,8 @@ Click to expand –\>
 | 'interaction'        | indicates the 2 actor types interacting in the event (encoded inter1 & inter2 by concatenation)          |
 +----------------------+----------------------------------------------------------------------------------------------------------+
 | 'civilian_targeting' | indicates whether the event involved civilian targeting (e.g. null if false)                             |
+|                      |                                                                                                          |
+|                      | -   **Note: no data format irregularity**                                                                |
 +----------------------+----------------------------------------------------------------------------------------------------------+
 | 'iso'                | unique 3-digit numeric code assigned to each country or territory according to ISO 3166                  |
 +----------------------+----------------------------------------------------------------------------------------------------------+
@@ -163,98 +166,89 @@ Click to expand –\>
 
 2.  Load
 
-3.  Check structure or whatever
+3.  Check structure and boundary plot
+
+For the purposes of exploring the differences in detail:
 
 ::: panel-tabset
 ### admin 0
 
 ```{r}
+#| eval: false
 the1_mymr_shp4326_admin0 <- st_read(dsn = 'data/gadm41_MMR_0/', layer = 'gadm41_MMR_0')
 ```
 
 ```{r}
+#| eval: false
 str(the1_mymr_shp4326_admin0)
 
 # geometry: "XY" "MULTIPOLYGON"
 ```
 
 ```{r}
+#| eval: false
 plot(the1_mymr_shp4326_admin0$geometry)
 ```
 
 ### admin 1
 
 ```{r}
+#| eval: false
 the1_mymr_shp4326_admin1 <- st_read(dsn = 'data/gadm41_MMR_1/', layer = 'gadm41_MMR_1')
 ```
 
 ```{r}
+#| eval: false
 str(the1_mymr_shp4326_admin1)
 ```
 
 ```{r}
+#| eval: false
 plot(the1_mymr_shp4326_admin1$geometry)
 ```
 
 ### admin 2
 
 ```{r}
+#| eval: false
 the1_mymr_shp4326_admin2 <- st_read(dsn = 'data/gadm41_MMR_2/', layer = 'gadm41_MMR_2')
 ```
 
 ```{r}
+#| eval: false
 str(the1_mymr_shp4326_admin2)
 ```
 
 ```{r}
+#| eval: false
 plot(the1_mymr_shp4326_admin2$geometry)
 ```
 
 ### admin 3
 
 ```{r}
+#| eval: false
 the1_mymr_shp4326_admin3 <- st_read(dsn = 'data/gadm41_MMR_3/', layer = 'gadm41_MMR_3')
 ```
 
 ```{r}
+#| eval: false
 str(the1_mymr_shp4326_admin3)
 ```
 
 ```{r}
+#| eval: false
 plot(the1_mymr_shp4326_admin3$geometry)
 ```
 :::
 
-### Deciding on which Boundary
+### Study Area
 
 To balance spatial detail and computational efficiency, I think using `the1_mymr_shp4326_admin1` (state/region) boundary data will be the best fit. While looking at district-/township-level provides fine granularity for analysis, for potato machines like my macbook, `the1_mymr_shp4326_admin1` provides the best compromise.
 
 ```{r}
-tmap_mode('plot')
-```
-
-::: panel-tabset
-#### admin1
-
-```{r}
-qtm(the1_mymr_shp4326_admin1)
-```
-
-#### admin3
-
-```{r}
-qtm(the1_mymr_shp4326_admin3)
-```
-:::
-
-```{r}
+#| eval: false
 summary(the1_mymr_shp4326_admin1)
-```
-
-**Transform for more precise analysis**
-
-```{r}
-st_transform(the1_mymr_shp4326_admin1, crs = 32646) # WGS 84 / UTM zone 46N
 ```
 
 # Data Wrangling
@@ -264,24 +258,28 @@ In this section, I will be doing basic data cleaning and formatting across the A
 **Inspecting ACLED**
 
 ```{r}
+#| eval: false
 head(acled_sf, n=5)
 ```
 
 **Check ACLED structure**
 
 ```{r}
+#| eval: false
 str(acled_sf)
 ```
 
 **Check `event_type` values**
 
 ```{r}
+#| eval: false
 unique(acled_sf$event_type)
 ```
 
 **Check for Missing Data**
 
 ```{r}
+#| eval: false
 sum(is.na(acled_sf))
 ```
 
@@ -290,6 +288,7 @@ Clearly, this doesn't provide much insight to the state of the ACLED **columns**
 -   base R
 
 ```{r}
+#| eval: false
 acled_sf %>% 
   summarise(across(everything(), ~ sum(is.na(.)))) %>% 
   
@@ -300,6 +299,8 @@ acled_sf %>%
   filter(missing_count > 0)
 ```
 
+> Notes from output:
+>
 > '`actor`'-related columns: possible to have 1 or more actors responsible
 >
 > '`civilian_targeting`': boolean-like variable — null for no civilian targeting
@@ -307,12 +308,17 @@ acled_sf %>%
 > '`admin3`': location identifiers are still discernible at least 1 of the `admin` columns are filled
 >
 > '`tags`': supplementary target description information
+>
+> Hence, `missing_count` values can be ignored.
 
 -   `skim()` from `skimr` package
 
 ```{r}
+#| eval: false
 skim(acled_sf) %>%
   tibble::as_tibble()
+
+# n_missing, character.n_unique, various summary statistics are somwhat useful; added here for extra reference
 ```
 
 **Checking for duplicates in ACLED's unique identifier `event_id_cnty`**
@@ -320,7 +326,8 @@ skim(acled_sf) %>%
 -   base R
 
 ```{r}
-sum(duplicated(acled_sf['event_id_cnty']))
+#| eval: false
+sum(duplicated(acled_sf['event_id_cnty'])) # no duplicates
 ```
 
 ## Wrangling
@@ -328,17 +335,31 @@ sum(duplicated(acled_sf['event_id_cnty']))
 #### **Reference system**
 
 ```{r}
+#| eval: false
 st_crs(acled_sf)
 ```
 
 ```{r}
+#| eval: false
 acled_sf <- acled_sf %>% 
   st_as_sf(coords = c('longitude','latitude'), crs = 4326) %>% 
   st_transform(crs = 32646)
-st_crs(acled_sf)
+st_crs(acled_sf) # last line: ID["EPSG",32646]]
 ```
 
-#### **Date formatting**
+```{r}
+#| eval: false
+st_crs(the1_mymr_shp4326_admin1) # last line: ID["EPSG",4326]]
+```
+
+```{r}
+#| eval: false
+the1_mymr_shp32646_admin1 <- the1_mymr_shp4326_admin1 %>% 
+  st_transform(crs = 32646)
+st_crs(the1_mymr_shp32646_admin1) # now should be: ID["EPSG",32646]]
+```
+
+#### **Date format**
 
 -   `lubridate` package
 
@@ -347,6 +368,7 @@ st_crs(acled_sf)
     -   `quarter()`: extracts quarter info
 
 ```{r}
+#| eval: false
 # to-do: assign variable; mix in geospatial data too
 acled_sf_prepped <- acled_sf %>% 
   group_by(event_id_cnty) %>%
@@ -364,6 +386,167 @@ acled_sf_prepped <- acled_sf %>%
 ```
 
 > Note: Unix timestamps count the number of seconds since the Unix epoch (January 1st, 1970 at UTC)
+
+## Saving Derived Data
+
+Save working data files and check data structures and attributes if needed before proceeding with analysis
+
+::: panel-tabset
+### ACLED
+
+```{r}
+#| eval: false
+acled_sf_prepped
+```
+
+### Boundary shapefile
+
+```{r}
+#| eval: false
+the1_mymr_shp32646_admin1
+```
+
+### Derived Datasets
+
+```{r}
+#| eval: false
+# refer to previously, 
+# "Strategic developments"
+# "Explosions/Remote violence"
+# "Battles"
+# "Protests"
+# "Violence against civilians"
+# "Riots"
+
+acled_stratdev_sf <- acled_sf_prepped %>% 
+  filter(event_type=='Strategic developments') %>% 
+  select(1,33,30)
+
+acled_explo_sf <- acled_sf_prepped %>% 
+  filter(event_type=='Explosions/Remote violence') %>% 
+  select(1,33,30)
+
+acled_battle_sf <- acled_sf_prepped %>% 
+  filter(event_type=='Battles') %>% 
+  select(1,33,30)
+
+acled_protest_sf <- acled_sf_prepped %>% 
+  filter(event_type=='Protests') %>% 
+  select(1,33,30)
+
+acled_civi_sf <- acled_sf_prepped %>% 
+  filter(event_type=='Violence against civilians') %>% 
+  select(1,33,30)
+
+acled_riot_sf <- acled_sf_prepped %>% 
+  filter(event_type=='Riots') %>% 
+  select(1,33,30)
+
+write_rds(acled_stratdev_sf, 'data/rds/acled_stratdev_sf.rds')
+write_rds(acled_explo_sf, 'data/rds/acled_explo_sf.rds')
+write_rds(acled_battle_sf, 'data/rds/acled_battle_sf.rds')
+write_rds(acled_protest_sf, 'data/rds/acled_protest_sf.rds')
+write_rds(acled_civi_sf, 'data/rds/acled_civi_sf.rds')
+write_rds(acled_riot_sf, 'data/rds/acled_riot_sf.rds')
+
+write_rds(acled_sf_prepped, 'data/rds/acled_sf_prepped.rds')
+write_rds(the1_mymr_shp32646_admin1, 'data/rds/the1_mymr_shp32646_admin1.rds')
+# event_id_cnty,1
+# quarter_period,33
+# geometry,30
+```
+:::
+
+# RDS Checkpoint
+
+```{r}
+acled_sf_prepped <- read_rds('data/rds/acled_sf_prepped.rds')
+the1_mymr_shp32646_admin1 <- read_rds('data/rds/the1_mymr_shp32646_admin1.rds')
+
+acled_stratdev_sf <- read_rds('data/rds/acled_stratdev_sf.rds')
+acled_explo_sf    <- read_rds('data/rds/acled_explo_sf.rds')
+acled_battle_sf   <- read_rds('data/rds/acled_battle_sf.rds')
+acled_protest_sf  <- read_rds('data/rds/acled_protest_sf.rds')
+acled_civi_sf     <- read_rds('data/rds/acled_civi_sf.rds')
+acled_riot_sf     <- read_rds('data/rds/acled_riot_sf.rds')
+```
+
+# KDEs
+
+## Overview
+
+### Creating `ppp` object
+
+**`as.ppp()` from `spatstat.geom`**
+
+```{r}
+acled_ppp <- as.ppp(acled_sf_prepped)
+summary(acled_ppp)
+```
+
+### Creating `owin` object of `admin1` boundary
+
+```{r}
+the1_mymr_shp4326_admin1_owin <- as.owin(the1_mymr_shp32646_admin1)
+```
+
+### Combine ppp and owin
+
+```{r}
+acled_ppp <- acled_ppp[the1_mymr_shp4326_admin1_owin]
+```
+
+### Rescale `m` to `km`
+
+```{r}
+acled_ppp_km <- rescale.ppp(acled_ppp,1000,'km')
+```
+
+Varying admin1 geographical boundaries — hence **adaptive bandwidth KDE:**
+
+```{r}
+kde_acled_bw_diggle <- density(
+  acled_ppp_km,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+```
+
+```{r}
+kde_acled_bw_scott <- density(
+  acled_ppp_km,
+  sigma=bw.scott,
+  edge=TRUE,
+  kernel='gaussian'
+)
+```
+
+```{r}
+kde_acled_bw_ppl <- density(
+  acled_ppp_km,
+  sigma=bw.ppl,
+  edge=TRUE,
+  kernel='gaussian'
+)
+```
+
+```{r}
+kde_acled_bw_cvl <- density(
+  acled_ppp_km,
+  sigma=bw.CvL,
+  edge=TRUE,
+  kernel='gaussian'
+)
+```
+
+```{r}
+par(mfrow=c(1,4))
+plot(kde_acled_bw_cvl)
+plot(kde_acled_bw_diggle)
+plot(kde_acled_bw_ppl)
+plot(kde_acled_bw_scott)
+```
 
 # `event_type` Exploratory Analysis by Quarter
 
