@@ -9,7 +9,7 @@ execute:
   freeze: true
 ---
 
-# Objectives
+# Objectives of THE1
 
 I will be using armed conflict [data](https://acleddata.com/data-export-tool/) of Myanmar from January 2021 to June 2024, aka Armed Conflict Location & Event Data (ACLED).
 
@@ -459,7 +459,7 @@ write_rds(the1_mymr_shp32646_admin1, 'data/rds/the1_mymr_shp32646_admin1.rds')
 ```
 :::
 
-# RDS Checkpoint: `event_types` sf
+## RDS Checkpoint: `event_types` sf
 
 ```{r}
 acled_sf_prepped <- read_rds('data/rds/acled_sf_prepped.rds')
@@ -475,7 +475,7 @@ acled_riot_sf     <- read_rds('data/rds/acled_riot_sf.rds')
 
 # Basemap Visualisation by `event_type`
 
-## Overview plots (from 2021-01-01 to 2024-06-31)
+## Overview plots by `event_type`
 
 ### Compute
 
@@ -703,7 +703,7 @@ for (i in seq_along(qtrs)) {
 ```
 :::
 
-### Save
+### Save as RDS
 
 ```{r}
 #| eval: false
@@ -730,46 +730,49 @@ plot_civi_list     <- read_rds('data/rds/plot_civi_list.rds')
 #### Battles
 
 ```{r}
-#| eval: false
+## | eval: false
 tmap_arrange(plot_battle_list, ncol = 4)
 ```
 
 #### Explosions/Violence
 
 ```{r}
-#| eval: false
+##| eval: false
 tmap_arrange(plot_explo_list, ncol = 4)
 ```
 
 #### Protests
 
 ```{r}
-#| eval: false
+##| eval: false
 tmap_arrange(plot_protest_list, ncol = 4)
 ```
 
 #### Riots
 
 ```{r}
-#| eval: false
+##| eval: false
 tmap_arrange(plot_riot_list, ncol = 4)
 ```
 
 #### Strategic Devs
 
 ```{r}
+##| eval: false
 tmap_arrange(plot_stratdev_list, ncol = 4)
 ```
 
 #### Violence against Civilians
 
 ```{r}
-#| eval: false
+##| eval: false
 tmap_arrange(plot_civi_list, ncol = 4)
 ```
 :::
 
-# **First-order Spatial Point Patterns Analysis**
+# **First-order Spatial Point Patterns Analysis (SPPA)**
+
+1st order SPPA deals with the variation of intensity (density) of points in a study area. In this context, I will be visualising the variation in the density of each `event_type` instances across the `admin 1` (state/region) boundaries.
 
 ## Overview KDEs
 
@@ -856,7 +859,9 @@ plot(kde_acled_bw_scott)
 >
 > -   Smoother plots might help with observing overall trends across quarterly `event_type` data, hence I will opt to use `bw_scott`
 
-## Quarterly KDEs (excluding Riots)
+## Quarterly KDE layers (excluding Riots)
+
+### Compute
 
 ::: panel-tabset
 #### Battles
@@ -1080,7 +1085,7 @@ for (quarter in quarters) {
 ```
 :::
 
-### Another RDS Checkpoint: KDE Layers
+### Save as RDS
 
 ```{r}
 #| eval: false
@@ -1115,6 +1120,8 @@ kde_protest_list  <- read_rds('data/rds/kde_protest_list.rds')
 kde_stratdev_list <- read_rds('data/rds/kde_stratdev_list.rds')
 kde_civi_list     <- read_rds('data/rds/kde_civi_list.rds')
 ```
+
+### Visualise
 
 ::: panel-tabset
 #### Battles
@@ -1302,6 +1309,317 @@ combined_plot
 ```
 :::
 
-## **Nearest Neighbour Analysis (TBD)**
+> Note:
+>
+> KDEs have different scales; probably related to how this visualisation is supposed to be under under Spatial Temporal analysis.
 
-# **Second-order Spatial Point Patterns Analysis**
+# Second-order Spatial Point Patterns Analysis
+
+Now, after studying the variation of point density, I will be studying the **spatial relationship between points**, to see if it clustered, dispersed or completely random (complete spatial randomness, CSR) at different distances. In order to do that, I will be using G-, F-, K-, and L-Functions for each `event_type`
+
+## Set Seed
+
+```{r}
+set.seed(69)
+```
+
+Get `event_type` `ppp` objects
+
+```{r}
+# rather simple to obtain so doesnt warrant converting to rds files
+acled_battle_ppp <- as.ppp(acled_battle_sf)
+acled_explo_ppp <- as.ppp(acled_explo_sf)
+acled_protest_ppp <- as.ppp(acled_protest_sf)
+acled_stratdev_ppp <- as.ppp(acled_stratdev_sf)
+acled_civi_ppp <- as.ppp(acled_civi_sf)
+```
+
+## G-Function (Nearest Neighbor Distance)
+
+::: panel-tabset
+### Battles
+
+**Computing G-function estimation**
+
+```{r}
+G_battles <- Gest(acled_battle_ppp, correction = "border")
+plot(G_battles, xlim=c(0,500))
+```
+
+**Performing CSR Test**
+
+```{r}
+G_battles.csr <- envelope(acled_battle_ppp, Gest, nsim = 39)
+plot(G_battles.csr)
+```
+
+### Explosions/Violence
+
+```{r}
+G_explo <- Gest(acled_explo_ppp, correction = "border")
+plot(G_explo, xlim=c(0,500))
+```
+
+```{r}
+G_explo.csr <- envelope(acled_explo_ppp, Gest, nsim = 39)
+plot(G_explo.csr)
+```
+
+### Protests
+
+```{r}
+G_protest <- Gest(acled_protest_ppp, correction = "border")
+plot(G_protest, xlim=c(0,500))
+```
+
+```{r}
+# G_protest.csr <- envelope(acled_protest_ppp, Gest, nsim = 39)
+# plot(G_protest.csr)
+```
+
+### Strategic Devs
+
+```{r}
+G_stratdev <- Gest(acled_stratdev_ppp, correction = "border")
+plot(G_stratdev, xlim=c(0,500))
+```
+
+```{r}
+G_stratdev.csr <- envelope(acled_stratdev_ppp, Gest, nsim = 39)
+plot(G_stratdev.csr)
+```
+
+### Violence against Civilians
+
+```{r}
+G_civi <- Gest(acled_civi_ppp, correction = "border")
+plot(G_civi, xlim=c(0,500))
+```
+
+```{r}
+G_civi.csr <- envelope(acled_civi_ppp, Gest, nsim = 39)
+plot(G_civi.csr)
+```
+
+### Conclusion
+
+All plots strongly indicate clustering of events of every type (above the CSR line)
+:::
+
+## F-Function (Empty Space Function)
+
+::: panel-tabset
+### Battles
+
+**Computing F-function estimation**
+
+```{r}
+F_battles <- Fest(acled_battle_ppp)
+plot(F_battles)
+```
+
+**Performing CSR Test**
+
+```{r}
+F_battles.csr <- envelope(acled_battle_ppp, Fest, nsim = 39)
+plot(F_battles.csr)
+```
+
+### Explosions/Violence
+
+```{r}
+F_explo <- Fest(acled_explo_ppp)
+plot(F_explo)
+```
+
+```{r}
+F_explo.csr <- envelope(acled_explo_ppp, Fest, nsim = 39)
+plot(F_explo.csr)
+```
+
+### Protests
+
+```{r}
+F_protest <- Fest(acled_protest_ppp)
+plot(F_protest)
+```
+
+```{r}
+F_protest.csr <- envelope(acled_protest_ppp, Fest, nsim = 39)
+plot(F_protest.csr)
+```
+
+### Strategic Devs
+
+```{r}
+F_stratdev <- Fest(acled_stratdev_ppp)
+plot(F_stratdev)
+```
+
+```{r}
+F_stratdev.csr <- envelope(acled_stratdev_ppp, Fest, nsim = 39)
+plot(F_stratdev.csr)
+```
+
+### Violence against Civilians
+
+```{r}
+F_civi <- Fest(acled_civi_ppp)
+plot(F_civi)
+```
+
+```{r}
+F_civi.csr <- envelope(acled_civi_ppp, Fest, nsim = 39)
+plot(F_civi.csr)
+```
+
+### Conclusion
+
+All plots strongly indicate a dispersed pattern, or large between-event point distances (below the CSR line)
+:::
+
+## K-Function (Ripley's K Function)
+
+::: panel-tabset
+### Battles
+
+```{r}
+K_battles = Kest(acled_battle_ppp, correction = "Ripley")
+plot(K_battles, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_battles.csr <- envelope(acled_battle_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
+plot(K_battles.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+### Explosions/Violence
+
+```{r}
+K_explo = Kest(acled_explo_ppp, correction = "Ripley")
+plot(K_explo, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_explo.csr <- envelope(acled_explo_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
+plot(K_explo.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+### Protests
+
+```{r}
+K_protest = Kest(acled_protest_ppp, correction = "Ripley")
+plot(K_protest, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_protest.csr <- envelope(acled_protest_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
+plot(K_protest.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+### Strategic Devs
+
+```{r}
+K_stratdev = Kest(acled_stratdev_ppp, correction = "Ripley")
+plot(K_stratdev, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_stratdev.csr <- envelope(acled_stratdev_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
+plot(K_stratdev.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+### Violence against Civilians
+
+```{r}
+K_civi = Kest(acled_civi_ppp, correction = "Ripley")
+plot(K_civi, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_civi.csr <- envelope(acled_civi_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
+plot(K_civi.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+### Conclusion
+
+All plots strongly indicate clustering of events at every given distance (above the CSR line)
+:::
+
+## L-Function (Besag’s L Function)
+
+::: panel-tabset
+### Battles
+
+```{r}
+L_battles = Lest(acled_battle_ppp, correction = "Ripley")
+plot(L_battles, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_battles.csr <- envelope(acled_battle_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
+plot(L_battles.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r")
+```
+
+### Explosions/Violence
+
+```{r}
+L_explo = Lest(acled_explo_ppp, correction = "Ripley")
+plot(L_explo, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_explo.csr <- envelope(acled_explo_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
+plot(L_explo.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r")
+```
+
+### Protests
+
+```{r}
+L_protest = Lest(acled_protest_ppp, correction = "Ripley")
+plot(L_protest, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_protest.csr <- envelope(acled_protest_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
+plot(L_protest.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r")
+```
+
+### Strategic Devs
+
+```{r}
+L_stratdev = Lest(acled_stratdev_ppp, correction = "Ripley")
+plot(L_stratdev, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_stratdev.csr <- envelope(acled_stratdev_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
+plot(L_stratdev.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r")
+```
+
+### Violence against Civilians
+
+```{r}
+L_civi = Lest(acled_civi_ppp, correction = "Ripley")
+plot(L_civi, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_civi.csr <- envelope(acled_civi_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
+plot(L_civi.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r")
+```
+
+### Conclusion
+
+It is odd that all CSR lines lie along x-axis (or very near it), because it means all L-functions have positive deviations from its corresponding CSR line, indicating strong spatial dependence / clustering as observed under the K-function section
+:::
