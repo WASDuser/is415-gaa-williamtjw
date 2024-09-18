@@ -53,18 +53,18 @@ These R packages will be used:
 
     -   **scrutiny**: data wrangling
 
-    -   cowplot - add-on to ggplot for higher quality figures
-
     -   [htmlwidgets](https://www.htmlwidgets.org/showcase_leaflet.html) for R - interactive visualisations (could be used for visual analytics)
 
         -   leaflet - geo-spatial mapping
 
-    -   raster: `raster()`
+    -   **raster**: `raster()`
 
-    -   terra: `writeRaster()`
+    -   **terra**: `writeRaster()`
+
+    -   **gridExtra, patchwork**: +**ggplot2** for ease of control of grid output layout
 
 ```{r}
-pacman:::p_load(sf,tidyverse,spatstat,raster,terra,janitor,skimr,lubridate,tmap) # more to be added
+pacman:::p_load(sf,tidyverse,spatstat,raster,terra,janitor,skimr,lubridate,tmap,gridExtra,patchwork) # more to be added
 ```
 
 ## ACLED
@@ -473,9 +473,305 @@ acled_civi_sf     <- read_rds('data/rds/acled_civi_sf.rds')
 acled_riot_sf     <- read_rds('data/rds/acled_riot_sf.rds')
 ```
 
-# KDEs
+# Basemap Visualisation by `event_type`
 
-## Overview
+## Overview plots (from 2021-01-01 to 2024-06-31)
+
+### Compute
+
+```{r}
+#| eval: false
+# remove(p,plot,plot_list,events,event_type, event_type_list)
+
+plot_list <- list()
+
+event_type_list <- list(
+  acled_battle_sf,
+  acled_explo_sf,
+  acled_protest_sf,
+  acled_riot_sf,
+  acled_stratdev_sf,
+  acled_civi_sf
+  )
+
+event = sort(unique(acled_sf_prepped$event_type))
+
+for (i in seq_along(event_type_list)) {
+  event_type <- event_type_list[[i]]
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+  tm_shape(event_type) +
+    tm_dots(size = 0.005) +
+  tm_layout(title = toString(event[i]))
+  plot_list[[i]] <- plot
+}
+```
+
+> Note: Append the plots to a separate list, otherwise tmap plot will not work (due to how tmap output works)
+
+### Save
+
+```{r}
+#| eval: false
+write_rds(plot_list,'data/rds/event_overview_plot_list.rds')
+```
+
+### Visualise
+
+```{r}
+event_overview_plot_list <- read_rds('data/rds/event_overview_plot_list.rds')
+tmap_arrange(event_overview_plot_list, ncol = 6)
+```
+
+## Quarterly plots
+
+### Compute Quarterly plots
+
+::: panel-tabset
+#### Battles
+
+```{r}
+#| eval: false
+# Extract unique quarters from the data
+qtrs <- unique(acled_battle_sf$quarter_period)
+
+# Create an empty list to store plots
+plot_battle_list <- list()
+
+# Loop through each unique quarter and generate plots
+for (i in seq_along(qtrs)) {
+  qtr <- qtrs[i]
+  
+  # Filter data for the current quarter
+  qtr_data <- acled_battle_sf %>% filter(quarter_period==qtr)
+  
+  # Create plot for the current quarter
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+    tm_shape(qtr_data) +
+    tm_dots(size = 0.005) +
+    tm_layout(title = toString(qtr))
+  
+  # Store the plot in the list
+  plot_battle_list[[i]] <- plot
+}
+```
+
+#### Explosions/Remote violence
+
+```{r}
+#| eval: false
+# Extract unique quarters from the data
+qtrs <- unique(acled_explo_sf$quarter_period)
+
+# Create an empty list to store plots
+plot_explo_list <- list()
+
+# Loop through each unique quarter and generate plots
+for (i in seq_along(qtrs)) {
+  qtr <- qtrs[i]
+  
+  # Filter data for the current quarter
+  qtr_data <- acled_explo_sf %>% filter(quarter_period==qtr)
+  
+  # Create plot for the current quarter
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+    tm_shape(qtr_data) +
+    tm_dots(size = 0.005) +
+    tm_layout(title = toString(qtr))
+  
+  # Store the plot in the list
+  plot_explo_list[[i]] <- plot
+}
+```
+
+#### Protests
+
+```{r}
+#| eval: false
+# Extract unique quarters from the data
+qtrs <- unique(acled_protest_sf$quarter_period)
+
+# Create an empty list to store plots
+plot_protest_list <- list()
+
+# Loop through each unique quarter and generate plots
+for (i in seq_along(qtrs)) {
+  qtr <- qtrs[i]
+  
+  # Filter data for the current quarter
+  qtr_data <- acled_protest_sf %>% filter(quarter_period==qtr)
+  
+  # Create plot for the current quarter
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+    tm_shape(qtr_data) +
+    tm_dots(size = 0.005) +
+    tm_layout(title = toString(qtr))
+  
+  # Store the plot in the list
+  plot_protest_list[[i]] <- plot
+}
+```
+
+#### Riot
+
+```{r}
+#| eval: false
+# Extract unique quarters from the data
+qtrs <- unique(acled_riot_sf$quarter_period)
+
+# Create an empty list to store plots
+plot_riot_list <- list()
+
+# Loop through each unique quarter and generate plots
+for (i in seq_along(qtrs)) {
+  qtr <- qtrs[i]
+  
+  # Filter data for the current quarter
+  qtr_data <- acled_riot_sf %>% filter(quarter_period==qtr)
+  
+  # Create plot for the current quarter
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+    tm_shape(qtr_data) +
+    tm_dots(size = 0.005) +
+    tm_layout(title = toString(qtr))
+  
+  # Store the plot in the list
+  plot_riot_list[[i]] <- plot
+}
+```
+
+#### Strategic Developments
+
+```{r}
+#| eval: false
+# Extract unique quarters from the data
+qtrs <- unique(acled_stratdev_sf$quarter_period)
+
+# Create an empty list to store plots
+plot_stratdev_list <- list()
+
+# Loop through each unique quarter and generate plots
+for (i in seq_along(qtrs)) {
+  qtr <- qtrs[i]
+  
+  # Filter data for the current quarter
+  qtr_data <- acled_stratdev_sf %>% filter(quarter_period==qtr)
+  
+  # Create plot for the current quarter
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+    tm_shape(qtr_data) +
+    tm_dots(size = 0.005) +
+    tm_layout(title = toString(qtr))
+  
+  # Store the plot in the list
+  plot_stratdev_list[[i]] <- plot
+}
+```
+
+#### Violence against Civilian
+
+```{r}
+#| eval: false
+# Extract unique quarters from the data
+qtrs <- unique(acled_civi_sf$quarter_period)
+
+# Create an empty list to store plots
+plot_civi_list <- list()
+
+# Loop through each unique quarter and generate plots
+for (i in seq_along(qtrs)) {
+  qtr <- qtrs[i]
+  
+  # Filter data for the current quarter
+  qtr_data <- acled_civi_sf %>% filter(quarter_period==qtr)
+  
+  # Create plot for the current quarter
+  plot <- tm_shape(the1_mymr_shp32646_admin1) +
+    tm_polygons() +
+    tm_shape(qtr_data) +
+    tm_dots(size = 0.005) +
+    tm_layout(title = toString(qtr))
+  
+  # Store the plot in the list
+  plot_civi_list[[i]] <- plot
+}
+```
+:::
+
+### Save
+
+```{r}
+#| eval: false
+write_rds(plot_battle_list, 'data/rds/plot_battle_list.rds')
+write_rds(plot_explo_list, 'data/rds/plot_explo_list.rds')
+write_rds(plot_protest_list, 'data/rds/plot_protest_list.rds')
+write_rds(plot_riot_list, 'data/rds/plot_riot_list.rds')
+write_rds(plot_stratdev_list, 'data/rds/plot_stratdev_list.rds')
+write_rds(plot_civi_list, 'data/rds/plot_civi_list.rds')
+```
+
+```{r}
+plot_battle_list   <- read_rds('data/rds/plot_battle_list.rds')
+plot_explo_list    <- read_rds('data/rds/plot_explo_list.rds')
+plot_protest_list  <- read_rds('data/rds/plot_protest_list.rds')
+plot_riot_list     <- read_rds('data/rds/plot_riot_list.rds')
+plot_stratdev_list <- read_rds('data/rds/plot_stratdev_list.rds')
+plot_civi_list     <- read_rds('data/rds/plot_civi_list.rds')
+```
+
+### Visualise
+
+::: panel-tabset
+#### Battles
+
+```{r}
+#| eval: false
+tmap_arrange(plot_battle_list, ncol = 4)
+```
+
+#### Explosions/Violence
+
+```{r}
+#| eval: false
+tmap_arrange(plot_explo_list, ncol = 4)
+```
+
+#### Protests
+
+```{r}
+#| eval: false
+tmap_arrange(plot_protest_list, ncol = 4)
+```
+
+#### Riots
+
+```{r}
+#| eval: false
+tmap_arrange(plot_riot_list, ncol = 4)
+```
+
+#### Strategic Devs
+
+```{r}
+tmap_arrange(plot_stratdev_list, ncol = 4)
+```
+
+#### Violence against Civilians
+
+```{r}
+#| eval: false
+tmap_arrange(plot_civi_list, ncol = 4)
+```
+:::
+
+# **First-order Spatial Point Patterns Analysis**
+
+## Overview KDEs
 
 ### Creating `ppp` object
 
@@ -504,7 +800,9 @@ acled_ppp <- acled_ppp[the1_mymr_shp4326_admin1_owin]
 acled_ppp_km <- rescale.ppp(acled_ppp,1000,'km')
 ```
 
-Varying admin1 geographical boundaries — ideal adaptive bandwidth KDE, but because of **computational limitation**, fixed BW is used**:**
+> Varying admin1 geographical boundaries — ideal adaptive bandwidth KDE, but because of **computational limitation**, fixed BW is used**:**
+
+### Compute KDEs
 
 ```{r}
 kde_acled_bw_diggle <- density(
@@ -550,7 +848,15 @@ plot(kde_acled_bw_ppl)
 plot(kde_acled_bw_scott)
 ```
 
-### Generating Quarterly KDE Layers for `event_type` 
+> Only `kde_acled_bw_cvl` and `kde_acled_bw_scott` produced discernible plots with notable differences:
+>
+> -   `kde_acled_bw_cvl` : **smoother —** provides a **cleaner** overall trend without excessive noise
+>
+> -   `kde_acled_bw_scott` : greater **detail —** capture small variations or nuances in the data
+>
+> -   Smoother plots might help with observing overall trends across quarterly `event_type` data, hence I will opt to use `bw_scott`
+
+## Quarterly KDEs (excluding Riots)
 
 ::: panel-tabset
 #### Battles
@@ -561,6 +867,7 @@ plot(kde_acled_bw_scott)
 # initialise
 quarters <- unique(acled_battle_sf$quarter_period)
 kde_battles_list <- list()
+ppp_battles_list <- list()
 
 # test
 # acled_battle_sf %>% filter(quarter_period=='2021Q1')
@@ -579,6 +886,9 @@ for (quarter in quarters) {
     # rescale to KM
     acled_battle_ppp_km_qtr <- rescale.ppp(acled_battle_ppp_qtr,1000,'km')
     
+    # Append ppp object to list
+    ppp_battles_list[[quarter]] <- acled_battle_ppp_km_qtr
+    
     # compute KDE
     kde_acled_battle_qtr_bw_cvl <- density(
       acled_battle_ppp_km_qtr,
@@ -591,11 +901,9 @@ for (quarter in quarters) {
     kde_battles_list[[quarter]] <- kde_acled_battle_qtr_bw_cvl
     print('qtr done!')
 }
-
-kde_battles_list
 ```
 
-#### Explosions/Remote violence
+#### Explosions/Violence
 
 ```{r}
 #| eval: false
@@ -603,6 +911,7 @@ kde_battles_list
 # initialise
 quarters <- unique(acled_explo_sf$quarter_period)
 kde_explo_list <- list()
+ppp_explo_list <- list()
 
 # test
 # acled_battle_sf %>% filter(quarter_period=='2021Q1')
@@ -621,6 +930,9 @@ for (quarter in quarters) {
     # rescale to KM
     acled_explo_ppp_km_qtr <- rescale.ppp(acled_explo_ppp_qtr,1000,'km')
     
+    # Append ppp object to list
+    ppp_explo_list[[quarter]] <- acled_battle_ppp_km_qtr
+    
     # compute KDE
     kde_acled_explo_qtr_bw_cvl <- density(
       acled_explo_ppp_km_qtr,
@@ -633,8 +945,6 @@ for (quarter in quarters) {
     kde_explo_list[[quarter]] <- kde_acled_explo_qtr_bw_cvl
     print('qtr done!')
 }
-
-kde_explo_list
 ```
 
 #### Protests
@@ -645,6 +955,7 @@ kde_explo_list
 # initialise
 quarters <- unique(acled_protest_sf$quarter_period)
 kde_protest_list <- list()
+ppp_protest_list <- list()
 
 # test
 # acled_battle_sf %>% filter(quarter_period=='2021Q1')
@@ -663,6 +974,9 @@ for (quarter in quarters) {
     # rescale to KM
     acled_protest_ppp_km_qtr <- rescale.ppp(acled_protest_ppp_qtr,1000,'km')
     
+    # Append ppp object to list
+    ppp_protest_list[[quarter]] <- acled_battle_ppp_km_qtr
+    
     # compute KDE
     kde_acled_protest_qtr_bw_cvl <- density(
       acled_protest_ppp_km_qtr,
@@ -675,60 +989,17 @@ for (quarter in quarters) {
     kde_protest_list[[quarter]] <- kde_acled_protest_qtr_bw_cvl
     print('qtr done!')
 }
-
-kde_protest_list
 ```
 
-#### Riots - Relatively insignificant population size
-
-```{r}
-#| eval: false
-# initialise
-quarters <- unique(acled_riot_sf$quarter_period)
-quarters
-kde_riot_list <- list()
-
-# test
-# acled_battle_sf %>% filter(quarter_period=='2021Q1')
-
-for (quarter in quarters) {
-
-    # filter quarter
-    acled_riot_sf_qtr <- acled_riot_sf %>% filter(quarter_period == quarter)
-
-    # create ppp object
-    acled_riot_ppp_qtr <- as.ppp(acled_riot_sf_qtr)
-
-    # create owin object
-    acled_riot_ppp_qtr <- acled_riot_ppp_qtr[the1_mymr_shp4326_admin1_owin]
-
-    # rescale to KM
-    acled_riot_ppp_km_qtr <- rescale.ppp(acled_riot_ppp_qtr,1000,'km')
-
-    # compute KDE
-    kde_acled_riot_qtr_bw_cvl <- density(
-      acled_riot_ppp_km_qtr,
-      sigma=bw.CvL,
-      edge=TRUE,
-      kernel='gaussian'
-    )
-
-    # Append to list
-    kde_riot_list[[quarter]] <- kde_acled_riot_qtr_bw_cvl
-    print('qtr done!')
-}
-
-kde_riot_list
-```
-
-#### Strategic Developments
+#### Strategic Devs
 
 ```{r}
 #| eval: false
 #| warning: false
 # initialise
-  quarters <- unique(acled_stratdev_sf$quarter_period)
+quarters <- unique(acled_stratdev_sf$quarter_period)
 kde_stratdev_list <- list()
+ppp_stratdev_list <- list()
 
 # test
 # acled_battle_sf %>% filter(quarter_period=='2021Q1')
@@ -747,6 +1018,9 @@ for (quarter in quarters) {
     # rescale to KM
     acled_stratdev_ppp_km_qtr <- rescale.ppp(acled_stratdev_ppp_qtr,1000,'km')
     
+    # Append ppp object to list
+    ppp_protest_list[[quarter]] <- acled_battle_ppp_km_qtr
+    
     # compute KDE
     kde_acled_stratdev_qtr_bw_cvl <- density(
       acled_stratdev_ppp_km_qtr,
@@ -759,8 +1033,6 @@ for (quarter in quarters) {
     kde_stratdev_list[[quarter]] <- kde_acled_stratdev_qtr_bw_cvl
     print('qtr done!')
 }
-
-kde_stratdev_list
 ```
 
 #### Violence against Civilians
@@ -771,6 +1043,7 @@ kde_stratdev_list
 # initialise
 quarters <- unique(acled_civi_sf$quarter_period)
 kde_civi_list <- list()
+ppp_civi_list <- list()
 
 # test
 # acled_battle_sf %>% filter(quarter_period=='2021Q1')
@@ -789,6 +1062,9 @@ for (quarter in quarters) {
     # rescale to KM
     acled_civi_ppp_km_qtr <- rescale.ppp(acled_civi_ppp_qtr,1000,'km')
     
+    # Append ppp object to list
+    ppp_protest_list[[quarter]] <- acled_battle_ppp_km_qtr
+    
     # compute KDE
     kde_acled_civi_qtr_bw_cvl <- density(
       acled_civi_ppp_km_qtr,
@@ -801,12 +1077,10 @@ for (quarter in quarters) {
     kde_civi_list[[quarter]] <- kde_acled_civi_qtr_bw_cvl
     print('qtr done!')
 }
-
-kde_civi_list
 ```
 :::
 
-# Another RDS Checkpoint: KDE Layers
+### Another RDS Checkpoint: KDE Layers
 
 ```{r}
 #| eval: false
@@ -818,6 +1092,23 @@ write_rds(kde_civi_list, 'data/rds/kde_civi_list.rds')
 ```
 
 ```{r}
+#| eval: false
+write_rds(ppp_battles_list, 'data/rds/ppp_battles_list.rds')
+write_rds(ppp_explo_list, 'data/rds/ppp_explo_list.rds')
+write_rds(ppp_protest_list, 'data/rds/ppp_protest_list.rds')
+write_rds(ppp_stratdev_list, 'data/rds/ppp_stratdev_list.rds')
+write_rds(ppp_civi_list, 'data/rds/ppp_civi_list.rds')
+```
+
+```{r}
+ppp_battles_list  <- read_rds('data/rds/kde_battles_list.rds')
+ppp_explo_list    <- read_rds('data/rds/kde_explo_list.rds')
+ppp_protest_list  <- read_rds('data/rds/kde_protest_list.rds')
+ppp_stratdev_list <- read_rds('data/rds/kde_stratdev_list.rds')
+ppp_civi_list     <- read_rds('data/rds/kde_civi_list.rds')
+```
+
+```{r}
 kde_battles_list  <- read_rds('data/rds/kde_battles_list.rds')
 kde_explo_list    <- read_rds('data/rds/kde_explo_list.rds')
 kde_protest_list  <- read_rds('data/rds/kde_protest_list.rds')
@@ -825,320 +1116,192 @@ kde_stratdev_list <- read_rds('data/rds/kde_stratdev_list.rds')
 kde_civi_list     <- read_rds('data/rds/kde_civi_list.rds')
 ```
 
-# Visualisation of Quarterly KDE layers
-
-```{r}
-tmap_mode('plot')
-```
-
-### Overview by `event_type`
-
-```{r}
-#| eval: false
-# remove(p,plot,plot_list,events,event_type, event_type_list)
-
-plot_list <- list()
-
-event_type_list <- list(
-  acled_battle_sf,
-  acled_explo_sf,
-  acled_protest_sf,
-  acled_riot_sf,
-  acled_stratdev_sf,
-  acled_civi_sf
-  )
-
-event = sort(unique(acled_sf_prepped$event_type))
-
-for (i in seq_along(event_type_list)) {
-  event_type <- event_type_list[[i]]
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-  tm_shape(event_type) +
-    tm_dots(size = 0.005) +
-  tm_layout(title = toString(event[i]))
-  plot_list[[i]] <- plot
-}
-```
-
-> Note: Append the plots to a separate list, otherwise tmap plot will not work (due to how tmap output works)
-
-```{r}
-#| eval: false
-write_rds(plot_list,'data/rds/event_overview_plot_list.rds')
-```
-
-```{r}
-event_overview_plot_list <- read_rds('data/rds/event_overview_plot_list.rds')
-tmap_arrange(event_overview_plot_list, ncol = 6)
-```
-
-> Note:
->
-> I will be **excluding Riots** from any further analysis due to overwhelmingly sparse event instances.
-
-# Quarterly Visualisation
-
-### Compute Quarterly plots
-
-::: panel-tabset
-## Battles
-
-```{r}
-#| eval: false
-# Extract unique quarters from the data
-qtrs <- unique(acled_battle_sf$quarter_period)
-
-# Create an empty list to store plots
-plot_battle_list <- list()
-
-# Loop through each unique quarter and generate plots
-for (i in seq_along(qtrs)) {
-  qtr <- qtrs[i]
-  
-  # Filter data for the current quarter
-  qtr_data <- acled_battle_sf %>% filter(quarter_period==qtr)
-  
-  # Create plot for the current quarter
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-    tm_shape(qtr_data) +
-    tm_dots(size = 0.005) +
-    tm_layout(title = toString(qtr))
-  
-  # Store the plot in the list
-  plot_battle_list[[i]] <- plot
-}
-```
-
-## Explosions/Remote violence
-
-```{r}
-#| eval: false
-# Extract unique quarters from the data
-qtrs <- unique(acled_explo_sf$quarter_period)
-
-# Create an empty list to store plots
-plot_explo_list <- list()
-
-# Loop through each unique quarter and generate plots
-for (i in seq_along(qtrs)) {
-  qtr <- qtrs[i]
-  
-  # Filter data for the current quarter
-  qtr_data <- acled_explo_sf %>% filter(quarter_period==qtr)
-  
-  # Create plot for the current quarter
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-    tm_shape(qtr_data) +
-    tm_dots(size = 0.005) +
-    tm_layout(title = toString(qtr))
-  
-  # Store the plot in the list
-  plot_explo_list[[i]] <- plot
-}
-```
-
-## Protests
-
-```{r}
-#| eval: false
-# Extract unique quarters from the data
-qtrs <- unique(acled_protest_sf$quarter_period)
-
-# Create an empty list to store plots
-plot_protest_list <- list()
-
-# Loop through each unique quarter and generate plots
-for (i in seq_along(qtrs)) {
-  qtr <- qtrs[i]
-  
-  # Filter data for the current quarter
-  qtr_data <- acled_protest_sf %>% filter(quarter_period==qtr)
-  
-  # Create plot for the current quarter
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-    tm_shape(qtr_data) +
-    tm_dots(size = 0.005) +
-    tm_layout(title = toString(qtr))
-  
-  # Store the plot in the list
-  plot_protest_list[[i]] <- plot
-}
-```
-
-## Riot
-
-```{r}
-#| eval: false
-# Extract unique quarters from the data
-qtrs <- unique(acled_riot_sf$quarter_period)
-
-# Create an empty list to store plots
-plot_riot_list <- list()
-
-# Loop through each unique quarter and generate plots
-for (i in seq_along(qtrs)) {
-  qtr <- qtrs[i]
-  
-  # Filter data for the current quarter
-  qtr_data <- acled_riot_sf %>% filter(quarter_period==qtr)
-  
-  # Create plot for the current quarter
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-    tm_shape(qtr_data) +
-    tm_dots(size = 0.005) +
-    tm_layout(title = toString(qtr))
-  
-  # Store the plot in the list
-  plot_riot_list[[i]] <- plot
-}
-```
-
-## Strategic Developments
-
-```{r}
-#| eval: false
-# Extract unique quarters from the data
-qtrs <- unique(acled_stratdev_sf$quarter_period)
-
-# Create an empty list to store plots
-plot_stratdev_list <- list()
-
-# Loop through each unique quarter and generate plots
-for (i in seq_along(qtrs)) {
-  qtr <- qtrs[i]
-  
-  # Filter data for the current quarter
-  qtr_data <- acled_stratdev_sf %>% filter(quarter_period==qtr)
-  
-  # Create plot for the current quarter
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-    tm_shape(qtr_data) +
-    tm_dots(size = 0.005) +
-    tm_layout(title = toString(qtr))
-  
-  # Store the plot in the list
-  plot_stratdev_list[[i]] <- plot
-}
-```
-
-## Violence against Civilian
-
-```{r}
-#| eval: false
-# Extract unique quarters from the data
-qtrs <- unique(acled_civi_sf$quarter_period)
-
-# Create an empty list to store plots
-plot_civi_list <- list()
-
-# Loop through each unique quarter and generate plots
-for (i in seq_along(qtrs)) {
-  qtr <- qtrs[i]
-  
-  # Filter data for the current quarter
-  qtr_data <- acled_civi_sf %>% filter(quarter_period==qtr)
-  
-  # Create plot for the current quarter
-  plot <- tm_shape(the1_mymr_shp32646_admin1) +
-    tm_polygons() +
-    tm_shape(qtr_data) +
-    tm_dots(size = 0.005) +
-    tm_layout(title = toString(qtr))
-  
-  # Store the plot in the list
-  plot_civi_list[[i]] <- plot
-}
-```
-:::
-
-### Save plots
-
-```{r}
-#| eval: false
-write_rds(plot_battle_list, 'data/rds/plot_battle_list.rds')
-write_rds(plot_explo_list, 'data/rds/plot_explo_list.rds')
-write_rds(plot_protest_list, 'data/rds/plot_protest_list.rds')
-write_rds(plot_riot_list, 'data/rds/plot_riot_list.rds')
-write_rds(plot_stratdev_list, 'data/rds/plot_stratdev_list.rds')
-write_rds(plot_civi_list, 'data/rds/plot_civi_list.rds')
-```
-
-```{r}
-plot_battle_list   <- read_rds('data/rds/plot_battle_list.rds')
-plot_explo_list    <- read_rds('data/rds/plot_explo_list.rds')
-plot_protest_list  <- read_rds('data/rds/plot_protest_list.rds')
-plot_riot_list     <- read_rds('data/rds/plot_riot_list.rds')
-plot_stratdev_list <- read_rds('data/rds/plot_stratdev_list.rds')
-plot_civi_list     <- read_rds('data/rds/plot_civi_list.rds')
-```
-
-### Visualise plots
-
 ::: panel-tabset
 #### Battles
 
 ```{r}
-tmap_arrange(plot_battle_list, ncol = 4)
+# Create a list to store ggplot objects
+kde_plots <- list()
+
+# Loop through each KDE and create a ggplot object
+for (quarter in names(kde_battles_list)) {
+  kde_df <- as.data.frame(kde_battles_list[[quarter]])  # Convert KDE raster to data frame
+  
+  # Create a plot
+  p <- ggplot() +
+    geom_raster(aes(x, y, fill = value), data = kde_df) +
+    scale_fill_viridis_c() +
+    ggtitle(paste("KDE for", quarter)) +
+    
+    # Reduce the size of titles, legends, and axis text
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 5),               # Reduce title size
+      axis.title = element_blank(),                      # Remove axis titles
+      axis.text = element_text(size = 5),                # Minimize axis text size
+      legend.title = element_text(size = 5),             # Reduce legend title size
+      legend.text = element_text(size = 5),              # Reduce legend text size
+      legend.key.size = unit(0.3, "cm"),                 # Minimize legend key size
+      plot.margin = margin(1, 1, 1, 1, "mm")             # Minimize margins around the plot
+    )
+  
+  kde_plots[[quarter]] <- p
+}
+
+# Combine plots into a grid with 4 columns
+combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
+# Display the combined plot
+combined_plot
 ```
 
 #### Explosions/Violence
 
 ```{r}
-tmap_arrange(plot_explo_list, ncol = 4)
+# Create a list to store ggplot objects
+kde_plots <- list()
+
+# Loop through each KDE and create a ggplot object
+for (quarter in names(kde_explo_list)) {
+  kde_df <- as.data.frame(kde_explo_list[[quarter]])  # Convert KDE raster to data frame
+  
+  # Create a plot
+  p <- ggplot() +
+    geom_raster(aes(x, y, fill = value), data = kde_df) +
+    scale_fill_viridis_c() +
+    ggtitle(paste("KDE for", quarter)) +
+    
+    # Reduce the size of titles, legends, and axis text
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 5),               # Reduce title size
+      axis.title = element_blank(),                      # Remove axis titles
+      axis.text = element_text(size = 5),                # Minimize axis text size
+      legend.title = element_text(size = 5),             # Reduce legend title size
+      legend.text = element_text(size = 5),              # Reduce legend text size
+      legend.key.size = unit(0.3, "cm"),                 # Minimize legend key size
+      plot.margin = margin(1, 1, 1, 1, "mm")             # Minimize margins around the plot
+    )
+  
+  kde_plots[[quarter]] <- p
+}
+
+# Combine plots into a grid with 4 columns
+combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
+# Display the combined plot
+combined_plot
 ```
 
 #### Protests
 
 ```{r}
-tmap_arrange(plot_protest_list, ncol = 4)
-```
+# Create a list to store ggplot objects
+kde_plots <- list()
 
-#### Riots
+# Loop through each KDE and create a ggplot object
+for (quarter in names(kde_protest_list)) {
+  kde_df <- as.data.frame(kde_protest_list[[quarter]])  # Convert KDE raster to data frame
+  
+  # Create a plot
+  p <- ggplot() +
+    geom_raster(aes(x, y, fill = value), data = kde_df) +
+    scale_fill_viridis_c() +
+    ggtitle(paste("KDE for", quarter)) +
+    
+    # Reduce the size of titles, legends, and axis text
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 5),               # Reduce title size
+      axis.title = element_blank(),                      # Remove axis titles
+      axis.text = element_text(size = 5),                # Minimize axis text size
+      legend.title = element_text(size = 5),             # Reduce legend title size
+      legend.text = element_text(size = 5),              # Reduce legend text size
+      legend.key.size = unit(0.3, "cm"),                 # Minimize legend key size
+      plot.margin = margin(1, 1, 1, 1, "mm")             # Minimize margins around the plot
+    )
+  
+  kde_plots[[quarter]] <- p
+}
 
-```{r}
-tmap_arrange(plot_riot_list, ncol = 4)
+# Combine plots into a grid with 4 columns
+combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
+# Display the combined plot
+combined_plot
 ```
 
 #### Strategic Devs
 
 ```{r}
-tmap_arrange(plot_stratdev_list, ncol = 4)
+# Create a list to store ggplot objects
+kde_plots <- list()
+
+# Loop through each KDE and create a ggplot object
+for (quarter in names(kde_stratdev_list)) {
+  kde_df <- as.data.frame(kde_stratdev_list[[quarter]])  # Convert KDE raster to data frame
+  
+  # Create a plot
+  p <- ggplot() +
+    geom_raster(aes(x, y, fill = value), data = kde_df) +
+    scale_fill_viridis_c() +
+    ggtitle(paste("KDE for", quarter)) +
+    
+    # Reduce the size of titles, legends, and axis text
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 5),               # Reduce title size
+      axis.title = element_blank(),                      # Remove axis titles
+      axis.text = element_text(size = 5),                # Minimize axis text size
+      legend.title = element_text(size = 5),             # Reduce legend title size
+      legend.text = element_text(size = 5),              # Reduce legend text size
+      legend.key.size = unit(0.3, "cm"),                 # Minimize legend key size
+      plot.margin = margin(1, 1, 1, 1, "mm")             # Minimize margins around the plot
+    )
+  
+  kde_plots[[quarter]] <- p
+}
+
+# Combine plots into a grid with 4 columns
+combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
+# Display the combined plot
+combined_plot
 ```
 
 #### Violence against Civilians
 
 ```{r}
-tmap_arrange(plot_civi_list, ncol = 4)
+# Create a list to store ggplot objects
+kde_plots <- list()
+
+# Loop through each KDE and create a ggplot object
+for (quarter in names(kde_civi_list)) {
+  kde_df <- as.data.frame(kde_civi_list[[quarter]])  # Convert KDE raster to data frame
+  
+  # Create a plot
+  p <- ggplot() +
+    geom_raster(aes(x, y, fill = value), data = kde_df) +
+    scale_fill_viridis_c() +
+    ggtitle(paste("KDE for", quarter)) +
+    
+    # Reduce the size of titles, legends, and axis text
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 5),               # Reduce title size
+      axis.title = element_blank(),                      # Remove axis titles
+      axis.text = element_text(size = 5),                # Minimize axis text size
+      legend.title = element_text(size = 5),             # Reduce legend title size
+      legend.text = element_text(size = 5),              # Reduce legend text size
+      legend.key.size = unit(0.3, "cm"),                 # Minimize legend key size
+      plot.margin = margin(1, 1, 1, 1, "mm")             # Minimize margins around the plot
+    )
+  
+  kde_plots[[quarter]] <- p
+}
+# Combine plots into a grid with 4 columns
+combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
+# Display the combined plot
+combined_plot
 ```
 :::
 
-```{r}
-# 
-# for (quarter in names(kde_battles_list)) {
-#     plot(kde_battles_list[[quarter]], main = paste("KDE for", quarter))
-# }
-# 
-# for (quarter in names(kde_explo_list)) {
-#     plot(kde_explo_list[[quarter]], main = paste("KDE for", quarter))
-# }
-# 
-# for (quarter in names(kde_protest_list)) {
-#     plot(kde_protest_list[[quarter]], main = paste("KDE for", quarter))
-# }
-# 
-# for (quarter in names(kde_stratdev_list)) {
-#     plot(kde_stratdev_list[[quarter]], main = paste("KDE for", quarter))
-# }
-# 
-# for (quarter in names(kde_civi_list)) {
-#     plot(kde_civi_list[[quarter]], main = paste("KDE for", quarter))
-# }
-```
+## **Nearest Neighbour Analysis (TBD)**
 
-For other data export instructions, visit the link [here](https://acleddata.com/data-export-tool/).
+# **Second-order Spatial Point Patterns Analysis**
