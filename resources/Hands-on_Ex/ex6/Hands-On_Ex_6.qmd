@@ -1,0 +1,10 @@
+---
+title: "Hands-On Exercise 6: Spatial Weights & Applications"
+author: "William"
+date: "September 20, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
