@@ -43,6 +43,8 @@ These R packages will be used:
 
 -   **lubridate**: date formatting
 
+-   **sparr** : Spatio-temporal analysis
+
 -   **Extra (TBD):**
 
     -   **janitor**: data cleaning
@@ -51,20 +53,16 @@ These R packages will be used:
 
     -   **skimr**: provide summary statistics
 
-    -   **scrutiny**: data wrangling
-
-    -   [htmlwidgets](https://www.htmlwidgets.org/showcase_leaflet.html) for R - interactive visualisations (could be used for visual analytics)
-
-        -   leaflet - geo-spatial mapping
-
     -   **raster**: `raster()`
 
     -   **terra**: `writeRaster()`
 
     -   **gridExtra, patchwork**: +**ggplot2** for ease of control of grid output layout
 
+    -   **gganimate + gifski**: animated STKDE output
+
 ```{r}
-pacman:::p_load(sf,tidyverse,spatstat,raster,terra,janitor,skimr,lubridate,tmap,gridExtra,patchwork) # more to be added
+pacman:::p_load(sf,tidyverse,sparr,spatstat,raster,terra,janitor,skimr,lubridate,tmap,gridExtra,patchwork,gganimate) # more to be added
 ```
 
 ## ACLED
@@ -195,7 +193,7 @@ plot(the1_mymr_shp4326_admin0$geometry)
 ### admin 1
 
 ```{r}
-#| eval: false
+
 the1_mymr_shp4326_admin1 <- st_read(dsn = 'data/gadm41_MMR_1/', layer = 'gadm41_MMR_1')
 ```
 
@@ -355,7 +353,7 @@ st_crs(the1_mymr_shp4326_admin1) # last line: ID["EPSG",4326]]
 ```
 
 ```{r}
-#| eval: false
+
 the1_mymr_shp32646_admin1 <- the1_mymr_shp4326_admin1 %>% 
   st_transform(crs = 32646)
 st_crs(the1_mymr_shp32646_admin1) # now should be: ID["EPSG",32646]]
@@ -384,7 +382,8 @@ acled_sf_prepped <- acled_sf %>%
     
     # concatenate
     quarter_period = paste(year,'Q', quarter_num, sep = '')
-  )
+  ) %>% 
+  ungroup()
 ```
 
 > Note: Unix timestamps count the number of seconds since the Unix epoch (January 1st, 1970 at UTC)
@@ -404,7 +403,7 @@ acled_sf_prepped
 ### Boundary shapefile
 
 ```{r}
-#| eval: false
+# | eval: false
 the1_mymr_shp32646_admin1
 ```
 
@@ -422,27 +421,28 @@ the1_mymr_shp32646_admin1
 
 acled_stratdev_sf <- acled_sf_prepped %>% 
   filter(event_type=='Strategic developments') %>% 
-  select(1,33,30)
+  dplyr::select(1,33,30,3,32) 
+# if i did not specify dplyr unknown error pops: Error: unable to find an inherited method for function ‘select’ for signature ‘x = "sf"’
 
 acled_explo_sf <- acled_sf_prepped %>% 
   filter(event_type=='Explosions/Remote violence') %>% 
-  select(1,33,30)
+  dplyr::select(1,33,30,3,32)
 
 acled_battle_sf <- acled_sf_prepped %>% 
   filter(event_type=='Battles') %>% 
-  select(1,33,30)
+  dplyr::select(1,33,30,3,32)
 
 acled_protest_sf <- acled_sf_prepped %>% 
   filter(event_type=='Protests') %>% 
-  select(1,33,30)
+  dplyr::select(1,33,30,3,32)
 
 acled_civi_sf <- acled_sf_prepped %>% 
   filter(event_type=='Violence against civilians') %>% 
-  select(1,33,30)
+  dplyr::select(1,33,30,3,32)
 
 acled_riot_sf <- acled_sf_prepped %>% 
   filter(event_type=='Riots') %>% 
-  select(1,33,30)
+  dplyr::select(1,33,30,3,32)
 
 write_rds(acled_stratdev_sf, 'data/rds/acled_stratdev_sf.rds')
 write_rds(acled_explo_sf, 'data/rds/acled_explo_sf.rds')
@@ -1326,6 +1326,7 @@ set.seed(69)
 Get `event_type` `ppp` objects
 
 ```{r}
+#| warning: false
 # rather simple to obtain so doesnt warrant converting to rds files
 acled_battle_ppp <- as.ppp(acled_battle_sf)
 acled_explo_ppp <- as.ppp(acled_explo_sf)
@@ -1622,4 +1623,444 @@ plot(L_civi.csr, . - r ~ r,
 ### Conclusion
 
 It is odd that all CSR lines lie along x-axis (or very near it), because it means all L-functions have positive deviations from its corresponding CSR line, indicating strong spatial dependence / clustering as observed under the K-function section
+:::
+
+# Spatio-Temporal Point Patterns Analysis (STPPA)
+
+I will be using BOOT.spattemp() to optimise the spatial bandwidth and the scalar temporal bandwidth, to avoid having sparse data in the quarterly STKDEs.
+
+In this case, because the previous KDEs seem to indicate that events tend to occur in a spatially concentrated manner, I opt to use the event-specific OWIN object for the STKDE computation to find out if theres also a temporal pattern within each event.
+
+::: panel-tabset
+### Battle
+
+**Compute**
+
+```{r}
+# runtime: <30s
+
+# initialise variables
+stkde_battle_results <- list()
+qtr <- c(1,2,3,4)
+years <- unique(acled_battle_sf$year)
+
+# loop thru by year then then quarter
+for (yr in years){
+    temp_sf <- acled_battle_sf %>% filter(year==yr)
+    
+    # incase there's no data in the year (unlikely though)
+    if (nrow(temp_sf) == 0) next
+    
+    temp_ppp <- temp_sf %>% dplyr::select(quarter_num) %>% as.ppp()
+    temp_ppp <- temp_ppp[the1_mymr_shp4326_admin1_owin]
+    temp_stkde <- spattemp.density(temp_ppp)
+
+    for (q in qtr){
+      # terminate condition
+      if (yr == 2024 & q > 3) {
+        break
+      }
+      # Extracting density values from `temp_stkde`
+      density_matrix <- temp_stkde$z[[q]]$v  # 'v'   : density 
+      x_vals <- temp_stkde$z[[q]]$xcol       # 'xcol': x-coordinates
+      y_vals <- temp_stkde$z[[q]]$yrow       # 'yrow': y-coordinates
+      
+      # vector-ise matrices to convert to dataframe
+      density_df <- expand.grid(x = x_vals, y = y_vals)
+      density_df$density <- as.vector(density_matrix)
+      
+      stkde_battle_results[[paste(yr, q, sep = 'Q')]] <- data.frame(
+        x = density_df$x, 
+        y = density_df$y, 
+        density = density_df$density, 
+        year = yr, 
+        quarter = q
+    )
+    }
+}
+```
+
+**Configure Visualisation**
+
+```{r}
+# runtime: <30s
+# Combine the results into one data frame
+stkde_battle_combined <- do.call(rbind, stkde_battle_results)
+
+
+# Create a ggplot and animate over the 'year' and 'quarter'
+battle_anime <- ggplot(stkde_battle_combined, aes(x = y, y = x, fill = density)) + # flip axes
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  
+  theme(aspect.ratio = 3) +  # Adjust this value to stretch vertically
+
+  labs(title = 'Spatio-Temporal Kernel Density Estimation', subtitle = 'Year: {closest_state}') +
+  coord_fixed() +
+  transition_states(paste(year, quarter, sep = "Q"), state_length = 1) +
+  ease_aes('linear')
+
+# save 
+battle_animation <- animate(battle_anime, duration = 10, renderer = gifski_renderer())
+anim_save(
+  filename = 'battle_animation.gif',
+  animation = battle_animation, 
+  path = 'animation/battle/')
+```
+
+**Output GIF**
+
+![](animation/battle/battle_animation.gif){width="600"}
+
+![]()
+
+> Note:
+>
+> After the first render, set `eval: false` for the "Compute" and "Configure Visualisation", otherwise a new GIF will be created, replacing the previous one.
+>
+> Current workaround: delete the previous GIF so that the new one will be referenced successfully.
+>
+> For the following `event_types` , I encountered a 'sparse data' error so I played around with different spatial bandwidths (bw.diggle, bw.ppl), different temporal bandwidths (90 for quarter; 365 for a year).
+
+### Explosion/Violence
+
+**Compute**
+
+```{r}
+# runtime: <5min
+
+# initialise variables
+stkde_explo_results <- list()
+qtr <- c(1,2,3,4)
+years <- unique(acled_explo_sf$year)
+
+# loop thru by year then then quarter
+for (yr in years){
+    temp_sf <- acled_explo_sf %>% filter(year==yr)
+    
+    # incase there's no data in the year (unlikely though)
+    if (nrow(temp_sf) == 0) next
+    
+    temp_ppp <- temp_sf %>% dplyr::select(quarter_num) %>% as.ppp()
+    temp_ppp <- temp_ppp[the1_mymr_shp4326_admin1_owin]
+    temp_stkde <- spattemp.density(
+      temp_ppp,
+      # h = bw.diggle(temp_ppp), # conflict events are concentrated in some regions
+      h = 5*bw.ppl(temp_ppp), # larger, more generalised bandwidth
+      lambda = 90
+    )
+    
+    for (q in qtr){
+      # terminate condition
+      if (yr == 2024 & q > 3) {
+        break
+      }
+      # Extracting density values from `temp_stkde`
+      density_matrix <- temp_stkde$z[[q]]$v  # 'v'   : density 
+      x_vals <- temp_stkde$z[[q]]$xcol       # 'xcol': x-coordinates
+      y_vals <- temp_stkde$z[[q]]$yrow       # 'yrow': y-coordinates
+      
+      # vector-ise matrices to convert to dataframe
+      density_df <- expand.grid(x = x_vals, y = y_vals)
+      density_df$density <- as.vector(density_matrix)
+      
+      stkde_explo_results[[paste(yr, q, sep = 'Q')]] <- data.frame(
+        x = density_df$x, 
+        y = density_df$y, 
+        density = density_df$density, 
+        year = yr, 
+        quarter = q
+    )
+    }
+}
+```
+
+**Configure Visualisation**
+
+```{r}
+# runtime: <30s
+# Combine the results into one data frame
+stkde_explo_combined <- do.call(rbind, stkde_explo_results)
+
+
+# Create a ggplot and animate over the 'year' and 'quarter'
+explo_anime <- ggplot(stkde_explo_combined, aes(x = y, y = x, fill = density)) + # flip axes
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  
+  theme(aspect.ratio = 3) +  # Adjust this value to stretch vertically
+
+  labs(title = 'Spatio-Temporal Kernel Density Estimation', subtitle = 'Year: {closest_state}') +
+  coord_fixed() +
+  transition_states(paste(year, quarter, sep = "Q"), state_length = 1) +
+  ease_aes('linear')
+
+# save 
+explo_animation <- animate(explo_anime, duration = 10, renderer = gifski_renderer())
+anim_save(
+  filename = 'explo_animation.gif',
+  animation = explo_animation, 
+  path = 'animation/explosion_violence/')
+```
+
+**Output GIF**
+
+![](animation/explosion_violence/explo_animation.gif){width="600"}
+
+### Protests
+
+**Compute**
+
+```{r}
+# runtime: <10min
+
+# initialise variables
+stkde_protest_results <- list()
+qtr <- c(1,2,3,4)
+years <- unique(acled_protest_sf$year)
+
+# loop thru by year then then quarter
+for (yr in years){
+    temp_sf <- acled_protest_sf %>% filter(year==yr)
+    
+    # incase there's no data in the year (unlikely though)
+    if (nrow(temp_sf) == 0) next
+    
+    temp_ppp <- temp_sf %>% dplyr::select(quarter_num) %>% as.ppp()
+    temp_ppp <- temp_ppp[the1_mymr_shp4326_admin1_owin]
+    temp_stkde <- spattemp.density(
+      temp_ppp,
+      h = 5*bw.ppl(temp_ppp), 
+      lambda = 90
+      )
+
+    for (q in qtr){
+      # terminate condition
+      if (yr == 2024 & q > 3) {
+        break
+      }
+      # Extracting density values from `temp_stkde`
+      density_matrix <- temp_stkde$z[[q]]$v  # 'v'   : density 
+      x_vals <- temp_stkde$z[[q]]$xcol       # 'xcol': x-coordinates
+      y_vals <- temp_stkde$z[[q]]$yrow       # 'yrow': y-coordinates
+      
+      # vector-ise matrices to convert to dataframe
+      density_df <- expand.grid(x = x_vals, y = y_vals)
+      density_df$density <- as.vector(density_matrix)
+      
+      stkde_protest_results[[paste(yr, q, sep = 'Q')]] <- data.frame(
+        x = density_df$x, 
+        y = density_df$y, 
+        density = density_df$density, 
+        year = yr, 
+        quarter = q
+    )
+    }
+}
+```
+
+**Configure Visualisation**
+
+```{r}
+# runtime: <30s
+# Combine the results into one data frame
+stkde_protest_combined <- do.call(rbind, stkde_protest_results)
+
+
+# Create a ggplot and animate over the 'year' and 'quarter'
+protest_anime <- ggplot(stkde_protest_combined, aes(x = y, y = x, fill = density)) + # flip axes
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  
+  theme(aspect.ratio = 3) +  # Adjust this value to stretch vertically
+
+  labs(title = 'Spatio-Temporal Kernel Density Estimation', subtitle = 'Year: {closest_state}') +
+  coord_fixed() +
+  transition_states(paste(year, quarter, sep = "Q"), state_length = 1) +
+  ease_aes('linear')
+
+# save 
+protest_animation <- animate(protest_anime, duration = 10, renderer = gifski_renderer())
+anim_save(
+  filename = 'protest_animation.gif',
+  animation = protest_animation, 
+  path = 'animation/protests/')
+```
+
+**Output GIF**
+
+![](animation/protests/protest_animation.gif){width="600"}
+
+### Strategic Developments
+
+**Compute**
+
+```{r}
+# runtime: <5mins
+
+# initialise variables
+stkde_stratdev_results <- list()
+qtr <- c(1,2,3,4)
+years <- unique(acled_stratdev_sf$year)
+
+# loop thru by year then then quarter
+for (yr in years){
+    temp_sf <- acled_stratdev_sf %>% filter(year==yr)
+    
+    # incase there's no data in the year (unlikely though)
+    if (nrow(temp_sf) == 0) next
+    
+    temp_ppp <- temp_sf %>% dplyr::select(quarter_num) %>% as.ppp()
+    temp_ppp <- temp_ppp[the1_mymr_shp4326_admin1_owin]
+    temp_stkde <- spattemp.density(
+      temp_ppp,
+      h = 5*bw.ppl(temp_ppp), 
+      lambda = 90
+      )
+    
+    for (q in qtr){
+      # terminate condition
+      if (yr == 2024 & q > 3) {
+        break
+      }
+      # Extracting density values from `temp_stkde`
+      density_matrix <- temp_stkde$z[[q]]$v  # 'v'   : density 
+      x_vals <- temp_stkde$z[[q]]$xcol       # 'xcol': x-coordinates
+      y_vals <- temp_stkde$z[[q]]$yrow       # 'yrow': y-coordinates
+      
+      # vector-ise matrices to convert to dataframe
+      density_df <- expand.grid(x = x_vals, y = y_vals)
+      density_df$density <- as.vector(density_matrix)
+      
+      stkde_stratdev_results[[paste(yr, q, sep = 'Q')]] <- data.frame(
+        x = density_df$x, 
+        y = density_df$y, 
+        density = density_df$density, 
+        year = yr, 
+        quarter = q
+    )
+    }
+}
+```
+
+**Configure Visualisation**
+
+```{r}
+# runtime: <30s
+# Combine the results into one data frame
+stkde_stratdev_combined <- do.call(rbind, stkde_stratdev_results)
+
+
+# Create a ggplot and animate over the 'year' and 'quarter'
+stratdev_anime <- ggplot(stkde_stratdev_combined, aes(x = y, y = x, fill = density)) + # flip axes
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  
+  theme(aspect.ratio = 3) +  # Adjust this value to stretch vertically
+
+  labs(title = 'Spatio-Temporal Kernel Density Estimation', subtitle = 'Year: {closest_state}') +
+  coord_fixed() +
+  transition_states(paste(year, quarter, sep = "Q"), state_length = 1) +
+  ease_aes('linear')
+
+# save 
+stratdev_animation <- animate(stratdev_anime, duration = 10, renderer = gifski_renderer())
+anim_save(
+  filename = 'stratdev_animation.gif',
+  animation = stratdev_animation, 
+  path = 'animation/strategic_development/')
+```
+
+**Output GIF**
+
+![](animation/strategic_development/stratdev_animation.gif){width="600"}
+
+### Violence against Civilians
+
+**Compute**
+
+```{r}
+# runtime: <5mins
+
+# initialise variables
+stkde_civi_results <- list()
+qtr <- c(1,2,3,4)
+years <- unique(acled_civi_sf$year)
+
+# loop thru by year then then quarter
+for (yr in years){
+    temp_sf <- acled_civi_sf %>% filter(year==yr)
+    
+    # incase there's no data in the year (unlikely though)
+    if (nrow(temp_sf) == 0) next
+    
+    temp_ppp <- temp_sf %>% dplyr::select(quarter_num) %>% as.ppp()
+    temp_ppp <- temp_ppp[the1_mymr_shp4326_admin1_owin]
+    temp_stkde <- spattemp.density(
+      temp_ppp,
+      h = 5*bw.ppl(temp_ppp), # raised the multiplier for fun -- turned out to have most balance
+      lambda = 90
+      )
+    
+    for (q in qtr){
+      # terminate condition
+      if (yr == 2024 & q > 3) {
+        break
+      }
+      # Extracting density values from `temp_stkde`
+      density_matrix <- temp_stkde$z[[q]]$v  # 'v'   : density 
+      x_vals <- temp_stkde$z[[q]]$xcol       # 'xcol': x-coordinates
+      y_vals <- temp_stkde$z[[q]]$yrow       # 'yrow': y-coordinates
+      
+      # vector-ise matrices to convert to dataframe
+      density_df <- expand.grid(x = x_vals, y = y_vals)
+      density_df$density <- as.vector(density_matrix)
+      
+      stkde_civi_results[[paste(yr, q, sep = 'Q')]] <- data.frame(
+        x = density_df$x, 
+        y = density_df$y, 
+        density = density_df$density, 
+        year = yr, 
+        quarter = q
+    )
+    }
+}
+```
+
+**Configure Visualisation**
+
+```{r}
+# runtime: <30s
+# Combine the results into one data frame
+stkde_civi_combined <- do.call(rbind, stkde_civi_results)
+
+
+# Create a ggplot and animate over the 'year' and 'quarter'
+civi_anime <- ggplot(stkde_civi_combined, aes(x = y, y = x, fill = density)) + # flip axes
+  geom_tile() +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  
+  theme(aspect.ratio = 3) +  # Adjust this value to stretch vertically
+
+  labs(title = 'Spatio-Temporal Kernel Density Estimation', subtitle = 'Year: {closest_state}') +
+  coord_fixed() +
+  transition_states(paste(year, quarter, sep = "Q"), state_length = 1) +
+  ease_aes('linear')
+
+# save 
+civi_animation <- animate(civi_anime, duration = 10, renderer = gifski_renderer())
+anim_save(
+  filename = 'civi_animation.gif',
+  animation = civi_animation, 
+  path = 'animation/violence_against_civi/')
+```
+
+**Output GIF**
+
+![](animation/violence_against_civi/civi_animation.gif){width="600"}
 :::
