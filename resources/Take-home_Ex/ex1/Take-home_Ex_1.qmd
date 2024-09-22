@@ -13,17 +13,7 @@ execute:
 
 I will be using armed conflict [data](https://acleddata.com/data-export-tool/) of Myanmar from January 2021 to June 2024, aka Armed Conflict Location & Event Data (ACLED).
 
-I will be focusing on thsese main event types:
-
--   Battles,
-
--   Explosion/Remote violence,
-
--   Strategic developments, and
-
--   Violence against civilians.
-
-Along the way, I will be exploring the use of different functions to obtain more aesthetically pleasing outputs for fun.
+Along the way, I will be exploring the use of different functions to obtain more aesthetically pleasing outputs for fun, and documenting my findings and conclusion as and when needed.
 
 # Data
 
@@ -49,8 +39,6 @@ These R packages will be used:
 
     -   **janitor**: data cleaning
 
-    -   **lubridate**: date formatting
-
     -   **skimr**: provide summary statistics
 
     -   **raster**: `raster()`
@@ -62,7 +50,7 @@ These R packages will be used:
     -   **gganimate + gifski**: animated STKDE output
 
 ```{r}
-pacman:::p_load(sf,tidyverse,sparr,spatstat,raster,terra,janitor,skimr,lubridate,tmap,gridExtra,patchwork,gganimate) # more to be added
+pacman:::p_load(sf,tidyverse,sparr,spatstat,stpp,raster,terra,janitor,skimr,lubridate,tmap,gridExtra,patchwork,gganimate,gifski)
 ```
 
 ## ACLED
@@ -730,42 +718,42 @@ plot_civi_list     <- read_rds('data/rds/plot_civi_list.rds')
 #### Battles
 
 ```{r}
-## | eval: false
+# | eval: false
 tmap_arrange(plot_battle_list, ncol = 4)
 ```
 
 #### Explosions/Violence
 
 ```{r}
-##| eval: false
+#| eval: false
 tmap_arrange(plot_explo_list, ncol = 4)
 ```
 
 #### Protests
 
 ```{r}
-##| eval: false
+#| eval: false
 tmap_arrange(plot_protest_list, ncol = 4)
 ```
 
 #### Riots
 
 ```{r}
-##| eval: false
+#| eval: false
 tmap_arrange(plot_riot_list, ncol = 4)
 ```
 
 #### Strategic Devs
 
 ```{r}
-##| eval: false
+#| eval: false
 tmap_arrange(plot_stratdev_list, ncol = 4)
 ```
 
 #### Violence against Civilians
 
 ```{r}
-##| eval: false
+#| eval: false
 tmap_arrange(plot_civi_list, ncol = 4)
 ```
 :::
@@ -807,6 +795,8 @@ acled_ppp_km <- rescale.ppp(acled_ppp,1000,'km')
 
 ### Compute KDEs
 
+#### Big Picture KDEs
+
 ```{r}
 kde_acled_bw_diggle <- density(
   acled_ppp_km,
@@ -831,7 +821,7 @@ kde_acled_bw_ppl <- density(
   sigma=bw.ppl,
   edge=TRUE,
   kernel='gaussian'
-)
+)# choosing this
 ```
 
 ```{r}
@@ -840,7 +830,7 @@ kde_acled_bw_cvl <- density(
   sigma=bw.CvL,
   edge=TRUE,
   kernel='gaussian'
-) # choosing this
+)
 ```
 
 ```{r}
@@ -858,6 +848,356 @@ plot(kde_acled_bw_scott)
 > -   `kde_acled_bw_scott` : greater **detail —** capture small variations or nuances in the data
 >
 > -   Smoother plots might help with observing overall trends across quarterly `event_type` data, hence I will opt to use `bw_scott`
+
+```{r}
+table(acled_sf_prepped$admin1) %>% sort(decreasing = TRUE)
+```
+
+> From `kde_acled_bw_cvl` and `kde_acled_bw_scott` plots and the table counts of admin1, the 2 most apparent event clusters are situated at/in the **Sagaing-Mandalay city areas and Yangon city.**
+
+#### `event_type` KDEs
+
+```{r}
+#| warning: false
+#| eval: false
+# rather simple to obtain so doesnt warrant converting to rds files
+acled_battle_ppp <- as.ppp(acled_battle_sf)
+acled_explo_ppp <- as.ppp(acled_explo_sf)
+acled_protest_ppp <- as.ppp(acled_protest_sf)
+acled_stratdev_ppp <- as.ppp(acled_stratdev_sf)
+acled_civi_ppp <- as.ppp(acled_civi_sf)
+```
+
+```{r}
+#| eval: false
+acled_battle_ppp   <- acled_battle_ppp[the1_mymr_shp4326_admin1_owin]
+acled_explo_ppp    <- acled_explo_ppp[the1_mymr_shp4326_admin1_owin]
+acled_protest_ppp  <- acled_protest_ppp[the1_mymr_shp4326_admin1_owin]
+acled_stratdev_ppp <- acled_stratdev_ppp[the1_mymr_shp4326_admin1_owin]
+acled_civi_ppp     <- acled_civi_ppp[the1_mymr_shp4326_admin1_owin]
+```
+
+```{r}
+#| eval: false
+write_rds(acled_battle_ppp, 'data/rds/acled_battle_ppp.rds')
+write_rds(acled_explo_ppp, 'data/rds/acled_explo_ppp.rds')
+write_rds(acled_protest_ppp, 'data/rds/acled_protest_ppp.rds')
+write_rds(acled_stratdev_ppp, 'data/rds/acled_stratdev_ppp.rds')
+write_rds(acled_civi_ppp, 'data/rds/acled_civi_ppp.rds')
+```
+
+```{r}
+acled_battle_ppp   <- read_rds('data/rds/acled_battle_ppp.rds')
+acled_explo_ppp    <- read_rds('data/rds/acled_explo_ppp.rds')
+acled_protest_ppp  <- read_rds('data/rds/acled_protest_ppp.rds')
+acled_stratdev_ppp <- read_rds('data/rds/acled_stratdev_ppp.rds')
+acled_civi_ppp     <- read_rds('data/rds/acled_civi_ppp.rds')
+```
+
+Even though only bw.CvL and bw.scout results in discernible plots, I will explore the use of the other 2 (diggle and ppl) bandwidths to be thorough.
+
+## Battles
+
+::: panel-tabset
+### bw.CvL
+
+```{r}
+kde_battle_cvl <- density(
+  acled_battle_ppp,
+  sigma=bw.CvL,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_battle_cvl)
+```
+
+### bw.scott
+
+```{r}
+kde_battle_scott <- density(
+  acled_battle_ppp,
+  sigma=bw.scott,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_battle_scott)
+```
+
+### bw.diggle
+
+```{r}
+kde_battle_diggle <- density(
+  acled_battle_ppp,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_battle_diggle)
+```
+
+### bw.ppl
+
+```{r}
+kde_battle_ppl <- density(
+  acled_battle_ppp,
+  sigma=bw.ppl,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_battle_ppl)
+```
+:::
+
+```{r}
+# in hindsight i should have included admin1 in the prepped dataset, but future me did not realise until the last minute
+table((acled_sf_prepped %>% filter(event_type=="Battles"))$admin1) %>% sort(decreasing = TRUE)
+```
+
+> KDE Plots, verified with the above table counts, depict significant clusters of battles at **Sagaing-Magway areas**, **Shan-North, Kachin** and the near the start of Myanmar's 'tail' at **Kayin**
+>
+> Both `bw.CvL` and `bw.scott` yielded comparable plots in terms of smoothness but `bw.scott` is better in detail (more distinct clusters, less over-smoothing)
+
+## Explosions/Remote violence
+
+::: panel-tabset
+### bw.CvL
+
+```{r}
+kde_explo_cvl <- density(
+  acled_explo_ppp,
+  sigma=bw.CvL,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_explo_cvl)
+```
+
+### bw.scott
+
+```{r}
+kde_explo_scott <- density(
+  acled_explo_ppp,
+  sigma=bw.scott,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_explo_scott)
+```
+
+### bw.diggle
+
+```{r}
+kde_explo_diggle <- density(
+  acled_explo_ppp,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_explo_diggle)
+```
+
+### bw.ppl
+
+```{r}
+kde_explo_ppl <- density(
+  acled_explo_ppp,
+  sigma=bw.ppl,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_explo_ppl)
+```
+:::
+
+```{r}
+table((acled_sf_prepped %>% filter(event_type=="Explosions/Remote violence"))$admin1) %>% sort(decreasing = TRUE)
+```
+
+> Similar clustering patterns with Battle-type events with **one additional cluster at Yangon**
+>
+> Both `bw.CvL` and `bw.scott` yielded comparable plots in terms of smoothness but `bw.scott` is better in detail (more distinct clusters, less over-smoothing)
+
+## Protests
+
+::: panel-tabset
+### bw.CvL
+
+```{r}
+kde_protest_cvl <- density(
+  acled_protest_ppp,
+  sigma=bw.CvL,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_protest_cvl)
+```
+
+### bw.scott
+
+```{r}
+kde_protest_scott <- density(
+  acled_protest_ppp,
+  sigma=bw.scott,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_protest_scott)
+```
+
+### bw.diggle
+
+```{r}
+kde_protest_diggle <- density(
+  acled_protest_ppp,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_protest_diggle)
+```
+
+### bw.ppl
+
+```{r}
+kde_protest_ppl <- density(
+  acled_protest_ppp,
+  sigma=bw.ppl,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_protest_ppl)
+```
+:::
+
+```{r}
+table((acled_sf_prepped %>% filter(event_type=="Protests"))$admin1) %>% sort(decreasing = TRUE)
+```
+
+> Similar event clustering in the **Sagaing-Mandalay and Yangon** region (like those in Battles, Explosions/Violence) but seems more **localised** to those regions;
+>
+> This time`bw.scott` clearly yielded the best plot in terms of level of cluster detail: with reference to the bw.CvL plot, that middle-ish cluster turned out to be 2 distinct clusters in `bw.scott` 's plot.
+
+## Strategic Developments
+
+::: panel-tabset
+### bw.CvL
+
+```{r}
+kde_stratdev_cvl <- density(
+  acled_stratdev_ppp,
+  sigma=bw.CvL,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_stratdev_cvl)
+```
+
+### bw.scott
+
+```{r}
+kde_stratdev_scott <- density(
+  acled_stratdev_ppp,
+  sigma=bw.scott,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_stratdev_scott)
+```
+
+### bw.diggle
+
+```{r}
+kde_stratdev_diggle <- density(
+  acled_stratdev_ppp,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_stratdev_diggle)
+```
+
+### bw.ppl
+
+```{r}
+kde_stratdev_ppl <- density(
+  acled_stratdev_ppp,
+  sigma=bw.ppl,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_stratdev_ppl)
+```
+:::
+
+```{r}
+table((acled_sf_prepped %>% filter(event_type=="Strategic developments"))$admin1) %>% sort(decreasing = TRUE)
+```
+
+> Event clustering in the **Sagaing, Mandalay, Magway and Yangon** regions (like those in Battles, Explosions/Violence)
+>
+> At this juncture of the analysis, I have realised that while event clusters do occur in their corresponding admin1 regional boundaries, there is a significant portion of the respective regions that are likely rural (mountainous, undeveloped areas, dense forested areas, etc.). It is worth noting that while my current direction is to study the big picture and quarterly trends of event_types, zooming further down into the admin boundaries for conflict-prone areas should be done to gain more area-specific (district-/township- level) insights.
+>
+> Both `bw.CvL` and `bw.scott` yielded comparable plots in terms of smoothness but `bw.scott` is better in detail (more distinct clusters, less over-smoothing)
+
+## Violence against Civilians
+
+::: panel-tabset
+### bw.CvL
+
+```{r}
+kde_civi_cvl <- density(
+  acled_civi_ppp,
+  sigma=bw.CvL,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_civi_cvl)
+```
+
+### bw.scott
+
+```{r}
+kde_civi_scott <- density(
+  acled_civi_ppp,
+  sigma=bw.scott,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_civi_scott)
+```
+
+### bw.diggle
+
+```{r}
+kde_civi_diggle <- density(
+  acled_civi_ppp,
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_civi_diggle)
+```
+
+### bw.ppl
+
+```{r}
+kde_civi_ppl <- density(
+  acled_civi_ppp,
+  sigma=bw.ppl,
+  edge=TRUE,
+  kernel='gaussian'
+)
+plot(kde_civi_ppl)
+```
+:::
+
+```{r}
+table((acled_sf_prepped %>% filter(event_type=="Violence against civilians"))$admin1) %>% sort(decreasing = TRUE)
+```
+
+> Both `bw.CvL` and `bw.scott` yielded comparable plots in terms of smoothness but `bw.scott` is better in detail (more distinct clusters, less over-smoothing)
+>
+> Similar clustering in the **Sagaing, Mandalay, Magway and Yangon,** with a new moderate cluster down south at **Tanintharyi** region.
 
 ## Quarterly KDE layers (excluding Riots)
 
@@ -897,7 +1237,7 @@ for (quarter in quarters) {
     # compute KDE
     kde_acled_battle_qtr_bw_cvl <- density(
       acled_battle_ppp_km_qtr,
-      sigma=bw.CvL,
+      sigma=bw.scott,
       edge=TRUE,
       kernel='gaussian'
     )
@@ -941,7 +1281,7 @@ for (quarter in quarters) {
     # compute KDE
     kde_acled_explo_qtr_bw_cvl <- density(
       acled_explo_ppp_km_qtr,
-      sigma=bw.CvL,
+      sigma=bw.scott,
       edge=TRUE,
       kernel='gaussian'
     )
@@ -985,7 +1325,7 @@ for (quarter in quarters) {
     # compute KDE
     kde_acled_protest_qtr_bw_cvl <- density(
       acled_protest_ppp_km_qtr,
-      sigma=bw.CvL,
+      sigma=bw.scott,
       edge=TRUE,
       kernel='gaussian'
     )
@@ -1029,7 +1369,7 @@ for (quarter in quarters) {
     # compute KDE
     kde_acled_stratdev_qtr_bw_cvl <- density(
       acled_stratdev_ppp_km_qtr,
-      sigma=bw.CvL,
+      sigma=bw.scott,
       edge=TRUE,
       kernel='gaussian'
     )
@@ -1073,7 +1413,7 @@ for (quarter in quarters) {
     # compute KDE
     kde_acled_civi_qtr_bw_cvl <- density(
       acled_civi_ppp_km_qtr,
-      sigma=bw.CvL,
+      sigma=bw.scott,
       edge=TRUE,
       kernel='gaussian'
     )
@@ -1127,6 +1467,7 @@ kde_civi_list     <- read_rds('data/rds/kde_civi_list.rds')
 #### Battles
 
 ```{r}
+#| eval: false
 # Create a list to store ggplot objects
 kde_plots <- list()
 
@@ -1161,9 +1502,16 @@ combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
 combined_plot
 ```
 
+-   Battle clusters seem to be most localised in Q1 and Q2 of all years excluding 2024
+
+-   Battle density appear to have a cycle until 2024: where battle events disperses around its initial dense cluster location as time passes from Q1 to Q4
+
+-   2024 data seem sparse or spread out.
+
 #### Explosions/Violence
 
 ```{r}
+#| eval: false
 # Create a list to store ggplot objects
 kde_plots <- list()
 
@@ -1198,9 +1546,14 @@ combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
 combined_plot
 ```
 
+-   Clusters often appear to re-converge at the same regions as previously mentioned under the corresponding 'event_type KDEs' section
+
+-   Again, 2024 data seem sparse or spread out
+
 #### Protests
 
 ```{r}
+#| eval: false
 # Create a list to store ggplot objects
 kde_plots <- list()
 
@@ -1235,9 +1588,14 @@ combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
 combined_plot
 ```
 
+-   In general, significant protest clusters are far and few between; the few clusters that exists are much more localised within the regions previously mentioned under the corresponding 'event_type KDEs' section
+
+-   The sparse pattern makes sense given the oppressive nature of the conflict on civilians.
+
 #### Strategic Devs
 
 ```{r}
+#| eval: false
 # Create a list to store ggplot objects
 kde_plots <- list()
 
@@ -1272,9 +1630,12 @@ combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
 combined_plot
 ```
 
+-   In general, the event clusters appear to have relatively similar locality, albeit their densities seem to be fluctuating throughout the time period
+
 #### Violence against Civilians
 
 ```{r}
+#| eval: false
 # Create a list to store ggplot objects
 kde_plots <- list()
 
@@ -1307,11 +1668,11 @@ combined_plot <- wrap_plots(kde_plots) + plot_layout(ncol = 4)
 # Display the combined plot
 combined_plot
 ```
-:::
 
-> Note:
->
-> KDEs have different scales; probably related to how this visualisation is supposed to be under under Spatial Temporal analysis.
+-   Clusters often appear to re-converge at the same regions as previously mentioned under the corresponding 'event_type KDEs' section
+
+-   Mostly widespread
+:::
 
 # Second-order Spatial Point Patterns Analysis
 
@@ -1323,18 +1684,6 @@ Now, after studying the variation of point density, I will be studying the **spa
 set.seed(69)
 ```
 
-Get `event_type` `ppp` objects
-
-```{r}
-#| warning: false
-# rather simple to obtain so doesnt warrant converting to rds files
-acled_battle_ppp <- as.ppp(acled_battle_sf)
-acled_explo_ppp <- as.ppp(acled_explo_sf)
-acled_protest_ppp <- as.ppp(acled_protest_sf)
-acled_stratdev_ppp <- as.ppp(acled_stratdev_sf)
-acled_civi_ppp <- as.ppp(acled_civi_sf)
-```
-
 ## G-Function (Nearest Neighbor Distance)
 
 ::: panel-tabset
@@ -1343,6 +1692,7 @@ acled_civi_ppp <- as.ppp(acled_civi_sf)
 **Computing G-function estimation**
 
 ```{r}
+#| eval: false
 G_battles <- Gest(acled_battle_ppp, correction = "border")
 plot(G_battles, xlim=c(0,500))
 ```
@@ -1350,6 +1700,7 @@ plot(G_battles, xlim=c(0,500))
 **Performing CSR Test**
 
 ```{r}
+#| eval: false
 G_battles.csr <- envelope(acled_battle_ppp, Gest, nsim = 39)
 plot(G_battles.csr)
 ```
@@ -1357,11 +1708,13 @@ plot(G_battles.csr)
 ### Explosions/Violence
 
 ```{r}
+#| eval: false
 G_explo <- Gest(acled_explo_ppp, correction = "border")
 plot(G_explo, xlim=c(0,500))
 ```
 
 ```{r}
+#| eval: false
 G_explo.csr <- envelope(acled_explo_ppp, Gest, nsim = 39)
 plot(G_explo.csr)
 ```
@@ -1369,23 +1722,27 @@ plot(G_explo.csr)
 ### Protests
 
 ```{r}
+#| eval: false
 G_protest <- Gest(acled_protest_ppp, correction = "border")
 plot(G_protest, xlim=c(0,500))
 ```
 
 ```{r}
-# G_protest.csr <- envelope(acled_protest_ppp, Gest, nsim = 39)
-# plot(G_protest.csr)
+#| eval: false
+G_protest.csr <- envelope(acled_protest_ppp, Gest, nsim = 39)
+plot(G_protest.csr)
 ```
 
 ### Strategic Devs
 
 ```{r}
+#| eval: false
 G_stratdev <- Gest(acled_stratdev_ppp, correction = "border")
 plot(G_stratdev, xlim=c(0,500))
 ```
 
 ```{r}
+#| eval: false
 G_stratdev.csr <- envelope(acled_stratdev_ppp, Gest, nsim = 39)
 plot(G_stratdev.csr)
 ```
@@ -1393,11 +1750,13 @@ plot(G_stratdev.csr)
 ### Violence against Civilians
 
 ```{r}
+#| eval: false
 G_civi <- Gest(acled_civi_ppp, correction = "border")
 plot(G_civi, xlim=c(0,500))
 ```
 
 ```{r}
+#| eval: false
 G_civi.csr <- envelope(acled_civi_ppp, Gest, nsim = 39)
 plot(G_civi.csr)
 ```
@@ -1415,6 +1774,7 @@ All plots strongly indicate clustering of events of every type (above the CSR li
 **Computing F-function estimation**
 
 ```{r}
+#| eval: false
 F_battles <- Fest(acled_battle_ppp)
 plot(F_battles)
 ```
@@ -1422,6 +1782,7 @@ plot(F_battles)
 **Performing CSR Test**
 
 ```{r}
+#| eval: false
 F_battles.csr <- envelope(acled_battle_ppp, Fest, nsim = 39)
 plot(F_battles.csr)
 ```
@@ -1429,11 +1790,13 @@ plot(F_battles.csr)
 ### Explosions/Violence
 
 ```{r}
+#| eval: false
 F_explo <- Fest(acled_explo_ppp)
 plot(F_explo)
 ```
 
 ```{r}
+#| eval: false
 F_explo.csr <- envelope(acled_explo_ppp, Fest, nsim = 39)
 plot(F_explo.csr)
 ```
@@ -1441,11 +1804,13 @@ plot(F_explo.csr)
 ### Protests
 
 ```{r}
+#| eval: false
 F_protest <- Fest(acled_protest_ppp)
 plot(F_protest)
 ```
 
 ```{r}
+#| eval: false
 F_protest.csr <- envelope(acled_protest_ppp, Fest, nsim = 39)
 plot(F_protest.csr)
 ```
@@ -1453,11 +1818,13 @@ plot(F_protest.csr)
 ### Strategic Devs
 
 ```{r}
+#| eval: false
 F_stratdev <- Fest(acled_stratdev_ppp)
 plot(F_stratdev)
 ```
 
 ```{r}
+#| eval: false
 F_stratdev.csr <- envelope(acled_stratdev_ppp, Fest, nsim = 39)
 plot(F_stratdev.csr)
 ```
@@ -1465,11 +1832,13 @@ plot(F_stratdev.csr)
 ### Violence against Civilians
 
 ```{r}
+#| eval: false
 F_civi <- Fest(acled_civi_ppp)
 plot(F_civi)
 ```
 
 ```{r}
+#| eval: false
 F_civi.csr <- envelope(acled_civi_ppp, Fest, nsim = 39)
 plot(F_civi.csr)
 ```
@@ -1485,11 +1854,13 @@ All plots strongly indicate a dispersed pattern, or large between-event point di
 ### Battles
 
 ```{r}
+#| eval: false
 K_battles = Kest(acled_battle_ppp, correction = "Ripley")
 plot(K_battles, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 K_battles.csr <- envelope(acled_battle_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
 plot(K_battles.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
@@ -1497,11 +1868,13 @@ plot(K_battles.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ### Explosions/Violence
 
 ```{r}
+#| eval: false
 K_explo = Kest(acled_explo_ppp, correction = "Ripley")
 plot(K_explo, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 K_explo.csr <- envelope(acled_explo_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
 plot(K_explo.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
@@ -1509,11 +1882,13 @@ plot(K_explo.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ### Protests
 
 ```{r}
+#| eval: false
 K_protest = Kest(acled_protest_ppp, correction = "Ripley")
 plot(K_protest, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 K_protest.csr <- envelope(acled_protest_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
 plot(K_protest.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
@@ -1521,11 +1896,13 @@ plot(K_protest.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ### Strategic Devs
 
 ```{r}
+#| eval: false
 K_stratdev = Kest(acled_stratdev_ppp, correction = "Ripley")
 plot(K_stratdev, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 K_stratdev.csr <- envelope(acled_stratdev_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
 plot(K_stratdev.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
@@ -1533,11 +1910,13 @@ plot(K_stratdev.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ### Violence against Civilians
 
 ```{r}
+#| eval: false
 K_civi = Kest(acled_civi_ppp, correction = "Ripley")
 plot(K_civi, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 K_civi.csr <- envelope(acled_civi_ppp, Kest, nsim = 39, rank = 1, glocal=TRUE)
 plot(K_civi.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
@@ -1553,12 +1932,14 @@ All plots strongly indicate clustering of events at every given distance (above 
 ### Battles
 
 ```{r}
+#| eval: false
 L_battles = Lest(acled_battle_ppp, correction = "Ripley")
 plot(L_battles, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 L_battles.csr <- envelope(acled_battle_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
 plot(L_battles.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r")
@@ -1567,12 +1948,14 @@ plot(L_battles.csr, . - r ~ r,
 ### Explosions/Violence
 
 ```{r}
+#| eval: false
 L_explo = Lest(acled_explo_ppp, correction = "Ripley")
 plot(L_explo, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 L_explo.csr <- envelope(acled_explo_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
 plot(L_explo.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r")
@@ -1581,12 +1964,14 @@ plot(L_explo.csr, . - r ~ r,
 ### Protests
 
 ```{r}
+#| eval: false
 L_protest = Lest(acled_protest_ppp, correction = "Ripley")
 plot(L_protest, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 L_protest.csr <- envelope(acled_protest_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
 plot(L_protest.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r")
@@ -1595,12 +1980,14 @@ plot(L_protest.csr, . - r ~ r,
 ### Strategic Devs
 
 ```{r}
+#| eval: false
 L_stratdev = Lest(acled_stratdev_ppp, correction = "Ripley")
 plot(L_stratdev, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 L_stratdev.csr <- envelope(acled_stratdev_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
 plot(L_stratdev.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r")
@@ -1609,12 +1996,14 @@ plot(L_stratdev.csr, . - r ~ r,
 ### Violence against Civilians
 
 ```{r}
+#| eval: false
 L_civi = Lest(acled_civi_ppp, correction = "Ripley")
 plot(L_civi, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)")
 ```
 
 ```{r}
+#| eval: false
 L_civi.csr <- envelope(acled_civi_ppp, Lest, nsim = 39, rank = 1, glocal=TRUE)
 plot(L_civi.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r")
@@ -1625,7 +2014,7 @@ plot(L_civi.csr, . - r ~ r,
 It is odd that all CSR lines lie along x-axis (or very near it), because it means all L-functions have positive deviations from its corresponding CSR line, indicating strong spatial dependence / clustering as observed under the K-function section
 :::
 
-# Spatio-Temporal Point Patterns Analysis (STPPA)
+# First-order Spatio-Temporal Point Patterns Analysis (STPPA)
 
 I will be using BOOT.spattemp() to optimise the spatial bandwidth and the scalar temporal bandwidth, to avoid having sparse data in the quarterly STKDEs.
 
@@ -1679,6 +2068,10 @@ for (yr in years){
     }
 }
 ```
+
+> Note:
+>
+> Initially use `spattemp.density` default parameters
 
 **Configure Visualisation**
 
@@ -2064,3 +2457,255 @@ anim_save(
 
 ![](animation/violence_against_civi/civi_animation.gif){width="600"}
 :::
+
+# Second-order STPPA
+
+Because of the additional time dimension factored in by the spatio-temporal KDE object, I figured that I cannot (at least should not) use the second-order SPPA methods of G-Function, F-Function, K-Function, and L-Function. However after consulting with Uncle Google, I discovered that the K-function has extensions that cover the temporal domain:
+
+### `stpp::STIKhat()`
+
+-   **inhomogeneous version** of the **K-function**; adjusts for variations in point density across space and time
+
+-   Why inhomogeneous?
+
+    -   Since ACLED is obviously real–world data, it will not follow a uniform distribution: certain regions of Myanmar are hotspots for conflict, while others have sparse data on such events(evidently from the dot plots and KDE figures above). Hence I thought that by using `STIKhat()` , I can detect clusters while factoring in these density differences.
+
+#### Prepare coordinates
+
+```{r}
+coords <- st_coordinates(acled_battle_sf)
+x <- coords[, 1]  # long
+y <- coords[, 2]  # lat
+```
+
+#### Prepare time variable by converting into numeric
+
+```{r}
+# Convert quarter_period to numeric time 
+# Compute the numeric time value as the number of quarters since 2021Q1
+acled_battle_sf$time <- ((acled_battle_sf$year - 2021) * 4) + acled_battle_sf$quarter_num
+unique(acled_battle_sf$time) # should be 15 quarters in total
+t <- acled_battle_sf$time
+```
+
+> I needed to convert the time periods into a continuous Numeric Value for `stpp::STIKhat()` , by:
+>
+> -   **`acled_battle_sf$year - 2021`**: Years have passed since 2021
+>
+> -   **`*4`**: Convert years to quarters
+>
+> -   **`+ acled_battle_sf$quarter`**: Adds the quarter (1 for Q1, 2 for Q2, etc.)
+
+#### Compute
+
+```{r}
+
+# Create spatio-temporal point pattern object
+stpp_battle <- as.3dpoints(x = x, y = y, t = t)
+
+# Run STIKhat to compute the inhomogeneous K-function
+stikhat_battle_result <- STIKhat(stpp_battle)
+str(stikhat_battle_result)
+```
+
+> It is possible that overlapping event_data are repeat conflicts rather than erroneous data collection; either way I chose to jitter rather than remove to hopefully maintain the overall structure
+>
+> Also, I already checked for duplicate data earlier, hence can ignore the 'Warning: Space-time data contains duplicated points', probably due to the repeated t values.
+
+#### Plot against distance
+
+```{r}
+k_values <- stikhat_battle_result$Khat
+# str(k_values)
+k_theoretical <- stikhat_battle_result$Ktheo
+distances <- stikhat_battle_result$dist
+# length(k_values)
+
+# Create the plot
+plot(
+  distances, 
+  k_values[2,], # or k_values[1,]
+  type = "l", 
+  col = "blue", 
+  main = "STIK-function for Battles",
+  xlab = "distance", ylab = "K-func",
+  ylim = range(c(k_values[2,], k_theoretical[2,]))
+  )
+
+# Add the theoretical K-function to the plot
+lines(distances, k_theoretical[2,], type = "l", col = "red") # or k_theoretical[1,]
+
+# Add a legend
+legend("topleft", legend = c("Observed", "Theoretical"),
+       col = c("blue", "red"), lty = 1)
+```
+
+#### Plot against time
+
+```{r}
+k_values <- stikhat_battle_result$Khat
+k_theoretical <- stikhat_battle_result$Ktheo
+times <- stikhat_battle_result$times
+
+# Create the plot
+plot(
+  times, 
+  k_values[2,], # or k_values[1,]
+  type = "l", 
+  col = "blue", 
+  main = "STIK-function for Battles",
+  xlab = "time", ylab = "K-func",
+  ylim = range(c(k_values[2,], k_theoretical[2,]))
+  )
+
+# Add the theoretical K-function to the plot
+lines(times, k_theoretical[2,], type = "l", col = "red") # or k_theoretical[1,]
+
+# Add a legend
+legend("topleft", legend = c("Observed K-function", "Theoretical K-function"),
+       col = c("blue", "red"), lty = 1)
+```
+
+> The upward steps of Observed K-function seems to coincide at certain distances and/or time periods.
+>
+> indicate that at could be explained by distances or the time; but it seems there are significantly more battle events than expected possibly due to the existence of more conflict-prone hotspots in Myanmar.
+
+# `tmap` plots
+
+## KDEs
+
+```{r}
+# KDEs used:
+# kde_battle_scott
+# kde_explo_scott
+# kde_protest_scott
+# kde_stratdev_scott
+# kde_civi_scott
+```
+
+**Convert KDEs into Spatial Grids**
+
+```{r}
+gridded_kde_battle   <- as(kde_battle_scott, "SpatialGridDataFrame")
+gridded_kde_explo    <- as(kde_explo_scott, "SpatialGridDataFrame")
+gridded_kde_protest  <- as(kde_protest_scott, "SpatialGridDataFrame")
+gridded_kde_stratdev <- as(kde_stratdev_scott, "SpatialGridDataFrame")
+gridded_kde_civi     <- as(kde_civi_scott, "SpatialGridDataFrame")
+```
+
+**View gridded objects**
+
+::: panel-tabset
+### Battles
+
+```{r}
+spplot(gridded_kde_battle)
+```
+
+### Explosions/Violence
+
+```{r}
+spplot(gridded_kde_explo)
+```
+
+### Protest
+
+```{r}
+spplot(gridded_kde_protest)
+```
+
+### Strategic Developments
+
+```{r}
+spplot(gridded_kde_stratdev)
+```
+
+### Violence against civilians
+
+```{r}
+spplot(gridded_kde_civi)
+```
+:::
+
+**Convert into rasters**
+
+```{r}
+raster_kde_battle <- raster(gridded_kde_battle)
+raster_kde_explo <- raster(gridded_kde_explo)
+raster_kde_protest <- raster(gridded_kde_protest)
+raster_kde_stratdev <- raster(gridded_kde_stratdev)
+raster_kde_civi <- raster(gridded_kde_civi)
+```
+
+**Assign EPSG code**
+
+```{r}
+projection(raster_kde_battle) <- CRS("+init=EPSG:3414")
+projection(raster_kde_explo) <- CRS("+init=EPSG:3414")
+projection(raster_kde_protest) <- CRS("+init=EPSG:3414")
+projection(raster_kde_stratdev) <- CRS("+init=EPSG:3414")
+projection(raster_kde_civi) <- CRS("+init=EPSG:3414")
+```
+
+## Visualise
+
+```{r}
+tmap_mode('plot')
+```
+
+::: panel-tabset
+### Battles
+
+```{r}
+#| warning: false
+tm_shape(raster_kde_battle) +
+  tm_raster("v") +
+  tm_layout(legend.position = c("left","bottom"),frame=FALSE)
+```
+
+### Explosions/Violence
+
+```{r}
+#| warning: false
+tm_shape(raster_kde_explo) +
+  tm_raster("v") +
+  tm_layout(legend.position = c("left","bottom"),frame=FALSE)
+```
+
+### Protest
+
+```{r}
+#| warning: false
+tm_shape(raster_kde_protest) +
+  tm_raster("v") +
+  tm_layout(legend.position = c("left","bottom"),frame=FALSE)
+```
+
+### Strategic Developments
+
+```{r}
+#| warning: false
+tm_shape(raster_kde_stratdev) +
+  tm_raster("v") +
+  tm_layout(legend.position = c("left","bottom"),frame=FALSE)
+```
+
+### Violence against civilians
+
+```{r}
+#| warning: false
+tm_shape(raster_kde_civi) +
+  tm_raster("v") +
+  tm_layout(legend.position = c("left","bottom"),frame=FALSE)
+```
+:::
+
+# Learnings
+
+Data wrangling makes all the difference in the overall analysis. There times where I did not extract crucial data columns I needed for later sections and had to re-adjust, ruining the analysis workflow.
+
+I followed the "throw and see what sticks" process, where I first employed methods learnt and discovered online to gain insights. For example, in my second-order STPPA, I then focused on a single method to evaluate my results because I realised other statistical methods did not extend to the temporal domain directly.
+
+Reading documentation is underrated. I mostly had to self-learn the animated visualisation methods, so internalising all the required parameters and their corresponding object type was also a significant challenge
+
+Overall, it was fun (not quite) :/
