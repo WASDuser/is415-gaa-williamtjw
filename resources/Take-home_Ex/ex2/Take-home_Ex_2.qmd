@@ -8,3 +8,193 @@ execute:
   echo: true
   freeze: true
 ---
+
+# Background
+
+Nothing for now.
+
+# Terms
+
+-   Thailand administrative level 0 (country): **admin0**,
+
+-   1 (province): **admin1**
+
+-   2 (district): **admin2**
+
+-   3 (sub-district, tambon): **admin3**
+
+For the purposes of this exercise I will be dealing with **admin1** only (province-level).
+
+# Objectives
+
+# R Packages used
+
+-   sf
+
+-   tidyverse
+
+-   [**readxl**](https://readxl.tidyverse.org/): since both datasets are in xls/xlsx format
+
+-   skimr
+
+-   sfdep
+
+-   tmap
+
+```{r}
+pacman::p_load(sf,tidyverse,skimr,readxl,sfdep,tmap)
+```
+
+# Data
+
+::: panel-tabset
+## \[.csv\] Thailand Drug Offenses 2017-2022
+
+[**Source**](https://www.kaggle.com/datasets/thaweewatboy/thailand-drug-offenses-2017-2022)
+
+**Metadata**
+
+-   fiscal_year: recorded year
+
+-   types_of_drug_offenses: category of offense
+
+-   no_cases: total records for combination of year, drug offense type and province
+
+-   province_th: province name in thai (**drop**)
+
+-   province_en
+
+**Import**
+
+```{r}
+thai_drug_offences_sf <- read_csv('data/aspatial/thai_drug_offenses_2017_2022.csv')
+```
+
+```{r}
+str(thai_drug_offences_sf)
+```
+
+```{r}
+summ_table <- skim(thai_drug_offences_sf) %>% as.data.frame()
+summ_table
+```
+
+> -   No missing data
+>
+> -   Date range is indeed 2017 to 2022
+>
+> -   16 types of drug offenses (check unique values)
+>
+> -   summary statistics of overall **`no_cases`** seem to indicate **right-skew**
+
+```{r}
+thai_no_case <- summ_table %>% filter(skim_variable == 'no_cases') %>% select(c(10:16))
+thai_no_case
+```
+
+> Might need to view by offense type to see offense-specific distributions
+
+Identify the unique values for each categorical column
+
+```{r}
+unique(thai_drug_offences_sf$fiscal_year)
+```
+
+```{r}
+offense_type <- unique(thai_drug_offences_sf$types_of_drug_offenses)
+offense_type
+```
+
+**Cleaning**
+
+Remove thai labels
+
+```{r}
+thai_drug_offences_sf <- thai_drug_offences_sf %>% select(1,2,3,5)
+```
+
+## \[.shp\] Thailand - Subnational Admin. Boundaries
+
+[**Source**](https://data.humdata.org/dataset/d24bdc45-eb4c-4e3d-8b16-44db02667c27/resource/d0c722ff-6939-4423-ac0d-6501830b1759/download/tha_adm_rtsd_itos_20210121_shp.zip)
+
+**Import**
+
+```{r}
+thai_admin1_sf <- st_read(
+  dsn = 'data/geospatial/tha_adm_rtsd_itos_20210121_shp/',
+  layer ='tha_admbnda_adm1_rtsd_20220121')
+```
+
+```{r}
+glimpse(thai_admin1_sf)
+```
+
+**Extracting Columns**
+
+Lots of completely missing fields and repetition across the columns.
+
+```{r}
+thai_admin1_sf <- thai_admin1_sf %>% select(1:3,5)
+thai_admin1_sf
+```
+
+```{r}
+any(duplicated(thai_admin1_sf))
+```
+:::
+
+# EDA
+
+```{r}
+set.seed(69)
+```
+
+```{r}
+province_drug_offences <- thai_drug_offences_sf %>% 
+  group_by(province_en) %>%
+  summarize(total_cases = sum(no_cases), .groups = 'drop')
+head(province_drug_offences)
+```
+
+```{r}
+prepped_drug_offences <- left_join(province_drug_offences, thai_admin1_sf,by = c('province_en'='ADM1_EN')) %>% st_as_sf()
+glimpse(prepped_drug_offences)
+```
+
+```{r}
+#| eval: false
+tmap_mode('plot')
+
+tm_shape(prepped_drug_offences)+
+  tm_polygons() +
+  tm_fill(alpha = .5,col = prepped_drug_offences$total_cases)
+  tm_text(prepped_drug_offences$province_en)
+```
+
+This is where I encountered the first landmine of sorts. The above code results in:
+
+``` R
+Error in `$<-`:
+! Assigned data `as.numeric(...)` must be compatible with existing data.
+✖ Existing data has 77 rows.
+✖ Assigned data has 75 rows.
+ℹ Only vectors of size 1 are recycled.
+Caused by error in `vectbl_recycle_rhs_rows()`:
+! Can't recycle input of size 75 to size 77.
+```
+
+So I went to re-check the left-joined table `prepped_drug_offences` . I realised for the "buogkan" and "Loburi" rows, besides the 'total_cases' field, the rest of the fields were empty.
+
+Seeing how suspiciously "buogkan" looks like a typo, I went to Google both "buogkan" and "Loburi" along with Thailand. Sure enough, the suggested words of "buogkan" and "Loburi" turned out to be **"Bueng Kan" and "Lop buri"** respectively.
+
+Turned out the **Thailand Drug Offenses** **had the 2 erroneous province names**, while the shapefiles' province labels checked out.
+
+I will have to do manual replacements for all affected fields in `thai_drug_offences_sf`
+
+```{r}
+# write_rds()
+```
+
+```{r}
+# read_rds()
+```

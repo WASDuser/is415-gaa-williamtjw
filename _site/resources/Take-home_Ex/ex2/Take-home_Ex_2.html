@@ -22,6 +22,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -188,8 +222,19 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#terms" id="toc-terms" class="nav-link" data-scroll-target="#terms">Terms</a></li>
+  <li><a href="#objectives" id="toc-objectives" class="nav-link" data-scroll-target="#objectives">Objectives</a></li>
+  <li><a href="#r-packages-used" id="toc-r-packages-used" class="nav-link" data-scroll-target="#r-packages-used">R Packages used</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
+  <li><a href="#eda" id="toc-eda" class="nav-link" data-scroll-target="#eda">EDA</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -231,8 +276,325 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="background" class="level1">
+<h1>Background</h1>
+<p>Nothing for now.</p>
+</section>
+<section id="terms" class="level1">
+<h1>Terms</h1>
+<ul>
+<li><p>Thailand administrative level 0 (country): <strong>admin0</strong>,</p></li>
+<li><p>1 (province): <strong>admin1</strong></p></li>
+<li><p>2 (district): <strong>admin2</strong></p></li>
+<li><p>3 (sub-district, tambon): <strong>admin3</strong></p></li>
+</ul>
+<p>For the purposes of this exercise I will be dealing with <strong>admin1</strong> only (province-level).</p>
+</section>
+<section id="objectives" class="level1">
+<h1>Objectives</h1>
+</section>
+<section id="r-packages-used" class="level1">
+<h1>R Packages used</h1>
+<ul>
+<li><p>sf</p></li>
+<li><p>tidyverse</p></li>
+<li><p><a href="https://readxl.tidyverse.org/"><strong>readxl</strong></a>: since both datasets are in xls/xlsx format</p></li>
+<li><p>skimr</p></li>
+<li><p>sfdep</p></li>
+<li><p>tmap</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf,tidyverse,skimr,readxl,sfdep,tmap)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data" class="level1">
+<h1>Data</h1>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">[.csv] Thailand Drug Offenses 2017-2022</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">[.shp] Thailand - Subnational Admin. Boundaries</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<p><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-drug-offenses-2017-2022"><strong>Source</strong></a></p>
+<p><strong>Metadata</strong></p>
+<ul>
+<li><p>fiscal_year: recorded year</p></li>
+<li><p>types_of_drug_offenses: category of offense</p></li>
+<li><p>no_cases: total records for combination of year, drug offense type and province</p></li>
+<li><p>province_th: province name in thai (<strong>drop</strong>)</p></li>
+<li><p>province_en</p></li>
+</ul>
+<p><strong>Import</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>thai_drug_offences_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/aspatial/thai_drug_offenses_2017_2022.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 7392 Columns: 5
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (3): types_of_drug_offenses, province_th, province_en
+dbl (2): fiscal_year, no_cases
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(thai_drug_offences_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>spc_tbl_ [7,392 × 5] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+ $ fiscal_year           : num [1:7392] 2017 2017 2017 2017 2017 ...
+ $ types_of_drug_offenses: chr [1:7392] "drug_use_cases" "drug_use_cases" "drug_use_cases" "drug_use_cases" ...
+ $ no_cases              : num [1:7392] 11871 200 553 450 378 ...
+ $ province_th           : chr [1:7392] "กรุงเทพมหานคร" "ชัยนาท" "นนทบุรี" "ปทุมธานี" ...
+ $ province_en           : chr [1:7392] "Bangkok" "Chai Nat" "Nonthaburi" "Pathum Thani" ...
+ - attr(*, "spec")=
+  .. cols(
+  ..   fiscal_year = col_double(),
+  ..   types_of_drug_offenses = col_character(),
+  ..   no_cases = col_double(),
+  ..   province_th = col_character(),
+  ..   province_en = col_character()
+  .. )
+ - attr(*, "problems")=&lt;externalptr&gt; </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>summ_table <span class="ot">&lt;-</span> <span class="fu">skim</span>(thai_drug_offences_sf) <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>summ_table</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  skim_type          skim_variable n_missing complete_rate character.min
+1 character types_of_drug_offenses         0             1            12
+2 character            province_th         0             1             3
+3 character            province_en         0             1             3
+4   numeric            fiscal_year         0             1            NA
+5   numeric               no_cases         0             1            NA
+  character.max character.empty character.n_unique character.whitespace
+1            54               0                 16                    0
+2            15               0                 77                    0
+3            24               0                 77                    0
+4            NA              NA                 NA                   NA
+5            NA              NA                 NA                   NA
+  numeric.mean  numeric.sd numeric.p0 numeric.p25 numeric.p50 numeric.p75
+1           NA          NA         NA          NA          NA          NA
+2           NA          NA         NA          NA          NA          NA
+3           NA          NA         NA          NA          NA          NA
+4    2019.5000    1.707941       2017        2018      2019.5        2021
+5     535.3486 1130.876262          0           1        70.0         623
+  numeric.p100 numeric.hist
+1           NA         &lt;NA&gt;
+2           NA         &lt;NA&gt;
+3           NA         &lt;NA&gt;
+4         2022        ▇▃▃▃▃
+5        17131        ▇▁▁▁▁</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<ul>
+<li><p>No missing data</p></li>
+<li><p>Date range is indeed 2017 to 2022</p></li>
+<li><p>16 types of drug offenses (check unique values)</p></li>
+<li><p>summary statistics of overall <strong><code>no_cases</code></strong> seem to indicate <strong>right-skew</strong></p></li>
+</ul>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>thai_no_case <span class="ot">&lt;-</span> summ_table <span class="sc">%&gt;%</span> <span class="fu">filter</span>(skim_variable <span class="sc">==</span> <span class="st">'no_cases'</span>) <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="fu">c</span>(<span class="dv">10</span><span class="sc">:</span><span class="dv">16</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>thai_no_case</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  numeric.mean numeric.sd numeric.p0 numeric.p25 numeric.p50 numeric.p75
+1     535.3486   1130.876          0           1          70         623
+  numeric.p100
+1        17131</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Might need to view by offense type to see offense-specific distributions</p>
+</blockquote>
+<p>Identify the unique values for each categorical column</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unique</span>(thai_drug_offences_sf<span class="sc">$</span>fiscal_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2017 2018 2019 2020 2021 2022</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>offense_type <span class="ot">&lt;-</span> <span class="fu">unique</span>(thai_drug_offences_sf<span class="sc">$</span>types_of_drug_offenses)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>offense_type</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "drug_use_cases"                                        
+ [2] "suspects_in_drug_use_cases"                            
+ [3] "possession_cases"                                      
+ [4] "suspects_in_possession_cases"                          
+ [5] "possession_with_intent_to_distribute_cases"            
+ [6] "suspects_in_possession_with_intent_to_distribute_cases"
+ [7] "trafficking_cases"                                     
+ [8] "suspects_in_trafficking_cases"                         
+ [9] "production_cases"                                      
+[10] "suspects_in_production_cases"                          
+[11] "import_cases"                                          
+[12] "suspects_in_import_cases"                              
+[13] "export_cases"                                          
+[14] "suspects_in_export_cases"                              
+[15] "conspiracy_cases"                                      
+[16] "suspects_in_conspiracy_cases"                          </code></pre>
+</div>
+</div>
+<p><strong>Cleaning</strong></p>
+<p>Remove thai labels</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>thai_drug_offences_sf <span class="ot">&lt;-</span> thai_drug_offences_sf <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<p><a href="https://data.humdata.org/dataset/d24bdc45-eb4c-4e3d-8b16-44db02667c27/resource/d0c722ff-6939-4423-ac0d-6501830b1759/download/tha_adm_rtsd_itos_20210121_shp.zip"><strong>Source</strong></a></p>
+<p><strong>Import</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>thai_admin1_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dsn =</span> <span class="st">'data/geospatial/tha_adm_rtsd_itos_20210121_shp/'</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">layer =</span><span class="st">'tha_admbnda_adm1_rtsd_20220121'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `tha_admbnda_adm1_rtsd_20220121' from data source 
+  `/Users/williamtjw/is415-gaa-williamtjw/resources/Take-home_Ex/ex2/data/geospatial/tha_adm_rtsd_itos_20210121_shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 77 features and 16 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 97.34336 ymin: 5.613038 xmax: 105.637 ymax: 20.46507
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(thai_admin1_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 77
+Columns: 17
+$ Shape_Leng &lt;dbl&gt; 2.417227, 1.695100, 1.251111, 1.884945, 3.041716, 1.739908,…
+$ Shape_Area &lt;dbl&gt; 0.13133873, 0.07926199, 0.05323766, 0.12698345, 0.21393797,…
+$ ADM1_EN    &lt;chr&gt; "Bangkok", "Samut Prakan", "Nonthaburi", "Pathum Thani", "P…
+$ ADM1_TH    &lt;chr&gt; "กรุงเทพมหานคร", "สมุทรปราการ", "นนทบุรี", "ปทุมธานี", "พระนครศรีอ…
+$ ADM1_PCODE &lt;chr&gt; "TH10", "TH11", "TH12", "TH13", "TH14", "TH15", "TH16", "TH…
+$ ADM1_REF   &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ ADM1ALT1EN &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ ADM1ALT2EN &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ ADM1ALT1TH &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ ADM1ALT2TH &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ ADM0_EN    &lt;chr&gt; "Thailand", "Thailand", "Thailand", "Thailand", "Thailand",…
+$ ADM0_TH    &lt;chr&gt; "ประเทศไทย", "ประเทศไทย", "ประเทศไทย", "ประเทศไทย", "ประเทศ…
+$ ADM0_PCODE &lt;chr&gt; "TH", "TH", "TH", "TH", "TH", "TH", "TH", "TH", "TH", "TH",…
+$ date       &lt;date&gt; 2019-02-18, 2019-02-18, 2019-02-18, 2019-02-18, 2019-02-18…
+$ validOn    &lt;date&gt; 2022-01-22, 2022-01-22, 2022-01-22, 2022-01-22, 2022-01-22…
+$ validTo    &lt;date&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+$ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((100.6139 13..., MULTIPOLYGON (…</code></pre>
+</div>
+</div>
+<p><strong>Extracting Columns</strong></p>
+<p>Lots of completely missing fields and repetition across the columns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>thai_admin1_sf <span class="ot">&lt;-</span> thai_admin1_sf <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,<span class="dv">5</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>thai_admin1_sf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 77 features and 4 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 97.34336 ymin: 5.613038 xmax: 105.637 ymax: 20.46507
+Geodetic CRS:  WGS 84
+First 10 features:
+   Shape_Leng Shape_Area                  ADM1_EN ADM1_PCODE
+1    2.417227 0.13133873                  Bangkok       TH10
+2    1.695100 0.07926199             Samut Prakan       TH11
+3    1.251111 0.05323766               Nonthaburi       TH12
+4    1.884945 0.12698345             Pathum Thani       TH13
+5    3.041716 0.21393797 Phra Nakhon Si Ayutthaya       TH14
+6    1.739908 0.07920961                Ang Thong       TH15
+7    5.693342 0.54578838                 Lop Buri       TH16
+8    1.778326 0.06872655                Sing Buri       TH17
+9    2.896316 0.20907828                 Chai Nat       TH18
+10   4.766446 0.29208711                 Saraburi       TH19
+                         geometry
+1  MULTIPOLYGON (((100.6139 13...
+2  MULTIPOLYGON (((100.7306 13...
+3  MULTIPOLYGON (((100.3415 14...
+4  MULTIPOLYGON (((100.8916 14...
+5  MULTIPOLYGON (((100.5131 14...
+6  MULTIPOLYGON (((100.3332 14...
+7  MULTIPOLYGON (((101.3453 15...
+8  MULTIPOLYGON (((100.3691 15...
+9  MULTIPOLYGON (((100.1199 15...
+10 MULTIPOLYGON (((101.3994 15...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(thai_admin1_sf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="eda" class="level1">
+<h1>EDA</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">69</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>province_drug_offences <span class="ot">&lt;-</span> thai_drug_offences_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(province_en) <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_cases =</span> <span class="fu">sum</span>(no_cases), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(province_drug_offences)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  province_en   total_cases
+  &lt;chr&gt;               &lt;dbl&gt;
+1 Amnat Charoen       35435
+2 Ang Thong           16168
+3 Bangkok            286480
+4 Buri Ram            57352
+5 Chachoengsao        53514
+6 Chai Nat            15310</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>prepped_drug_offences <span class="ot">&lt;-</span> <span class="fu">left_join</span>(province_drug_offences, thai_admin1_sf,<span class="at">by =</span> <span class="fu">c</span>(<span class="st">'province_en'</span><span class="ot">=</span><span class="st">'ADM1_EN'</span>)) <span class="sc">%&gt;%</span> <span class="fu">st_as_sf</span>()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(prepped_drug_offences)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 77
+Columns: 6
+$ province_en &lt;chr&gt; "Amnat Charoen", "Ang Thong", "Bangkok", "Buri Ram", "Chac…
+$ total_cases &lt;dbl&gt; 35435, 16168, 286480, 57352, 53514, 15310, 64497, 31473, 1…
+$ Shape_Leng  &lt;dbl&gt; 3.927244, 1.739908, 2.417227, 8.701860, 4.941453, 2.896316…
+$ Shape_Area  &lt;dbl&gt; 0.27531267, 0.07920961, 0.13133873, 0.84453704, 0.43148401…
+$ ADM1_PCODE  &lt;chr&gt; "TH37", "TH15", "TH10", "TH31", "TH24", "TH18", "TH36", "T…
+$ geometry    &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((104.9598 16..., MULTIPOLYGON …</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(prepped_drug_offences)<span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">alpha =</span> .<span class="dv">5</span>,<span class="at">col =</span> prepped_drug_offences<span class="sc">$</span>total_cases)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_text</span>(prepped_drug_offences<span class="sc">$</span>province_en)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This is where I encountered the first landmine of sorts. The above code results in:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>Error <span class="cf">in</span> <span class="st">`</span><span class="at">$&lt;-</span><span class="st">`</span><span class="sc">:</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span> Assigned data <span class="st">`</span><span class="at">as.numeric(...)</span><span class="st">`</span> must be compatible with existing data.</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>✖ Existing data has <span class="dv">77</span> rows.</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>✖ Assigned data has <span class="dv">75</span> rows.</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>ℹ Only vectors of size <span class="dv">1</span> are recycled.</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>Caused by error <span class="cf">in</span> <span class="st">`</span><span class="at">vectbl_recycle_rhs_rows()</span><span class="st">`</span><span class="sc">:</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="sc">!</span> Can<span class="st">'t recycle input of size 75 to size 77.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So I went to re-check the left-joined table <code>prepped_drug_offences</code> . I realised for the “buogkan” and “Loburi” rows, besides the ‘total_cases’ field, the rest of the fields were empty.</p>
+<p>Seeing how suspiciously “buogkan” looks like a typo, I went to Google both “buogkan” and “Loburi” along with Thailand. Sure enough, the suggested words of “buogkan” and “Loburi” turned out to be <strong>“Bueng Kan” and “Lop buri”</strong> respectively.</p>
+<p>Turned out the <strong>Thailand Drug Offenses</strong> <strong>had the 2 erroneous province names</strong>, while the shapefiles’ province labels checked out.</p>
+<p>I will have to do manual replacements for all affected fields in <code>thai_drug_offences_sf</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write_rds()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read_rds()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
