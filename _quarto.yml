@@ -32,6 +32,8 @@ website:
           href: "resources/ICEs/ex4/ice4.qmd"
         - text: "ICE 5"
           href: "resources/ICEs/ex5/ice5.qmd"
+        - text: "ICE 6"
+          href: "resources/ICEs/ex6/ice6.qmd"
           
     - text: "Take-home Exercise (THE)"
       menu:
