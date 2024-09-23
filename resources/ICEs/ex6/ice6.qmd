@@ -8,3 +8,261 @@ execute:
   echo: true
   freeze: true
 ---
+
+# Notes:
+
+Spatial Dependency (for interpolation/statistical methods): existence of statistical dependence in a collection of random variables, each with distinct geographical assoc.
+
+> Not the focus of this course
+
+### **Spatial Autocorrelation**
+
+![](images/clipboard-26460716.png){width="400"}
+
+-   systematic spatial variable
+
+    -   show signs of clustering of similar neighbors / random, dissimilar neighbors (checkerboard)
+
+### Moran’s I
+
+![](images/clipboard-3308707296.png)
+
+-   x~i~: observed value at location i
+
+-   x~j~: neighbor location of i
+
+-   w~i,j~: weight that determines the relationship between i and j
+
+-   denominator standardizes value
+
+-   can use to compared overall differences in study area
+
+### Geary’s C 
+
+![](images/clipboard-2186139489.png){width="600"}
+
+-   can compare immediate neighbors
+
+-   always \> 0
+
+### Relationship of Moran’s I and Geary’s C (from lesson [slides](https://is415-ay2024-25t1.netlify.app/lesson/lesson06/lesson06-glsa#/11))
+
+-   C approaches 0 and I approaches 1 when similar values are clustered.
+
+-   C approaches 3 and I approaches -1 when dissimilar values tend to cluster.
+
+-   High values of C measures correspond to low values of I.
+
+-   So the two measures are inversely related.
+
+### Getis-Ord Global G
+
+![](images/clipboard-2885065908.png){width="400"}
+
+-   Strictly identifies/detect clusters only (high-high, low-low clusters, ...)
+
+-   'd' means distance metric
+
+-   only positive
+
+### LISA
+
+-   array of analysis methods for clusters and outliers
+
+    -   High–high / Low-low clusters
+
+    -   Low-high (low outlier surrounded by high)
+
+    -   High-low (high outlier surrounded by low)
+
+-   **helps determine if resultant clustering patterns are statistically significant**
+
+-   Categorical geovisualisation to show distinct clusters; neutral/greyed out areas to indicate statistically INSIGNIFICANT areas (does not mean absence of data)
+
+# ICE
+
+-   [sfdep](https://sfdep.josiahparry.com/)
+
+-   enough for Take-home 2 requirements and additional exploration
+
+### Install R Packages
+
+```{r}
+pacman::p_load(sf,tmap,sfdep,tidyverse)
+```
+
+### Load Data
+
+**Hunan province administrative boundary layer at county level**
+
+```{r}
+hunan <- st_read('data/geospatial', layer = 'Hunan')
+```
+
+**Hunan_2012 development indicators**
+
+```{r}
+hunan2012 <- read_csv('data/aspatial/Hunan_2012.csv')
+```
+
+**Relational Join**
+
+```{r}
+hunan <- left_join(hunan,hunan2012) %>% dplyr::select(1:4, 7, 15)
+```
+
+```{r}
+wm_q <- hunan %>% mutate(
+    nb=st_contiguity(hunan$geometry), # neighbor list object created by st_neighbors()
+    wt=st_weights(nb, style='W'), # default: get row-standardized weights
+    .before=1 # insert to the front (column 1)
+  )
+```
+
+```{r}
+# compute global moran I
+moran1 <- global_moran(
+  wm_q$GDPPC,
+  wm_q$nb,
+  wm_q$wt
+)
+glimpse(moran1)
+
+# K: avg neighbors found
+```
+
+```{r}
+# perform global moran I test
+global_moran_test(
+  wm_q$GDPPC,
+  wm_q$nb,
+  wm_q$wt
+)
+
+# Output:
+# p-value < significance level (0.05): enough statistical evidence to reject null H0 with 95% confidence level
+# low positive Moran statistic: weak clustering
+```
+
+```{r}
+# perform global moran I permutation test using MC sims (ALWAYS USE THIS FIRST - 'MORE ROBUST')
+
+# set seed for reproducible computation
+set.seed(69)
+
+# perform MC sims
+global_moran_perm(
+  wm_q$GDPPC,
+  wm_q$nb,
+  wm_q$wt,
+  nsim = 99)
+
+# p-value even smaller
+```
+
+```{r}
+# perform local moran I
+lisa <-wm_q %>% 
+  mutate(
+    local_moran = local_moran(
+      GDPPC,
+      nb,
+      wt,
+      nsim = 99),
+    .before = 1,
+    ) %>% 
+  unnest(local_moran) # expands a list-column containing dataframes into rows and columns
+
+# there are 3 p-values
+# p_ii : base method (mean)
+# p_ii_sim : the nsim method (median -- better measure of central tendency; less affected by outliers)
+# p_folded_sim : permutation with replacement (pysal)
+```
+
+```{r}
+# visualising p-value and local moran I
+tmap_mode('plot')
+
+map1 <- tm_shape(lisa) +
+  tm_fill('ii') +
+  tm_borders(alpha = .5) +
+  tm_view(set.zoom.limits = c(6,8)) +
+  tm_layout(
+    main.title = 'local moran I',
+    main.title.size = 2)
+
+map2 <- tm_shape(lisa) +
+  tm_fill(col = "ii", 
+          breaks=c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+          palette="-Blues", 
+          title = "local Moran's I p-values") +
+  tm_borders(alpha = 0.5) +
+  tm_layout(
+    main.title = 'p-value moran I',
+    main.title.size = 2)
+
+tmap_arrange(map1, map2, ncol = 2)
+```
+
+```{r}
+# visualising LISA map
+lisa_sig <- lisa %>% filter(p_ii <.05)
+
+tmap_mode('plot')
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(alpha = .5) +
+tm_shape(lisa_sig) +
+  tm_polygons('mean') +
+  tm_borders(alpha = .4)
+```
+
+```{r}
+# Gi statistics - base
+wm_idw <- hunan %>% 
+  mutate(
+    nb = st_contiguity(hunan$geometry),
+    wt = st_inverse_distance(
+      nb,
+      hunan$geometry,
+      scale = 1,
+      alpha = 1),
+    .before = 1
+    )
+```
+
+```{r}
+# Gi-statistics MC sims perm
+HCSA <- wm_idw %>% 
+  mutate(
+    local_Gi = local_gstar_perm(
+      hunan$GDPPC,
+      nb,
+      wt,
+      nsim = 99),
+    .before = 1) %>% 
+  unnest(local_Gi)
+HCSA
+```
+
+```{r}
+# Visualising Gi
+
+tmap_mode('plot')
+tm_shape(HCSA) +
+  tm_fill('gi_star') +
+  tm_borders(alpha = .4)
+```
+
+```{r}
+tmap_mode('plot')
+HCSA_sig <- HCSA %>% filter(p_sim < 0.05)
+
+tm_shape(HCSA) +
+  tm_polygons() +
+  tm_borders(alpha = .5) +
+
+tm_shape(HCSA_sig) +
+  tm_fill('gi_star') +
+  tm_borders(alpha = .4)
+```
