@@ -152,7 +152,9 @@ any(duplicated(thai_admin1_sf))
 ```
 :::
 
-## Relational Join
+## Aggregating by Province
+
+### Relational Join
 
 ```{r}
 set.seed(69)
@@ -180,6 +182,8 @@ tm_shape(combined_prepped_drug_offences_)+
   tm_text(combined_prepped_drug_offences_$province_en)
 ```
 
+### Landmine
+
 This is where I encountered the first landmine of sorts. The above code results in:
 
 ``` r
@@ -200,16 +204,16 @@ Turned out the **Thailand Drug Offenses** **had the 2 erroneous province names**
 
 I will have to do manual replacements for all affected fields in `thai_drug_offences_sf`
 
-## Data Prep
+### Fixing Mispelled Province Names
 
-Check misspelled province names before
+Check before
 
 ```{r}
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
 
-Rename them
+Rename
 
 ```{r}
 thai_drug_offences_sf$province_en[which(thai_drug_offences_sf$province_en == "Loburi")] <- 'Lop buri'
@@ -225,7 +229,7 @@ unique(thai_drug_offences_sf$province_en)[30]
 
 That should resolve the landmine.
 
-## \[Again\] Relational Join
+### \[Again\] Relational Join
 
 ```{r}
 thai_adm1_drug_offences_sf <- left_join(
@@ -247,9 +251,22 @@ thai_adm1_drug_offences_sf <- left_join(
 str(thai_adm1_drug_offences_sf)
 ```
 
-Check Distribution of `no_cases`
+### Distribution of `no_cases` 
 
--   across Thailand
+::: panel-tabset
+#### Big Picture
+
+Overall
+
+```{r}
+plot(thai_drug_offences_sf$no_cases)
+```
+
+```{r}
+plot(fitdist(thai_drug_offences_sf$no_cases, 'norm'))
+```
+
+Check distributions annually to verify
 
 ```{r}
 thai_17 <- thai_drug_offences_sf %>% filter(fiscal_year==2017)
@@ -269,48 +286,251 @@ plot(fitdist(thai_21$no_cases, 'norm'))
 plot(fitdist(thai_22$no_cases, 'norm'))
 ```
 
--   Grouped by province
+#### Aggregated Cases by Province across 2017-2022
 
 ```{r}
-# plot(thai_adm1_drug_offences_sf$total_cases)
-plot(fitdist(thai_adm1_drug_offences_sf$total_cases, 'norm'))
+plot(thai_adm1_drug_offences_sf$total_cases)
 ```
 
-> Indicates big tail
+```{r}
+plot(fitdist(thai_adm1_drug_offences_sf$total_cases, 'norm'))
+```
+:::
 
-## Visualise
+#### 
+
+> **Conclusions: Right Skewed**; **Fat right tail**; Outliers present
+>
+> Hence, to visualise the continuous variable `total_cases` , I am goin to experiment with:
+>
+> -   `quantile`
+>
+> -   `log10`
+>
+> -   `order`
+>
+> ```{=html}
+> <!-- -->
+> ```
+> -   `headtails`
+>
+> -   `log10_pretty`
+>
+> -   `cont`
+
+### Visualise
 
 > [Visual styling](https://r-tmap.github.io/tmap-book/visual-variables.html)
 
 ```{r}
 tmap_mode('plot')
+```
 
+::: panel-tabset
+#### style = "quantile"
+
+```{r}
 tm_shape(thai_adm1_drug_offences_sf) +
-  tm_polygons(
+  tm_fill(
     col = "total_cases",
-    palette = "YlOrRd",
+    palette = "-RdYlGn",
     style = "quantile",    # Use quantiles to emphasize hotspots
     border.col = "white",
     lwd = 0.666,             # Adjust line width of province borders
-    title = "Total Drug Cases"
   ) +
   tm_text(
     "ADM1_PCODE",    # Province NUMERIC code
     size = "total_cases",  # proportional symbols
     col = "black",
-    auto.placement = TRUE,
+    # auto.placement = TRUE,
     shadow = TRUE
   ) +
-  tm_borders(lwd = 0.5) +  # Border thickness
+  
+  tm_borders(lwd = 0.666) +  # Border thickness
+  tm_compass(type="8star", size = 1.666) +
+  tm_scale_bar(width = 0.156, position = c("right", "bottom"))  +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  
   tm_layout(
     legend.outside = TRUE, 
     frame = FALSE,
     main.title = "Thailand Drug Offenses (2017-2022)",
-    main.title.size = 1.1
+    main.title.size = 1.0
   ) +
-  tm_scale_bar() +         # Scale Bar
-  tm_legend(position = c("right", "top")) # Legend Position
+  tm_legend(position = c("right", "bottom")) # Legend Position
 ```
+
+#### style = "log10"
+
+```{r}
+tm_shape(thai_adm1_drug_offences_sf) +
+  tm_fill(
+    col = "total_cases",
+    palette = "-RdYlGn",
+    style = "log10",    # Use quantiles to emphasize hotspots
+    border.col = "white",
+    lwd = 0.666,             # Adjust line width of province borders
+  ) +
+  tm_text(
+    "ADM1_PCODE",    # Province NUMERIC code
+    size = "total_cases",  # proportional symbols
+    col = "black",
+    # auto.placement = TRUE,
+    shadow = TRUE
+  ) +
+  
+  tm_borders(lwd = 0.666) +  # Border thickness
+  tm_compass(type="8star", size = 1.666) +
+  tm_scale_bar(width = 0.156, position = c("right", "bottom"))  +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  
+  tm_layout(
+    legend.outside = TRUE, 
+    frame = FALSE,
+    main.title = "Thailand Drug Offenses (2017-2022)",
+    main.title.size = 1.0
+  ) +
+  tm_legend(position = c("right", "bottom")) # Legend Position
+```
+
+#### style = "order"
+
+```{r}
+tm_shape(thai_adm1_drug_offences_sf) +
+  tm_fill(
+    col = "total_cases",
+    palette = "-RdYlGn",
+    style = "order",    # Use quantiles to emphasize hotspots
+    border.col = "white",
+    lwd = 0.666,             # Adjust line width of province borders
+  ) +
+  tm_text(
+    "ADM1_PCODE",    # Province NUMERIC code
+    size = "total_cases",  # proportional symbols
+    col = "black",
+    # auto.placement = TRUE,
+    shadow = TRUE
+  ) +
+  
+  tm_borders(lwd = 0.666) +  # Border thickness
+  tm_compass(type="8star", size = 1.666) +
+  tm_scale_bar(width = 0.156, position = c("right", "bottom"))  +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  
+  tm_layout(
+    legend.outside = TRUE, 
+    frame = FALSE,
+    main.title = "Thailand Drug Offenses (2017-2022)",
+    main.title.size = 1.0
+  ) +
+  tm_legend(position = c("right", "bottom")) # Legend Position
+```
+
+#### style = 'headtails'
+
+```{r}
+tm_shape(thai_adm1_drug_offences_sf) +
+  tm_fill(
+    col = "total_cases",
+    palette = "-RdYlGn",
+    style = "headtails",    # Use quantiles to emphasize hotspots
+    border.col = "white",
+    lwd = 0.666,             # Adjust line width of province borders
+  ) +
+  tm_text(
+    "ADM1_PCODE",    # Province NUMERIC code
+    size = "total_cases",  # proportional symbols
+    col = "black",
+    # auto.placement = TRUE,
+    shadow = TRUE
+  ) +
+  
+  tm_borders(lwd = 0.666) +  # Border thickness
+  tm_compass(type="8star", size = 1.666) +
+  tm_scale_bar(width = 0.156, position = c("right", "bottom"))  +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  
+  tm_layout(
+    legend.outside = TRUE, 
+    frame = FALSE,
+    main.title = "Thailand Drug Offenses (2017-2022)",
+    main.title.size = 1.0
+  ) +
+  tm_legend(position = c("right", "bottom")) # Legend Position
+```
+
+#### style = 'log10_pretty'
+
+```{r}
+tm_shape(thai_adm1_drug_offences_sf) +
+  tm_fill(
+    col = "total_cases",
+    palette = "-RdYlGn",
+    style = "log10_pretty",    # Use quantiles to emphasize hotspots
+    border.col = "white",
+    lwd = 0.666,             # Adjust line width of province borders
+  ) +
+  tm_text(
+    "ADM1_PCODE",    # Province NUMERIC code
+    size = "total_cases",  # proportional symbols
+    col = "black",
+    # auto.placement = TRUE,
+    shadow = TRUE
+  ) +
+  
+  tm_borders(lwd = 0.666) +  # Border thickness
+  tm_compass(type="8star", size = 1.666) +
+  tm_scale_bar(width = 0.156, position = c("right", "bottom"))  +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  
+  tm_layout(
+    legend.outside = TRUE, 
+    frame = FALSE,
+    main.title = "Thailand Drug Offenses (2017-2022)",
+    main.title.size = 1.0
+  ) +
+  tm_legend(position = c("right", "bottom")) # Legend Position
+```
+
+#### style = 'cont'
+
+```{r}
+tm_shape(thai_adm1_drug_offences_sf) +
+  tm_fill(
+    col = "total_cases",
+    palette = "-RdYlGn",
+    style = "cont",    # Use quantiles to emphasize hotspots
+    border.col = "white",
+    lwd = 0.666,             # Adjust line width of province borders
+  ) +
+  tm_text(
+    "ADM1_PCODE",    # Province NUMERIC code
+    size = "total_cases",  # proportional symbols
+    col = "black",
+    # auto.placement = TRUE,
+    shadow = TRUE
+  ) +
+  
+  tm_borders(lwd = 0.666) +  # Border thickness
+  tm_compass(type="8star", size = 1.666) +
+  tm_scale_bar(width = 0.156, position = c("right", "bottom"))  +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  
+  tm_layout(
+    legend.outside = TRUE, 
+    frame = FALSE,
+    main.title = "Thailand Drug Offenses (2017-2022)",
+    main.title.size = 1.0
+  ) +
+  tm_legend(position = c("right", "bottom")) # Legend Position
+```
+:::
+
+> `'log10'` style had the best visualisation of the distribution drug offenses in terms of **contrast** between 'hot' and 'cold' spots and overall aesthetics.
+
+### Comparing with Population Data
+
+\<TODO\>
 
 ```{r}
 # write_rds()
