@@ -168,6 +168,7 @@ head(province_drug_offences)
 ```
 
 ```{r}
+#| eval: false
 combined_prepped_drug_offences_ <- left_join(province_drug_offences, thai_admin1_sf,by = c('province_en'='ADM1_EN')) %>% st_as_sf()
 glimpse(combined_prepped_drug_offences_)
 ```
@@ -209,6 +210,7 @@ I will have to do manual replacements for all affected fields in `thai_drug_offe
 Check before
 
 ```{r}
+#| eval: false
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
@@ -223,6 +225,7 @@ thai_drug_offences_sf$province_en[which(thai_drug_offences_sf$province_en == "bu
 Check fix
 
 ```{r}
+#| eval: false
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
@@ -251,7 +254,7 @@ thai_adm1_drug_offences_sf <- left_join(
 str(thai_adm1_drug_offences_sf)
 ```
 
-### Distribution of `no_cases` 
+### Distribution of `no_cases`
 
 ::: panel-tabset
 #### Big Picture
@@ -259,10 +262,12 @@ str(thai_adm1_drug_offences_sf)
 Overall
 
 ```{r}
+#| eval: false
 plot(thai_drug_offences_sf$no_cases)
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(thai_drug_offences_sf$no_cases, 'norm'))
 ```
 
@@ -278,6 +283,7 @@ thai_22 <- thai_drug_offences_sf %>% filter(fiscal_year==2022)
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(thai_17$no_cases, 'norm'))
 plot(fitdist(thai_18$no_cases, 'norm'))
 plot(fitdist(thai_19$no_cases, 'norm'))
@@ -289,10 +295,12 @@ plot(fitdist(thai_22$no_cases, 'norm'))
 #### Aggregated Cases by Province across 2017-2022
 
 ```{r}
+#| eval: false
 plot(thai_adm1_drug_offences_sf$total_cases)
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(thai_adm1_drug_offences_sf$total_cases, 'norm'))
 ```
 :::
@@ -309,9 +317,8 @@ plot(fitdist(thai_adm1_drug_offences_sf$total_cases, 'norm'))
 >
 > -   `order`
 >
-> ```{=html}
 > <!-- -->
-> ```
+>
 > -   `headtails`
 >
 > -   `log10_pretty`
@@ -329,7 +336,12 @@ tmap_mode('plot')
 ::: panel-tabset
 #### style = "quantile"
 
+<details>
+
+<summary>Reveal Code</summary>
+
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -360,7 +372,13 @@ tm_shape(thai_adm1_drug_offences_sf) +
   tm_legend(position = c("right", "bottom")) # Legend Position
 ```
 
+</details>
+
 #### style = "log10"
+
+<details>
+
+<summary>Reveal Code</summary>
 
 ```{r}
 tm_shape(thai_adm1_drug_offences_sf) +
@@ -393,9 +411,16 @@ tm_shape(thai_adm1_drug_offences_sf) +
   tm_legend(position = c("right", "bottom")) # Legend Position
 ```
 
+</details>
+
 #### style = "order"
 
+<details>
+
+<summary>Reveal Code</summary>
+
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -426,9 +451,16 @@ tm_shape(thai_adm1_drug_offences_sf) +
   tm_legend(position = c("right", "bottom")) # Legend Position
 ```
 
+</details>
+
 #### style = 'headtails'
 
+<details>
+
+<summary>Reveal Code</summary>
+
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -459,9 +491,16 @@ tm_shape(thai_adm1_drug_offences_sf) +
   tm_legend(position = c("right", "bottom")) # Legend Position
 ```
 
+</details>
+
 #### style = 'log10_pretty'
 
+<details>
+
+<summary>Reveal Code</summary>
+
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -492,9 +531,16 @@ tm_shape(thai_adm1_drug_offences_sf) +
   tm_legend(position = c("right", "bottom")) # Legend Position
 ```
 
+</details>
+
 #### style = 'cont'
 
+<details>
+
+<summary>Reveal Code</summary>
+
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -524,6 +570,8 @@ tm_shape(thai_adm1_drug_offences_sf) +
   ) +
   tm_legend(position = c("right", "bottom")) # Legend Position
 ```
+
+</details>
 :::
 
 > `'log10'` style had the best visualisation of the distribution drug offenses in terms of **contrast** between 'hot' and 'cold' spots and overall aesthetics.

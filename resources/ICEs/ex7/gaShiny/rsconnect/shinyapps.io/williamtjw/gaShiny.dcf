@@ -1,0 +1,12 @@
+name: gaShiny
+title: gaShiny
+username: williamtjw
+account: williamtjw
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12867015
+bundleId: 9161186
+url: https://williamtjw.shinyapps.io/gaShiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
