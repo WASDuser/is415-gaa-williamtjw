@@ -341,7 +341,7 @@ tmap_mode('plot')
 
 <summary>Reveal Code</summary>
 
-```{r}
+```{r} <-}
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -381,6 +381,7 @@ tm_shape(thai_adm1_drug_offences_sf) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -420,6 +421,7 @@ tm_shape(thai_adm1_drug_offences_sf) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -459,6 +461,7 @@ tm_shape(thai_adm1_drug_offences_sf) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -498,6 +501,7 @@ tm_shape(thai_adm1_drug_offences_sf) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -537,6 +541,7 @@ tm_shape(thai_adm1_drug_offences_sf) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -577,7 +582,6 @@ tm_shape(thai_adm1_drug_offences_sf) +
 ### Prepare data
 
 ```{r}
-#| eval: false
 thai_drug_offences_sf_by_province_year <- left_join(
     (thai_drug_offences_sf %>% 
             mutate(province_en = toupper(province_en)) %>% group_by(fiscal_year)),
@@ -609,7 +613,6 @@ As previously plotted, the distribution of drug offenses in Thailand (across tim
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
 tm_shape(thai_drug_offences_sf_by_province_year) +
   tm_fill(
     col = "total_cases",
@@ -638,7 +641,6 @@ tm_shape(thai_drug_offences_sf_by_province_year) +
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
 # Create the faceted map
 tm_shape(thai_drug_offences_sf_by_province_year) +
   tm_fill(
