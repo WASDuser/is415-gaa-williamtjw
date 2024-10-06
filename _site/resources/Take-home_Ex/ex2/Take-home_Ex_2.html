@@ -241,7 +241,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#again-relational-join" id="toc-again-relational-join" class="nav-link" data-scroll-target="#again-relational-join">[Again] Relational Join</a></li>
   <li><a href="#distribution-of-no_cases" id="toc-distribution-of-no_cases" class="nav-link" data-scroll-target="#distribution-of-no_cases">Distribution of <code>no_cases</code></a></li>
   <li><a href="#visualise" id="toc-visualise" class="nav-link" data-scroll-target="#visualise">Visualise</a></li>
-  <li><a href="#comparing-with-population-data" id="toc-comparing-with-population-data" class="nav-link" data-scroll-target="#comparing-with-population-data">Comparing with Population Data</a></li>
+  </ul></li>
+  <li><a href="#aggregating-by-time-province-same-as-on-profs-site" id="toc-aggregating-by-time-province-same-as-on-profs-site" class="nav-link" data-scroll-target="#aggregating-by-time-province-same-as-on-profs-site">Aggregating by Time &amp; Province (Same as on Prof’s site)</a>
+  <ul class="collapse">
+  <li><a href="#prepare-data" id="toc-prepare-data" class="nav-link" data-scroll-target="#prepare-data">Prepare data</a></li>
+  <li><a href="#check" id="toc-check" class="nav-link" data-scroll-target="#check">Check</a></li>
+  <li><a href="#visualise-using-tmap" id="toc-visualise-using-tmap" class="nav-link" data-scroll-target="#visualise-using-tmap">Visualise using <code>tmap</code></a></li>
+  <li><a href="#future-comparing-with-population-data" id="toc-future-comparing-with-population-data" class="nav-link" data-scroll-target="#future-comparing-with-population-data">[FUTURE] Comparing with Population Data</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -276,7 +282,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">October 5, 2024</p>
+      <p class="date-modified">October 6, 2024</p>
     </div>
   </div>
     
@@ -599,7 +605,7 @@ First 10 features:
 <section id="section" class="level4">
 <h4 class="anchored" data-anchor-id="section"></h4>
 <blockquote class="blockquote">
-<p><strong>Conclusions: Right Skewed</strong>; <strong>Fat right tail</strong>; Outliers present</p>
+<p><strong>Conclusions: Right Skewed; Fat right tail; Outliers present</strong></p>
 <p>Hence, to visualise the continuous variable <code>total_cases</code> , I am goin to experiment with:</p>
 <ul>
 <li><p><code>quantile</code></p></li>
@@ -700,13 +706,6 @@ Reveal Code
 <span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">main.title.size =</span> <span class="fl">1.0</span></span>
 <span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_legend</span>(<span class="at">position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>)) <span class="co"># Legend Position</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Take-home_Ex_2_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
 </div>
 </details>
 </div>
@@ -864,14 +863,125 @@ Reveal Code
 <p><code>'log10'</code> style had the best visualisation of the distribution drug offenses in terms of <strong>contrast</strong> between ‘hot’ and ‘cold’ spots and overall aesthetics.</p>
 </blockquote>
 </section>
-<section id="comparing-with-population-data" class="level3">
-<h3 class="anchored" data-anchor-id="comparing-with-population-data">Comparing with Population Data</h3>
+</section>
+<section id="aggregating-by-time-province-same-as-on-profs-site" class="level2">
+<h2 class="anchored" data-anchor-id="aggregating-by-time-province-same-as-on-profs-site">Aggregating by Time &amp; Province (Same as on Prof’s site)</h2>
+<section id="prepare-data" class="level3">
+<h3 class="anchored" data-anchor-id="prepare-data">Prepare data</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>thai_drug_offences_sf_by_province_year <span class="ot">&lt;-</span> <span class="fu">left_join</span>(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    (thai_drug_offences_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">province_en =</span> <span class="fu">toupper</span>(province_en)) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(fiscal_year)),</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    (thai_admin1_sf <span class="sc">%&gt;%</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">ADM1_EN =</span> <span class="fu">toupper</span>(ADM1_EN), <span class="at">ADM1_PCODE =</span> <span class="fu">substr</span>(ADM1_PCODE, <span class="dv">3</span>, <span class="fu">nchar</span>(ADM1_PCODE)))),</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">'province_en'</span><span class="ot">=</span><span class="st">'ADM1_EN'</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_as_sf</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(fiscal_year,province_en,ADM1_PCODE, geometry) <span class="sc">%&gt;%</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">total_cases =</span> <span class="fu">sum</span>(no_cases, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<blockquote class="blockquote">
+<p><code>.groups = "drop"</code> avoids creating unnecessary group structure</p>
+</blockquote>
+</section>
+<section id="check" class="level3">
+<h3 class="anchored" data-anchor-id="check">Check</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(thai_drug_offences_sf_by_province_year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 462
+Columns: 5
+$ fiscal_year &lt;dbl&gt; 2017, 2017, 2017, 2017, 2017, 2017, 2017, 2017, 2017, 2017…
+$ province_en &lt;chr&gt; "AMNAT CHAROEN", "ANG THONG", "BANGKOK", "BUENG KAN", "BUR…
+$ ADM1_PCODE  &lt;chr&gt; "37", "15", "10", "38", "31", "24", "18", "36", "22", "50"…
+$ geometry    &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((104.9598 16..., MULTIPOLYGON …
+$ total_cases &lt;dbl&gt; 5076, 1614, 60067, 4312, 5061, 9318, 1536, 6435, 4021, 156…</code></pre>
+</div>
+</div>
+</section>
+<section id="visualise-using-tmap" class="level3">
+<h3 class="anchored" data-anchor-id="visualise-using-tmap">Visualise using <code>tmap</code></h3>
+<p>As previously plotted, the distribution of drug offenses in Thailand (across time periods and within province areas) is characteristic of a <strong>right-skewed distribution</strong> or <strong>heavy-tailed</strong> distribution. Hence, a <strong>logarithmic scale</strong> or a <strong>Jenks Natural Breaks</strong> method would be suitable to handle the skewness and emphasize meaningful breaks in the data.</p>
+<section id="log" class="level4">
+<h4 class="anchored" data-anchor-id="log">Log</h4>
+<details>
+<summary>
+Reveal Code
+</summary>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(thai_drug_offences_sf_by_province_year) <span class="sc">+</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"total_cases"</span>,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"Blues"</span>,       <span class="co"># Use a blue color palette similar to the image</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"log10"</span>,      <span class="co"># Adjust based on the distribution of your data</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">5</span>,                   <span class="co"># Define number of bins for colors</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Drug use cases"</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_facets</span>(<span class="at">by =</span> <span class="st">"fiscal_year"</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Facet by year, 2 rows and 3 columns</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(</span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Drug use cases by year"</span>,               <span class="co"># Title for the entire plot</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),         <span class="co"># Position the legend on the right</span></span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.label.size =</span> <span class="fl">1.333</span>,                         <span class="co"># Adjust the size of the year labels</span></span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title.size =</span> .<span class="dv">666</span>,                        <span class="co"># Customize the size of the legend title</span></span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text.size =</span> .<span class="dv">666</span>                          <span class="co"># Customize the size of the legend text</span></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_2_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</details>
+</section>
+<section id="jenks" class="level4">
+<h4 class="anchored" data-anchor-id="jenks">Jenks</h4>
+<details>
+<summary>
+Reveal Code
+</summary>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the faceted map</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(thai_drug_offences_sf_by_province_year) <span class="sc">+</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"total_cases"</span>,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"Blues"</span>,       <span class="co"># Use a blue color palette similar to the image</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"jenks"</span>,      <span class="co"># Adjust based on the distribution of your data</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">5</span>,                   <span class="co"># Define number of bins for colors</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Drug use cases"</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_facets</span>(<span class="at">by =</span> <span class="st">"fiscal_year"</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">3</span>) <span class="sc">+</span>  <span class="co"># Facet by year, 2 rows and 3 columns</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Drug use cases by year"</span>,               <span class="co"># Title for the entire plot</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),         <span class="co"># Position the legend on the right</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.label.size =</span> <span class="fl">1.333</span>,                         <span class="co"># Adjust the size of the year labels</span></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title.size =</span> .<span class="dv">666</span>,                        <span class="co"># Customize the size of the legend title</span></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text.size =</span> .<span class="dv">666</span>                          <span class="co"># Customize the size of the legend text</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex_2_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</details>
+<blockquote class="blockquote">
+<p>Jenks has better contrast between hot and cold spots overall compared to the logarithmic method</p>
+</blockquote>
+</section>
+</section>
+<section id="future-comparing-with-population-data" class="level3">
+<h3 class="anchored" data-anchor-id="future-comparing-with-population-data">[FUTURE] Comparing with Population Data</h3>
 <p>&lt;TODO&gt;</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write_rds()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(thai_drug_offences_sf_by_province_year, <span class="st">'data/rds/thai_drug_offences_sf_by_province_year.rds'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read_rds()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>thai_drug_offences_sf_by_province_year <span class="ot">=</span> <span class="fu">read_rds</span>(<span class="st">'data/rds/thai_drug_offences_sf_by_province_year.rds'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

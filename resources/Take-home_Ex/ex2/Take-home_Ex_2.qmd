@@ -274,6 +274,7 @@ plot(fitdist(thai_drug_offences_sf$no_cases, 'norm'))
 Check distributions annually to verify
 
 ```{r}
+#| eval: false
 thai_17 <- thai_drug_offences_sf %>% filter(fiscal_year==2017)
 thai_18 <- thai_drug_offences_sf %>% filter(fiscal_year==2018)
 thai_19 <- thai_drug_offences_sf %>% filter(fiscal_year==2019)
@@ -307,7 +308,7 @@ plot(fitdist(thai_adm1_drug_offences_sf$total_cases, 'norm'))
 
 #### 
 
-> **Conclusions: Right Skewed**; **Fat right tail**; Outliers present
+> **Conclusions: Right Skewed; Fat right tail; Outliers present**
 >
 > Hence, to visualise the continuous variable `total_cases` , I am goin to experiment with:
 >
@@ -381,6 +382,7 @@ tm_shape(thai_adm1_drug_offences_sf) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(thai_adm1_drug_offences_sf) +
   tm_fill(
     col = "total_cases",
@@ -576,14 +578,101 @@ tm_shape(thai_adm1_drug_offences_sf) +
 
 > `'log10'` style had the best visualisation of the distribution drug offenses in terms of **contrast** between 'hot' and 'cold' spots and overall aesthetics.
 
-### Comparing with Population Data
+## Aggregating by Time & Province (Same as on Prof's site)
+
+### Prepare data
+
+```{r}
+thai_drug_offences_sf_by_province_year <- left_join(
+    (thai_drug_offences_sf %>% 
+            mutate(province_en = toupper(province_en)) %>% group_by(fiscal_year)),
+    (thai_admin1_sf %>%
+            mutate(ADM1_EN = toupper(ADM1_EN), ADM1_PCODE = substr(ADM1_PCODE, 3, nchar(ADM1_PCODE)))),
+    by = c('province_en'='ADM1_EN')) %>%
+    st_as_sf() %>%
+    group_by(fiscal_year,province_en,ADM1_PCODE, geometry) %>%
+    summarise(total_cases = sum(no_cases, na.rm = TRUE), .groups = "drop")
+```
+
+> `.groups = "drop"` avoids creating unnecessary group structure
+
+### Check
+
+```{r}
+glimpse(thai_drug_offences_sf_by_province_year)
+```
+
+### Visualise using `tmap`
+
+As previously plotted, the distribution of drug offenses in Thailand (across time periods and within province areas) is characteristic of a **right-skewed distribution** or **heavy-tailed** distribution. Hence, a **logarithmic scale** or a **Jenks Natural Breaks** method would be suitable to handle the skewness and emphasize meaningful breaks in the data.
+
+#### Log
+
+<details>
+
+<summary>Reveal Code</summary>
+
+```{r}
+tm_shape(thai_drug_offences_sf_by_province_year) +
+  tm_fill(
+    col = "total_cases",
+    palette = "Blues",       # Use a blue color palette similar to the image
+    style = "log10",      # Adjust based on the distribution of your data
+    n = 5,                   # Define number of bins for colors
+    title = "Drug use cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", nrow = 2, ncol = 3) +  # Facet by year, 2 rows and 3 columns
+  tm_layout(
+    title = "Drug use cases by year",               # Title for the entire plot
+    legend.position = c("right", "bottom"),         # Position the legend on the right
+    panel.label.size = 1.333,                         # Adjust the size of the year labels
+    legend.title.size = .666,                        # Customize the size of the legend title
+    legend.text.size = .666                          # Customize the size of the legend text
+  )
+```
+
+</details>
+
+#### Jenks
+
+<details>
+
+<summary>Reveal Code</summary>
+
+```{r}
+# Create the faceted map
+tm_shape(thai_drug_offences_sf_by_province_year) +
+  tm_fill(
+    col = "total_cases",
+    palette = "Blues",       # Use a blue color palette similar to the image
+    style = "jenks",      # Adjust based on the distribution of your data
+    n = 5,                   # Define number of bins for colors
+    title = "Drug use cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", nrow = 2, ncol = 3) +  # Facet by year, 2 rows and 3 columns
+  tm_layout(
+    title = "Drug use cases by year",               # Title for the entire plot
+    legend.position = c("right", "bottom"),         # Position the legend on the right
+    panel.label.size = 1.333,                         # Adjust the size of the year labels
+    legend.title.size = .666,                        # Customize the size of the legend title
+    legend.text.size = .666                          # Customize the size of the legend text
+  )
+```
+
+</details>
+
+> Jenks has better contrast between hot and cold spots overall compared to the logarithmic method
+
+### \[FUTURE\] Comparing with Population Data
 
 \<TODO\>
 
 ```{r}
-# write_rds()
+write_rds(thai_drug_offences_sf_by_province_year, 'data/rds/thai_drug_offences_sf_by_province_year.rds')
 ```
 
 ```{r}
-# read_rds()
+thai_drug_offences_sf_by_province_year = read_rds('data/rds/thai_drug_offences_sf_by_province_year.rds')
 ```
