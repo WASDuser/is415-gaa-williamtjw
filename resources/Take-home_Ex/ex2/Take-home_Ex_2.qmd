@@ -4,7 +4,7 @@ author: "William"
 date: "September 23, 2024"
 date-modified: "last-modified"
 execute: 
-  eval: true
+  eval: false
   echo: true
   freeze: true
 ---
@@ -44,7 +44,8 @@ For the purposes of this exercise I will be dealing with **admin1** only (provin
 -   fitdist: finding out distribution type to match to match tmap style
 
 ```{r}
-pacman::p_load(sf,tidyverse,skimr,readxl,sfdep,tmap,fitdistrplus)
+
+pacman::p_load(sf,tidyverse,skimr,readxl,sfdep,tmap,fitdistrplus,sfdep)
 ```
 
 # Data
@@ -73,12 +74,12 @@ thai_drug_offences_sf <- read_csv('data/aspatial/thai_drug_offenses_2017_2022.cs
 ```
 
 ```{r}
-#| eval: false
+
 str(thai_drug_offences_sf)
 ```
 
 ```{r}
-#| eval: false
+
 summ_table <- skim(thai_drug_offences_sf) %>% as.data.frame()
 summ_table
 ```
@@ -92,7 +93,7 @@ summ_table
 > -   summary statistics of overall **`no_cases`** seem to indicate **right-skew**
 
 ```{r}
-#| eval: false
+
 thai_no_case <- summ_table %>% filter(skim_variable == 'no_cases') %>% dplyr::select(c(10:16))
 thai_no_case
 ```
@@ -102,12 +103,12 @@ thai_no_case
 Identify the unique values for each categorical column
 
 ```{r}
-#| eval: false
+
 unique(thai_drug_offences_sf$fiscal_year)
 ```
 
 ```{r}
-#| eval: false
+
 offense_type <- unique(thai_drug_offences_sf$types_of_drug_offenses)
 offense_type
 ```
@@ -133,7 +134,7 @@ thai_admin1_sf <- st_read(
 ```
 
 ```{r}
-#| eval: false
+
 glimpse(thai_admin1_sf)
 ```
 
@@ -149,7 +150,7 @@ thai_admin1_sf
 ```
 
 ```{r}
-#| eval: false
+
 any(duplicated(thai_admin1_sf))
 ```
 :::
@@ -163,7 +164,7 @@ set.seed(69)
 ```
 
 ```{r}
-#| eval: false
+#| eval:  false
 province_drug_offences <- thai_drug_offences_sf %>% 
   group_by(province_en) %>%
   summarize(total_cases = sum(no_cases), .groups = 'drop')
@@ -171,13 +172,13 @@ head(province_drug_offences)
 ```
 
 ```{r}
-#| eval: false
+#| eval:  false
 combined_prepped_drug_offences_ <- left_join(province_drug_offences, thai_admin1_sf,by = c('province_en'='ADM1_EN')) %>% st_as_sf()
 glimpse(combined_prepped_drug_offences_)
 ```
 
 ```{r}
-#| eval: false
+#| eval:  false
 tmap_mode('plot')
 
 tm_shape(combined_prepped_drug_offences_)+
@@ -213,7 +214,7 @@ I will have to do manual replacements for all affected fields in `thai_drug_offe
 Check before
 
 ```{r}
-#| eval: false
+
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
@@ -230,7 +231,7 @@ thai_drug_offences_sf <- thai_drug_offences_sf %>% mutate(province_en = toupper(
 Check fix
 
 ```{r}
-#| eval: false
+
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
@@ -294,7 +295,7 @@ str(combined_suspected_offenses_sf)
 Overall Visualisations using qtm() and tmap_arrange()
 
 ```{r}
-#| eval: false
+
 basemap <- tm_shape(combined_offenses_sf) + tm_polygons() + tm_text("ADM1_PCODE",size = 0.4)
 offenses <- qtm(combined_offenses_sf,"total_cases")
 suspects <- qtm(combined_suspected_offenses_sf,"total_cases")
@@ -304,38 +305,38 @@ tmap_arrange(suspects, basemap, offenses, asp=1, ncol=3)
 Overall Distributions
 
 ```{r}
-#| eval: false
+
 par(mfrow=c(1,2))
 plot(offenses_sf$no_cases)
 plot(suspected_offenses_sf$no_cases)
 ```
 
 ```{r}
-#| eval: false
+
 plot(fitdist(offenses_sf$no_cases, 'norm'))
 ```
 
 ```{r}
-#| eval: false
+
 plot(fitdist(suspected_offenses_sf$no_cases, 'norm'))
 ```
 
 #### Aggregated Cases by Province across 2017-2022
 
 ```{r}
-#| eval: false
+
 par(mfrow=c(1,2))
 plot(combined_offenses_sf$total_cases)
 plot(combined_suspected_offenses_sf$total_cases)
 ```
 
 ```{r}
-#| eval: false
+
 plot(fitdist(combined_offenses_sf$total_cases, 'norm'))
 ```
 
 ```{r}
-#| eval: false
+
 plot(fitdist(combined_suspected_offenses_sf$total_cases, 'norm'))
 ```
 :::
@@ -376,7 +377,7 @@ tmap_mode('plot')
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 offenses_qt <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -447,7 +448,7 @@ tmap_arrange(offenses_qt, suspected_qt, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 offenses_log <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -518,7 +519,7 @@ tmap_arrange(offenses_log, suspected_log, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 offenses_odr <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -589,7 +590,7 @@ tmap_arrange(offenses_odr, suspected_odr, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 offenses_ht <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -660,7 +661,7 @@ tmap_arrange(offenses_ht, suspected_ht, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 offenses_lgprty <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -731,7 +732,7 @@ tmap_arrange(offenses_lgprty, suspected_lgprty, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 offenses_cont <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -805,7 +806,7 @@ tmap_arrange(offenses_cont, suspected_cont, asp=1, ncol=2)
 #### Relational Join
 
 ```{r}
-#| eval: false
+
 offences_sf_joined <- left_join(
     (offenses_sf  %>% group_by(fiscal_year)),
     thai_admin1_sf,
@@ -822,7 +823,7 @@ suspected_offenses_sf_joined <- left_join(
 #### Modify
 
 ```{r}
-#| eval: false
+
 offences_sf_by_province_year <- offences_sf_joined %>% 
     group_by(fiscal_year,province_en,ADM1_PCODE, geometry) %>%
     summarise(total_cases = sum(no_cases, na.rm = TRUE), .groups = "drop")
@@ -837,12 +838,12 @@ suspected_offences_sf_by_province_year <- suspected_offenses_sf_joined %>%
 ### Check
 
 ```{r}
-#| eval: false
+
 glimpse(offences_sf_by_province_year)
 ```
 
 ```{r}
-#| eval: false
+
 glimpse(suspected_offences_sf_by_province_year)
 ```
 
@@ -857,7 +858,7 @@ As previously plotted, the distribution of drug offenses in Thailand (across tim
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 tm_shape(offences_sf_by_province_year) +
   tm_fill(
     col = "total_cases",
@@ -878,7 +879,7 @@ tm_shape(offences_sf_by_province_year) +
 ```
 
 ```{r}
-#| eval: false
+
 tm_shape(suspected_offences_sf_by_province_year) +
   tm_fill(
     col = "total_cases",
@@ -907,7 +908,7 @@ tm_shape(suspected_offences_sf_by_province_year) +
 <summary>Reveal Code</summary>
 
 ```{r}
-#| eval: false
+
 # Create the faceted map
 tm_shape(offences_sf_by_province_year) +
   tm_fill(
@@ -950,32 +951,12 @@ tm_shape(suspected_offences_sf_by_province_year) +
 
 > Jenks has better contrast between hot and cold spots overall compared to the logarithmic method
 
-# RDS Checkpoint
-
-```{r}
-#| eval: false
-
-# write_rds(offenses_sf,'data/rds/offenses_sf.rds')
-# write_rds(suspected_offenses_sf,'data/rds/suspected_offenses_sf.rds')
-
-# write_rds(offences_sf_by_province_year, 'data/rds/offences_sf_by_province_year.rds')
-# write_rds(suspected_offences_sf_by_province_year, 'data/rds/suspected_offences_sf_by_province_year.rds')
-```
-
-```{r}
-# offenses_sf <- read_rds('data/rds/offenses_sf.rds')
-# suspected_offences_sf <- read_rds('data/rds/suspected_offenses_sf.rds')
-
-# offences_sf_by_province_year = read_rds('data/rds/offences_sf_by_province_year.rds')
-# suspected_offences_sf_by_province_year = read_rds('data/rds/suspected_offences_sf_by_province_year.rds')``
-```
-
 # Visualising Drug Abuse Indicators
 
 ### Prepare layers
 
 ```{r}
-#| eval: false
+#| eval:  false
 drug_use    <- offenses_sf %>% filter(types_of_drug_offenses=='drug_use_cases')
 possession  <- offenses_sf %>% filter(types_of_drug_offenses=='possession_cases')
 possession_with_intent_to_distribute <- offenses_sf %>% filter(types_of_drug_offenses=='possession_with_intent_to_distribute_cases')
@@ -987,7 +968,7 @@ conspiracy  <- offenses_sf %>% filter(types_of_drug_offenses=='conspiracy_cases'
 ```
 
 ```{r}
-#| eval: false
+#| eval:  false
 drug_use    <- left_join(drug_use, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
 possession  <- left_join(possession, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
 possession_with_intent_to_distribute <- left_join(possession_with_intent_to_distribute, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
@@ -1023,7 +1004,7 @@ conspiracy  <- left_join(conspiracy, thai_admin1_sf, by = c('province_en'='ADM1_
 ### RDS Checkpoint
 
 ```{r}
-#| eval: false
+#| eval:  false
 write_rds(drug_use, 'data/rds/drug_use.rds')
 write_rds(possession, 'data/rds/possession.rds')
 write_rds(possession_with_intent_to_distribute, 'data/rds/possession_with_intent_to_distribute.rds')
@@ -1046,6 +1027,7 @@ write_rds(conspiracy, 'data/rds/conspiracy.rds')
 ```
 
 ```{r}
+
 drug_use =    read_rds('data/rds/drug_use.rds') %>% st_as_sf()
 possession =  read_rds('data/rds/possession.rds') %>% st_as_sf()
 possession_with_intent_to_distribute = read_rds('data/rds/possession_with_intent_to_distribute.rds') %>% st_as_sf()
@@ -1073,6 +1055,7 @@ conspiracy =  read_rds('data/rds/conspiracy.rds') %>% st_as_sf()
 #### drug use
 
 ```{r}
+
 range(drug_use$no_cases)
 ```
 
@@ -1081,6 +1064,7 @@ range(drug_use$no_cases)
 > -   yellow-orange-red sequential gradient to highlight hotspots
 
 ```{r}
+
 tm_shape(drug_use) + 
   tm_fill(
     col = "no_cases",
@@ -1098,6 +1082,7 @@ tm_shape(drug_use) +
 ```
 
 ```{r}
+
 tm_shape(drug_use) + 
   tm_fill(
     col = "no_cases",
@@ -1119,12 +1104,14 @@ tm_shape(drug_use) +
 #### possession
 
 ```{r}
+
 range(possession$no_cases)
 ```
 
 > Same settings, same rationale as `drug_use`
 
 ```{r}
+
 tm_shape(possession) + 
   tm_fill(
     col = "no_cases",
@@ -1142,6 +1129,7 @@ tm_shape(possession) +
 ```
 
 ```{r}
+
 tm_shape(possession) + 
   tm_fill(
     col = "no_cases",
@@ -1161,12 +1149,14 @@ tm_shape(possession) +
 #### possession with intent to distribute
 
 ```{r}
+
 range(possession_with_intent_to_distribute$no_cases)
 ```
 
 > Smaller range compared to `drug_use` and `possession`, so `quantile` can provide a good balance without compressing the data into a narrow visual range, possibly `jenks` too?
 
 ```{r}
+
 tm_shape(possession_with_intent_to_distribute) + 
   tm_fill(
     col = "no_cases",
@@ -1184,6 +1174,7 @@ tm_shape(possession_with_intent_to_distribute) +
 ```
 
 ```{r}
+
 tm_shape(possession_with_intent_to_distribute) + 
   tm_fill(
     col = "no_cases",
@@ -1203,6 +1194,7 @@ tm_shape(possession_with_intent_to_distribute) +
 #### trafficking
 
 ```{r}
+
 range(trafficking$no_cases)
 ```
 
@@ -1226,6 +1218,7 @@ tm_shape(trafficking) +
 ```
 
 ```{r}
+
 tm_shape(trafficking) + 
   tm_fill(
     col = "no_cases",
@@ -1245,12 +1238,14 @@ tm_shape(trafficking) +
 #### production
 
 ```{r}
+
 range(production$no_cases)
 ```
 
 > Same settings and rationale as trafficking
 
 ```{r}
+
 tm_shape(production) + 
   tm_fill(
     col = "no_cases",
@@ -1268,6 +1263,7 @@ tm_shape(production) +
 ```
 
 ```{r}
+
 tm_shape(production) + 
   tm_fill(
     col = "no_cases",
@@ -1287,12 +1283,14 @@ tm_shape(production) +
 #### import
 
 ```{r}
+
 range(import$no_cases)
 ```
 
 > Small range: pretty (default) should suffice since there aren't many useful data points anyways
 
 ```{r}
+
 tm_shape(import) + 
   tm_fill(
     col = "no_cases",
@@ -1313,12 +1311,14 @@ tm_shape(import) +
 #### export
 
 ```{r}
+
 range(export$no_cases)
 ```
 
 > Same settings and rationale as import
 
 ```{r}
+
 tm_shape(export) + 
   tm_fill(
     col = "no_cases",
@@ -1339,12 +1339,14 @@ tm_shape(export) +
 #### conspiracy
 
 ```{r}
+
 range(conspiracy$no_cases)
 ```
 
 > Same settings and rationale as import
 
 ```{r}
+
 tm_shape(conspiracy) + 
   tm_fill(
     col = "no_cases",
@@ -1362,6 +1364,241 @@ tm_shape(conspiracy) +
   )
 ```
 :::
+
+# Global Spatial Autocorrelation Analysis
+
+Normally, spatial weights can be computed using functions like `poly2nb()` (for polygons) or `knn2nb()` (for point data), but here we need to account for the time dimension as well.
+
+However I will perform it normally as discussed in class lectures and exercises.
+
+### Global Moran’s I with permutation testing
+
+::: panel-tabset
+```{r}
+set.seed(69)
+yr <- unique(drug_use$fiscal_year)
+```
+
+Compute weight matrix
+
+```{r}
+
+wm_data <- drug_use %>% filter(fiscal_year==2017)
+# wm_q <- wm_data %>% mutate(
+#     nb=st_contiguity(wm_data$geometry),
+#     wt=st_weights(nb, style='W'),
+#     .before=1)
+```
+
+The above code outputs this error message:
+
+```         
+Error in `stopifnot()`:
+ℹ In argument: `wt = st_weights(nb, style = "W")`.
+Caused by error in `nb2listw()`:
+! Empty neighbour sets found
+Backtrace:
+  1. wm_data %>% ...
+ 13. sfdep::st_weights(nb, style = "W")
+ 14. spdep::nb2listw(...)
+ 15. base::stop("Empty neighbour sets found")
+```
+
+Lets isolate the error:
+
+```{r}
+nb <- st_contiguity(wm_data$geometry)
+```
+
+> row 68 corresponds to Phuket
+
+According to Google Maps,
+
+![](images/clipboard-2790575953.png)
+
+Phuket seems to be physically closest to Phang Nga, but since its technically separated by a road bridge, it won't be 'recognised' as a neigbour by `st_contiguity` . I will be modifying Phuket's neigbour list to include Phang Nga:
+
+```{r}
+nb[[68]] <- as.integer(67) # should resolve error
+```
+
+```{r}
+wm_data <- drug_use %>% filter(fiscal_year==2017)
+wm_q <- wm_data %>% mutate(
+    nb=nb,
+    wt=st_weights(nb, style='W'),
+    .before=1) %>% dplyr::select(1,2)
+```
+
+#### drug_use
+
+```{r}
+drug_use_cases <- drug_use %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    drug_use_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### possession
+
+```{r}
+possession_cases <- possession %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    possession_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### possession_with_intent_to_distribute
+
+```{r}
+possession_with_intent_to_distribute_cases <- possession_with_intent_to_distribute %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### trafficking
+
+```{r}
+trafficking_cases <- trafficking %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    trafficking_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### production
+
+```{r}
+production_cases <- production %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    production_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### import
+
+```{r}
+import_cases <- import %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    import_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### export
+
+```{r}
+export_cases <- export %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  mi_perm <- global_moran_perm(
+    export_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+
+#### conspiracy
+
+```{r}
+conspiracy_cases <- conspiracy %>% dplyr::select(1,3)
+
+par(mfrow=c(2,3))
+for (year in yr){
+  cases = conspiracy_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2)
+  mi_perm <- global_moran_perm(
+    # x = integer(nrow(wm_q)),
+    cases,
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  
+  # debugging
+  # print(year)
+  # print(cases)
+
+  # checks if the year's vector has no_case = 0
+  if (sum(cases)==0) {
+    message(paste("Skipping year", year, "due to empty data (0 cases)"))
+    next  # continue to next iteration
+  }
+
+  hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
+  abline(v=0,col="red")
+}
+```
+:::
+
+## Geary's C
+
+## **Spatial Correlogram**
+
+# **Local Indicators of Spatial Association (LISA)**
+
+## Weights
+
+## Moran's I
+
+## LISA Cluster Map
+
+## Hot Spot and Cold Spot Area Analysis (Getis and Ord’s G-Statistics)
+
+#### Weights
+
+#### **Computing Gi statistics**
+
+#### **Mapping Gi values**
 
 # \[FUTURE\] Comparing with Population Data
 
