@@ -73,12 +73,12 @@ thai_drug_offences_sf <- read_csv('data/aspatial/thai_drug_offenses_2017_2022.cs
 ```
 
 ```{r}
-
+#| eval: false
 str(thai_drug_offences_sf)
 ```
 
 ```{r}
-
+#| eval: false
 summ_table <- skim(thai_drug_offences_sf) %>% as.data.frame()
 summ_table
 ```
@@ -92,7 +92,7 @@ summ_table
 > -   summary statistics of overall **`no_cases`** seem to indicate **right-skew**
 
 ```{r}
-
+#| eval: false
 thai_no_case <- summ_table %>% filter(skim_variable == 'no_cases') %>% dplyr::select(c(10:16))
 thai_no_case
 ```
@@ -102,11 +102,12 @@ thai_no_case
 Identify the unique values for each categorical column
 
 ```{r}
-
+#| eval: false
 unique(thai_drug_offences_sf$fiscal_year)
 ```
 
 ```{r}
+#| eval: false
 offense_type <- unique(thai_drug_offences_sf$types_of_drug_offenses)
 offense_type
 ```
@@ -132,21 +133,23 @@ thai_admin1_sf <- st_read(
 ```
 
 ```{r}
-
+#| eval: false
 glimpse(thai_admin1_sf)
 ```
 
-**Extracting Columns**
-
-Lots of completely missing fields and repetition across the columns.
+**Extracting Relevant Data**
 
 ```{r}
-thai_admin1_sf <- thai_admin1_sf %>% dplyr::select(1:3,5)
+thai_admin1_sf <- thai_admin1_sf %>% 
+    dplyr::select(1:3,5) %>% 
+    mutate(
+        ADM1_EN = toupper(ADM1_EN),
+        ADM1_PCODE = substr(ADM1_PCODE, 3, nchar(ADM1_PCODE)))
 thai_admin1_sf
 ```
 
 ```{r}
-
+#| eval: false
 any(duplicated(thai_admin1_sf))
 ```
 :::
@@ -210,22 +213,24 @@ I will have to do manual replacements for all affected fields in `thai_drug_offe
 Check before
 
 ```{r}
-
+#| eval: false
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
 
-Rename
+Rename and Standardise Case
 
 ```{r}
 thai_drug_offences_sf$province_en[which(thai_drug_offences_sf$province_en == "Loburi")] <- 'Lop buri'
 thai_drug_offences_sf$province_en[which(thai_drug_offences_sf$province_en == "buogkan")] <- 'Bueng Kan'
+
+thai_drug_offences_sf <- thai_drug_offences_sf %>% mutate(province_en = toupper(province_en))
 ```
 
 Check fix
 
 ```{r}
-
+#| eval: false
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
@@ -241,7 +246,7 @@ suspected_offenses_sf <- thai_drug_offences_sf %>% filter(grepl("suspects", type
 
 ```{r}
 # actual
-offenses_sf <- thai_drug_offences_sf %>% filter(!grepl("suspects", types_of_drug_offenses))
+offenses_sf <- thai_drug_offences_sf %>% filter(!grepl("suspects", types_of_drug_offenses)) 
 ```
 
 ### \[Again\] Relational Join
@@ -250,15 +255,10 @@ offenses_sf <- thai_drug_offences_sf %>% filter(!grepl("suspects", types_of_drug
 combined_offenses_sf <- left_join(
   (
     offenses_sf %>% 
-      mutate(province_en = toupper(province_en)) %>%
       group_by(province_en) %>%
       summarize(total_cases = sum(no_cases), .groups = 'drop')),
   
-  (
-    thai_admin1_sf %>% 
-      mutate(
-        ADM1_EN = toupper(ADM1_EN),
-        ADM1_PCODE = substr(ADM1_PCODE, 3, nchar(ADM1_PCODE)))),
+    thai_admin1_sf,
   
   by = c('province_en'='ADM1_EN')) %>% 
   st_as_sf()
@@ -294,6 +294,7 @@ str(combined_suspected_offenses_sf)
 Overall Visualisations using qtm() and tmap_arrange()
 
 ```{r}
+#| eval: false
 basemap <- tm_shape(combined_offenses_sf) + tm_polygons() + tm_text("ADM1_PCODE",size = 0.4)
 offenses <- qtm(combined_offenses_sf,"total_cases")
 suspects <- qtm(combined_suspected_offenses_sf,"total_cases")
@@ -303,32 +304,38 @@ tmap_arrange(suspects, basemap, offenses, asp=1, ncol=3)
 Overall Distributions
 
 ```{r}
+#| eval: false
 par(mfrow=c(1,2))
 plot(offenses_sf$no_cases)
 plot(suspected_offenses_sf$no_cases)
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(offenses_sf$no_cases, 'norm'))
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(suspected_offenses_sf$no_cases, 'norm'))
 ```
 
 #### Aggregated Cases by Province across 2017-2022
 
 ```{r}
+#| eval: false
 par(mfrow=c(1,2))
 plot(combined_offenses_sf$total_cases)
 plot(combined_suspected_offenses_sf$total_cases)
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(combined_offenses_sf$total_cases, 'norm'))
 ```
 
 ```{r}
+#| eval: false
 plot(fitdist(combined_suspected_offenses_sf$total_cases, 'norm'))
 ```
 :::
@@ -369,6 +376,7 @@ tmap_mode('plot')
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 offenses_qt <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -439,7 +447,7 @@ tmap_arrange(offenses_qt, suspected_qt, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-
+#| eval: false
 offenses_log <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -510,7 +518,7 @@ tmap_arrange(offenses_log, suspected_log, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-
+#| eval: false
 offenses_odr <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -581,7 +589,7 @@ tmap_arrange(offenses_odr, suspected_odr, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-
+#| eval: false
 offenses_ht <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -652,7 +660,7 @@ tmap_arrange(offenses_ht, suspected_ht, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-
+#| eval: false
 offenses_lgprty <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -723,7 +731,7 @@ tmap_arrange(offenses_lgprty, suspected_lgprty, asp=1, ncol=2)
 <summary>Reveal Code</summary>
 
 ```{r}
-
+#| eval: false
 offenses_cont <- tm_shape(combined_offenses_sf) +
   tm_fill(
     col = "total_cases",
@@ -797,19 +805,16 @@ tmap_arrange(offenses_cont, suspected_cont, asp=1, ncol=2)
 #### Relational Join
 
 ```{r}
+#| eval: false
 offences_sf_joined <- left_join(
-    (offenses_sf %>% 
-            mutate(province_en = toupper(province_en)) %>% group_by(fiscal_year)),
-    (thai_admin1_sf %>%
-            mutate(ADM1_EN = toupper(ADM1_EN), ADM1_PCODE = substr(ADM1_PCODE, 3, nchar(ADM1_PCODE)))),
+    (offenses_sf  %>% group_by(fiscal_year)),
+    thai_admin1_sf,
     by = c('province_en'='ADM1_EN')) %>%
     st_as_sf()
 
 suspected_offenses_sf_joined <- left_join(
-    (suspected_offenses_sf %>% 
-            mutate(province_en = toupper(province_en)) %>% group_by(fiscal_year)),
-    (thai_admin1_sf %>%
-            mutate(ADM1_EN = toupper(ADM1_EN), ADM1_PCODE = substr(ADM1_PCODE, 3, nchar(ADM1_PCODE)))),
+    (suspected_offenses_sf %>% group_by(fiscal_year)),
+    thai_admin1_sf,
     by = c('province_en'='ADM1_EN')) %>%
     st_as_sf()
 ```
@@ -817,6 +822,7 @@ suspected_offenses_sf_joined <- left_join(
 #### Modify
 
 ```{r}
+#| eval: false
 offences_sf_by_province_year <- offences_sf_joined %>% 
     group_by(fiscal_year,province_en,ADM1_PCODE, geometry) %>%
     summarise(total_cases = sum(no_cases, na.rm = TRUE), .groups = "drop")
@@ -831,10 +837,12 @@ suspected_offences_sf_by_province_year <- suspected_offenses_sf_joined %>%
 ### Check
 
 ```{r}
+#| eval: false
 glimpse(offences_sf_by_province_year)
 ```
 
 ```{r}
+#| eval: false
 glimpse(suspected_offences_sf_by_province_year)
 ```
 
@@ -849,6 +857,7 @@ As previously plotted, the distribution of drug offenses in Thailand (across tim
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 tm_shape(offences_sf_by_province_year) +
   tm_fill(
     col = "total_cases",
@@ -869,6 +878,7 @@ tm_shape(offences_sf_by_province_year) +
 ```
 
 ```{r}
+#| eval: false
 tm_shape(suspected_offences_sf_by_province_year) +
   tm_fill(
     col = "total_cases",
@@ -897,6 +907,7 @@ tm_shape(suspected_offences_sf_by_province_year) +
 <summary>Reveal Code</summary>
 
 ```{r}
+#| eval: false
 # Create the faceted map
 tm_shape(offences_sf_by_province_year) +
   tm_fill(
@@ -939,24 +950,419 @@ tm_shape(suspected_offences_sf_by_province_year) +
 
 > Jenks has better contrast between hot and cold spots overall compared to the logarithmic method
 
-### Visualising Drug Abuse Indicators
-
-Prepare layers
+# RDS Checkpoint
 
 ```{r}
-# drugthai_drug_offences_sf_by_joined %>% filter(types_of_drug_offenses=='drug_use_cases')
+#| eval: false
+
+# write_rds(offenses_sf,'data/rds/offenses_sf.rds')
+# write_rds(suspected_offenses_sf,'data/rds/suspected_offenses_sf.rds')
+
+# write_rds(offences_sf_by_province_year, 'data/rds/offences_sf_by_province_year.rds')
+# write_rds(suspected_offences_sf_by_province_year, 'data/rds/suspected_offences_sf_by_province_year.rds')
 ```
 
-### \[FUTURE\] Comparing with Population Data
+```{r}
+# offenses_sf <- read_rds('data/rds/offenses_sf.rds')
+# suspected_offences_sf <- read_rds('data/rds/suspected_offenses_sf.rds')
+
+# offences_sf_by_province_year = read_rds('data/rds/offences_sf_by_province_year.rds')
+# suspected_offences_sf_by_province_year = read_rds('data/rds/suspected_offences_sf_by_province_year.rds')``
+```
+
+# Visualising Drug Abuse Indicators
+
+### Prepare layers
+
+```{r}
+#| eval: false
+drug_use    <- offenses_sf %>% filter(types_of_drug_offenses=='drug_use_cases')
+possession  <- offenses_sf %>% filter(types_of_drug_offenses=='possession_cases')
+possession_with_intent_to_distribute <- offenses_sf %>% filter(types_of_drug_offenses=='possession_with_intent_to_distribute_cases')
+trafficking <- offenses_sf %>% filter(types_of_drug_offenses=='trafficking_cases')
+production  <- offenses_sf %>% filter(types_of_drug_offenses=='production_cases')
+import      <- offenses_sf %>% filter(types_of_drug_offenses=='import_cases')
+export      <- offenses_sf %>% filter(types_of_drug_offenses=='export_cases')
+conspiracy  <- offenses_sf %>% filter(types_of_drug_offenses=='conspiracy_cases')
+```
+
+```{r}
+#| eval: false
+drug_use    <- left_join(drug_use, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+possession  <- left_join(possession, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+possession_with_intent_to_distribute <- left_join(possession_with_intent_to_distribute, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+trafficking <- left_join(trafficking, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+production  <- left_join(production, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+import      <- left_join(import, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+export      <- left_join(export, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+conspiracy  <- left_join(conspiracy, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+```
+
+```{r}
+# suspected_drug_use    <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_drug_use_cases')
+# suspected_possession  <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_possession_cases')
+# suspected_possession_with_intent_to_distribute <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_possession_with_intent_to_distribute_cases')
+# suspected_trafficking <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_trafficking_cases')
+# suspected_production  <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_production_cases')
+# suspected_import      <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_import_cases')
+# suspected_export      <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_export_cases')
+# suspected_conspiracy  <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_conspiracy_cases')
+```
+
+```{r}
+# suspected_drug_use    <- left_join(suspected_drug_use, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_possession  <- left_join(suspected_possession, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_possession_with_intent_to_distribute <- left_join(suspected_possession_with_intent_to_distribute, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_trafficking <- left_join(suspected_trafficking, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_production  <- left_join(suspected_production, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_import      <- left_join(suspected_import, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_export      <- left_join(suspected_export, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+# suspected_conspiracy  <- left_join(suspected_conspiracy, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
+```
+
+### RDS Checkpoint
+
+```{r}
+#| eval: false
+write_rds(drug_use, 'data/rds/drug_use.rds')
+write_rds(possession, 'data/rds/possession.rds')
+write_rds(possession_with_intent_to_distribute, 'data/rds/possession_with_intent_to_distribute.rds')
+write_rds(trafficking, 'data/rds/trafficking.rds')
+write_rds(production, 'data/rds/production.rds')
+write_rds(import, 'data/rds/import.rds')
+write_rds(export, 'data/rds/export.rds')
+write_rds(conspiracy, 'data/rds/conspiracy.rds')
+```
+
+```{r}
+# write_rds(suspected_drug_use, 'data/rds/suspected_drug_use.rds')
+# write_rds(suspected_possession, 'data/rds/suspected_possession.rds')
+# write_rds(suspected_possession_with_intent_to_distribute, 'data/rds/suspected_possession_with_intent_to_distribute.rds')
+# write_rds(suspected_trafficking, 'data/rds/suspected_trafficking.rds')
+# write_rds(suspected_production, 'data/rds/suspected_production.rds')
+# write_rds(suspected_import, 'data/rds/suspected_import.rds')
+# write_rds(suspected_export, 'data/rds/suspected_export.rds')
+# write_rds(suspected_conspiracy, 'data/rds/suspected_conspiracy.rds')
+```
+
+```{r}
+drug_use =    read_rds('data/rds/drug_use.rds') %>% st_as_sf()
+possession =  read_rds('data/rds/possession.rds') %>% st_as_sf()
+possession_with_intent_to_distribute = read_rds('data/rds/possession_with_intent_to_distribute.rds') %>% st_as_sf()
+trafficking = read_rds('data/rds/trafficking.rds') %>% st_as_sf()
+production =  read_rds('data/rds/production.rds') %>% st_as_sf()
+import =      read_rds('data/rds/import.rds') %>% st_as_sf()
+export =      read_rds('data/rds/export.rds') %>% st_as_sf()
+conspiracy =  read_rds('data/rds/conspiracy.rds') %>% st_as_sf()
+```
+
+```{r}
+# suspected_drug_use =    read_rds('data/rds/suspected_drug_use.rds')
+# suspected_possession =  read_rds('data/rds/suspected_possession.rds')
+# suspected_possession_with_intent_to_distribute = read_rds('data/rds/suspected_possession_with_intent_to_distribute.rds')
+# suspected_trafficking = read_rds('data/rds/suspected_trafficking.rds')
+# suspected_production =  read_rds('data/rds/suspected_production.rds')
+# suspected_import =      read_rds('data/rds/suspected_import.rds')
+# suspected_export =      read_rds('data/rds/suspected_export.rds')
+# suspected_conspiracy =  read_rds('data/rds/suspected_conspiracy.rds')
+```
+
+### Visualise
+
+::: panel-tabset
+#### drug use
+
+```{r}
+range(drug_use$no_cases)
+```
+
+> -   Significant spread: quantile or log10 to prevent extreme outlier/values from overshadowing smaller ones
+>
+> -   yellow-orange-red sequential gradient to highlight hotspots
+
+```{r}
+tm_shape(drug_use) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "YlOrRd",
+    style = "quantile",
+    title = "Drug Use Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "Drug Use Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+```{r}
+tm_shape(drug_use) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "YlOrRd",
+    style = "log10",
+    title = "Drug Use Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "Drug Use Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+> Turns out log10 does not produce a well-contrasted chloropleth map
+
+#### possession
+
+```{r}
+range(possession$no_cases)
+```
+
+> Same settings, same rationale as `drug_use`
+
+```{r}
+tm_shape(possession) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "YlOrRd",
+    style = "quantile",
+    title = "Possession Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "Possession Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+```{r}
+tm_shape(possession) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "YlOrRd",
+    style = "log10",
+    title = "Possession Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "Possession by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+#### possession with intent to distribute
+
+```{r}
+range(possession_with_intent_to_distribute$no_cases)
+```
+
+> Smaller range compared to `drug_use` and `possession`, so `quantile` can provide a good balance without compressing the data into a narrow visual range, possibly `jenks` too?
+
+```{r}
+tm_shape(possession_with_intent_to_distribute) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "quantile",
+    title = "possession_with_intent_to_distribute Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "possession_with_intent_to_distribute Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+```{r}
+tm_shape(possession_with_intent_to_distribute) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "jenks",
+    title = "possession_with_intent_to_distribute Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 2)
+  tm_layout(
+    title = "possession_with_intent_to_distribute Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+#### trafficking
+
+```{r}
+range(trafficking$no_cases)
+```
+
+> Much smaller and more clustered range thus far. Using `jenks` should help discern significant differences without skewness.
+
+```{r}
+tm_shape(trafficking) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "jenks",
+    title = "trafficking Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "trafficking Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+```{r}
+tm_shape(trafficking) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "quantile",
+    title = "trafficking Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "trafficking Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+#### production
+
+```{r}
+range(production$no_cases)
+```
+
+> Same settings and rationale as trafficking
+
+```{r}
+tm_shape(production) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "jenks",
+    title = "production Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "production Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+```{r}
+tm_shape(production) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "quantile",
+    title = "production Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "production Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+#### import
+
+```{r}
+range(import$no_cases)
+```
+
+> Small range: pretty (default) should suffice since there aren't many useful data points anyways
+
+```{r}
+tm_shape(import) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "pretty",
+    n = 4,
+    title = "import Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "import Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+#### export
+
+```{r}
+range(export$no_cases)
+```
+
+> Same settings and rationale as import
+
+```{r}
+tm_shape(export) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "pretty",
+    n = 2,
+    title = "export Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "export Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+
+#### conspiracy
+
+```{r}
+range(conspiracy$no_cases)
+```
+
+> Same settings and rationale as import
+
+```{r}
+tm_shape(conspiracy) + 
+  tm_fill(
+    col = "no_cases",
+    palette = "Purples",
+    style = "pretty",
+    n = 3,
+    title = "conspiracy Cases"
+  ) +
+  tm_borders() +
+  tm_facets(by = "fiscal_year", ncol = 3)
+  tm_layout(
+    title = "conspiracy Cases by Province (2017-2022)",
+    legend.outside = TRUE,
+    frame = FALSE
+  )
+```
+:::
+
+# \[FUTURE\] Comparing with Population Data
 
 \<TODO\>
-
-```{r}
-write_rds(offences_sf_by_province_year, 'data/rds/offences_sf_by_province_year.rds')
-write_rds(suspected_offences_sf_by_province_year, 'data/rds/suspected_offences_sf_by_province_year.rds')
-```
-
-```{r}
-offences_sf_by_province_year = read_rds('data/rds/offences_sf_by_province_year.rds')
-suspected_offences_sf_by_province_year = read_rds('data/rds/suspected_offences_sf_by_province_year.rds')
-```
