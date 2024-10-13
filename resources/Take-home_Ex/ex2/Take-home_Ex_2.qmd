@@ -310,7 +310,7 @@ tmap_arrange(suspects, basemap, offenses, asp=1, ncol=3)
 #| layout-nrow: 2
 #| layout-ncol: 2
 
-par(mfrow=c(1,2))
+par(mfrow=c(1,1))
 plot(offenses_sf$no_cases)
 plot(fitdist(offenses_sf$no_cases, 'norm'))
 ```
