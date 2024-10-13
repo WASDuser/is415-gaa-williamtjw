@@ -44,8 +44,7 @@ For the purposes of this exercise I will be dealing with **admin1** only (provin
 -   fitdist: finding out distribution type to match to match tmap style
 
 ```{r}
-
-pacman::p_load(sf,tidyverse,skimr,readxl,sfdep,tmap,fitdistrplus,sfdep)
+pacman::p_load(sf,tidyverse,skimr,readxl,spdep, sfdep,tmap,fitdistrplus)
 ```
 
 # Data
@@ -55,7 +54,7 @@ pacman::p_load(sf,tidyverse,skimr,readxl,sfdep,tmap,fitdistrplus,sfdep)
 
 [**Source**](https://www.kaggle.com/datasets/thaweewatboy/thailand-drug-offenses-2017-2022)
 
-**Metadata**
+### Metadata
 
 -   fiscal_year: recorded year
 
@@ -67,14 +66,15 @@ pacman::p_load(sf,tidyverse,skimr,readxl,sfdep,tmap,fitdistrplus,sfdep)
 
 -   province_en
 
-**Import**
+### Import
 
 ```{r}
+#| output: false
 thai_drug_offences_sf <- read_csv('data/aspatial/thai_drug_offenses_2017_2022.csv')
 ```
 
 ```{r}
-
+#| output: false
 str(thai_drug_offences_sf)
 ```
 
@@ -93,29 +93,28 @@ summ_table
 > -   summary statistics of overall **`no_cases`** seem to indicate **right-skew**
 
 ```{r}
-
 thai_no_case <- summ_table %>% filter(skim_variable == 'no_cases') %>% dplyr::select(c(10:16))
 thai_no_case
 ```
 
 > Might need to view by offense type to see offense-specific distributions
 
-Identify the unique values for each categorical column
+**Identify the unique values for each categorical column**
 
 ```{r}
-
+#| output: false
 unique(thai_drug_offences_sf$fiscal_year)
 ```
 
 ```{r}
-
+#| output: false
 offense_type <- unique(thai_drug_offences_sf$types_of_drug_offenses)
 offense_type
 ```
 
-**Cleaning**
+### Extracting relevant columns
 
-Remove thai labels
+**Remove thai labels**
 
 ```{r}
 thai_drug_offences_sf <- thai_drug_offences_sf %>% dplyr::select(1,2,3,5)
@@ -125,7 +124,7 @@ thai_drug_offences_sf <- thai_drug_offences_sf %>% dplyr::select(1,2,3,5)
 
 [**Source**](https://data.humdata.org/dataset/d24bdc45-eb4c-4e3d-8b16-44db02667c27/resource/d0c722ff-6939-4423-ac0d-6501830b1759/download/tha_adm_rtsd_itos_20210121_shp.zip)
 
-**Import**
+### Import
 
 ```{r}
 thai_admin1_sf <- st_read(
@@ -134,11 +133,11 @@ thai_admin1_sf <- st_read(
 ```
 
 ```{r}
-
+#| output: false
 glimpse(thai_admin1_sf)
 ```
 
-**Extracting Relevant Data**
+### Extracting relevant data
 
 ```{r}
 thai_admin1_sf <- thai_admin1_sf %>% 
@@ -146,12 +145,6 @@ thai_admin1_sf <- thai_admin1_sf %>%
     mutate(
         ADM1_EN = toupper(ADM1_EN),
         ADM1_PCODE = substr(ADM1_PCODE, 3, nchar(ADM1_PCODE)))
-thai_admin1_sf
-```
-
-```{r}
-
-any(duplicated(thai_admin1_sf))
 ```
 :::
 
@@ -211,15 +204,14 @@ I will have to do manual replacements for all affected fields in `thai_drug_offe
 
 ### Fixing Mispelled Province Names
 
-Check before
+**Check before**
 
 ```{r}
-
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
 
-Rename and Standardise Case
+**Rename and Standardise Case**
 
 ```{r}
 thai_drug_offences_sf$province_en[which(thai_drug_offences_sf$province_en == "Loburi")] <- 'Lop buri'
@@ -228,17 +220,16 @@ thai_drug_offences_sf$province_en[which(thai_drug_offences_sf$province_en == "bu
 thai_drug_offences_sf <- thai_drug_offences_sf %>% mutate(province_en = toupper(province_en))
 ```
 
-Check fix
+**Check fix**
 
 ```{r}
-
 unique(thai_drug_offences_sf$province_en)[6]
 unique(thai_drug_offences_sf$province_en)[30]
 ```
 
 That should resolve the landmine.
 
-Separating suspected cases using `grepl()`
+**Separating suspected cases using `grepl()`**
 
 ```{r}
 # suspected
@@ -250,9 +241,13 @@ suspected_offenses_sf <- thai_drug_offences_sf %>% filter(grepl("suspects", type
 offenses_sf <- thai_drug_offences_sf %>% filter(!grepl("suspects", types_of_drug_offenses)) 
 ```
 
+I split `thai_drug_offences_sf` into confirmed cases (`offenses_sf`) and suspected cases(`suspected_offenses_sf`), because including suspected cases may skew the overall analysis results, adding noise and uncertainty to confirmed drug abuse activity. Splitting allows for separate modelling of suspected cases, which can value-add to the detection of drug abuse in areas of concern.
+
 ### \[Again\] Relational Join
 
 ```{r}
+#| output: false
+# actual
 combined_offenses_sf <- left_join(
   (
     offenses_sf %>% 
@@ -268,6 +263,8 @@ str(combined_offenses_sf)
 ```
 
 ```{r}
+#| output: false
+# suspected
 combined_suspected_offenses_sf <- left_join(
   (
     suspected_offenses_sf %>% 
@@ -292,51 +289,64 @@ str(combined_suspected_offenses_sf)
 ::: panel-tabset
 #### Big Picture
 
-Overall Visualisations using qtm() and tmap_arrange()
+**Overall Visualisations**
 
 ```{r}
+#| code-fold: true
+#| warning: false
 
 basemap <- tm_shape(combined_offenses_sf) + tm_polygons() + tm_text("ADM1_PCODE",size = 0.4)
-offenses <- qtm(combined_offenses_sf,"total_cases")
-suspects <- qtm(combined_suspected_offenses_sf,"total_cases")
+offenses <- qtm(combined_offenses_sf,"total_cases",title = 'confirmed offenses')
+suspects <- qtm(combined_suspected_offenses_sf,"total_cases", title = 'suspected offenses')
 tmap_arrange(suspects, basemap, offenses, asp=1, ncol=3)
 ```
 
-Overall Distributions
+**Overall Distribution**
+
+-   **Actual**
 
 ```{r}
+#| code-fold: true
+#| layout-nrow: 2
+#| layout-ncol: 2
 
 par(mfrow=c(1,2))
 plot(offenses_sf$no_cases)
-plot(suspected_offenses_sf$no_cases)
-```
-
-```{r}
-
 plot(fitdist(offenses_sf$no_cases, 'norm'))
 ```
 
-```{r}
+-   **Suspected**
 
+```{r}
+#| code-fold: true
+#| layout-nrow: 2
+#| layout-ncol: 2
+#| 
+plot(suspected_offenses_sf$no_cases)
 plot(fitdist(suspected_offenses_sf$no_cases, 'norm'))
 ```
 
 #### Aggregated Cases by Province across 2017-2022
 
-```{r}
-
-par(mfrow=c(1,2))
-plot(combined_offenses_sf$total_cases)
-plot(combined_suspected_offenses_sf$total_cases)
-```
+-   **Actual**
 
 ```{r}
+#| code-fold: true
+#| layout-nrow: 2
+#| layout-ncol: 2
 
+plot(combined_offenses_sf$total_cases, )
 plot(fitdist(combined_offenses_sf$total_cases, 'norm'))
 ```
 
-```{r}
+-   **Suspected**
 
+```{r}
+#| code-fold: true
+#| layout-nrow: 2
+#| layout-ncol: 2
+
+plot(combined_suspected_offenses_sf$total_cases)
 plot(fitdist(combined_suspected_offenses_sf$total_cases, 'norm'))
 ```
 :::
@@ -345,15 +355,13 @@ plot(fitdist(combined_suspected_offenses_sf$total_cases, 'norm'))
 
 > **Conclusions: Right Skewed, heavy right tail, outliers present; Actual and Suspected cases follow the similar distribution**
 >
-> Hence, to visualise the continuous variable `total_cases` , I am goin to experiment with:
+> Hence, to visualise the continuous variable `total_cases` , lets experiment with:
 >
 > -   `quantile`
 >
 > -   `log10`
 >
 > -   `order`
->
-> <!-- -->
 >
 > -   `headtails`
 >
@@ -372,11 +380,9 @@ tmap_mode('plot')
 ::: panel-tabset
 #### style = "quantile"
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
+#| warning: false
 
 offenses_qt <- tm_shape(combined_offenses_sf) +
   tm_fill(
@@ -439,15 +445,11 @@ suspected_qt <- tm_shape(combined_suspected_offenses_sf) +
 tmap_arrange(offenses_qt, suspected_qt, asp=1, ncol=2)
 ```
 
-</details>
-
 #### style = "log10"
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
+#| warning: false
 
 offenses_log <- tm_shape(combined_offenses_sf) +
   tm_fill(
@@ -510,15 +512,11 @@ suspected_log <- tm_shape(combined_suspected_offenses_sf) +
 tmap_arrange(offenses_log, suspected_log, asp=1, ncol=2)
 ```
 
-</details>
-
 #### style = "order"
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
+#| warning: false
 
 offenses_odr <- tm_shape(combined_offenses_sf) +
   tm_fill(
@@ -581,15 +579,11 @@ suspected_odr <- tm_shape(combined_suspected_offenses_sf) +
 tmap_arrange(offenses_odr, suspected_odr, asp=1, ncol=2)
 ```
 
-</details>
-
 #### style = 'headtails'
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
+#| warning: false
 
 offenses_ht <- tm_shape(combined_offenses_sf) +
   tm_fill(
@@ -652,15 +646,11 @@ suspected_ht <- tm_shape(combined_suspected_offenses_sf) +
 tmap_arrange(offenses_ht, suspected_ht, asp=1, ncol=2)
 ```
 
-</details>
-
 #### style = 'log10_pretty'
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
+#| warning: false
 
 offenses_lgprty <- tm_shape(combined_offenses_sf) +
   tm_fill(
@@ -723,15 +713,11 @@ suspected_lgprty <- tm_shape(combined_suspected_offenses_sf) +
 tmap_arrange(offenses_lgprty, suspected_lgprty, asp=1, ncol=2)
 ```
 
-</details>
-
 #### style = 'cont'
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
+#| warning: false
 
 offenses_cont <- tm_shape(combined_offenses_sf) +
   tm_fill(
@@ -793,20 +779,15 @@ suspected_cont <- tm_shape(combined_suspected_offenses_sf) +
 
 tmap_arrange(offenses_cont, suspected_cont, asp=1, ncol=2)
 ```
-
-</details>
 :::
 
 > `'log10'` style had the best visualisation of the distribution drug offenses in terms of **contrast** between 'hot' and 'cold' spots and overall aesthetics.
 
 ## Aggregating by Time & Province (Same as on Prof's site)
 
-### Prepare data
-
 #### Relational Join
 
 ```{r}
-
 offences_sf_joined <- left_join(
     (offenses_sf  %>% group_by(fiscal_year)),
     thai_admin1_sf,
@@ -823,7 +804,6 @@ suspected_offenses_sf_joined <- left_join(
 #### Modify
 
 ```{r}
-
 offences_sf_by_province_year <- offences_sf_joined %>% 
     group_by(fiscal_year,province_en,ADM1_PCODE, geometry) %>%
     summarise(total_cases = sum(no_cases, na.rm = TRUE), .groups = "drop")
@@ -838,12 +818,10 @@ suspected_offences_sf_by_province_year <- suspected_offenses_sf_joined %>%
 ### Check
 
 ```{r}
-
 glimpse(offences_sf_by_province_year)
 ```
 
 ```{r}
-
 glimpse(suspected_offences_sf_by_province_year)
 ```
 
@@ -853,11 +831,8 @@ As previously plotted, the distribution of drug offenses in Thailand (across tim
 
 #### Log
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
+#| code-fold: true
 
 tm_shape(offences_sf_by_province_year) +
   tm_fill(
@@ -876,9 +851,6 @@ tm_shape(offences_sf_by_province_year) +
     legend.title.size = .666,                        # Customize the size of the legend title
     legend.text.size = .666                          # Customize the size of the legend text
   )
-```
-
-```{r}
 
 tm_shape(suspected_offences_sf_by_province_year) +
   tm_fill(
@@ -898,18 +870,14 @@ tm_shape(suspected_offences_sf_by_province_year) +
     legend.text.size = .666                          # Customize the size of the legend text
   )
 ```
-
-</details>
 
 #### Jenks
 
-<details>
-
-<summary>Reveal Code</summary>
-
 ```{r}
 
-# Create the faceted map
+
+#| code-fold: true
+
 tm_shape(offences_sf_by_province_year) +
   tm_fill(
     col = "total_cases",
@@ -946,8 +914,6 @@ tm_shape(suspected_offences_sf_by_province_year) +
     legend.text.size = .666                          # Customize the size of the legend text
   )
 ```
-
-</details>
 
 > Jenks has better contrast between hot and cold spots overall compared to the logarithmic method
 
@@ -980,6 +946,7 @@ conspiracy  <- left_join(conspiracy, thai_admin1_sf, by = c('province_en'='ADM1_
 ```
 
 ```{r}
+#| echo: false
 # suspected_drug_use    <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_drug_use_cases')
 # suspected_possession  <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_possession_cases')
 # suspected_possession_with_intent_to_distribute <- suspected_offences_sf %>% filter(types_of_drug_offenses=='suspects_in_possession_with_intent_to_distribute_cases')
@@ -991,6 +958,7 @@ conspiracy  <- left_join(conspiracy, thai_admin1_sf, by = c('province_en'='ADM1_
 ```
 
 ```{r}
+#| echo: false
 # suspected_drug_use    <- left_join(suspected_drug_use, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
 # suspected_possession  <- left_join(suspected_possession, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
 # suspected_possession_with_intent_to_distribute <- left_join(suspected_possession_with_intent_to_distribute, thai_admin1_sf, by = c('province_en'='ADM1_EN'))
@@ -1016,6 +984,7 @@ write_rds(conspiracy, 'data/rds/conspiracy.rds')
 ```
 
 ```{r}
+#| echo: false
 # write_rds(suspected_drug_use, 'data/rds/suspected_drug_use.rds')
 # write_rds(suspected_possession, 'data/rds/suspected_possession.rds')
 # write_rds(suspected_possession_with_intent_to_distribute, 'data/rds/suspected_possession_with_intent_to_distribute.rds')
@@ -1027,7 +996,6 @@ write_rds(conspiracy, 'data/rds/conspiracy.rds')
 ```
 
 ```{r}
-
 drug_use =    read_rds('data/rds/drug_use.rds') %>% st_as_sf()
 possession =  read_rds('data/rds/possession.rds') %>% st_as_sf()
 possession_with_intent_to_distribute = read_rds('data/rds/possession_with_intent_to_distribute.rds') %>% st_as_sf()
@@ -1039,6 +1007,7 @@ conspiracy =  read_rds('data/rds/conspiracy.rds') %>% st_as_sf()
 ```
 
 ```{r}
+#| echo: false
 # suspected_drug_use =    read_rds('data/rds/suspected_drug_use.rds')
 # suspected_possession =  read_rds('data/rds/suspected_possession.rds')
 # suspected_possession_with_intent_to_distribute = read_rds('data/rds/suspected_possession_with_intent_to_distribute.rds')
@@ -1055,7 +1024,6 @@ conspiracy =  read_rds('data/rds/conspiracy.rds') %>% st_as_sf()
 #### drug use
 
 ```{r}
-
 range(drug_use$no_cases)
 ```
 
@@ -1064,6 +1032,7 @@ range(drug_use$no_cases)
 > -   yellow-orange-red sequential gradient to highlight hotspots
 
 ```{r}
+#| code-fold: true
 
 tm_shape(drug_use) + 
   tm_fill(
@@ -1075,14 +1044,11 @@ tm_shape(drug_use) +
   tm_borders() +
   tm_facets(by = "fiscal_year", ncol = 3)
   tm_layout(
-    title = "Drug Use Cases by Province (2017-2022)",
+    title = "[quantile] Drug Use Cases by Province (2017-2022)",
     legend.outside = TRUE,
     frame = FALSE
   )
-```
-
-```{r}
-
+  
 tm_shape(drug_use) + 
   tm_fill(
     col = "no_cases",
@@ -1093,7 +1059,7 @@ tm_shape(drug_use) +
   tm_borders() +
   tm_facets(by = "fiscal_year", ncol = 3)
   tm_layout(
-    title = "Drug Use Cases by Province (2017-2022)",
+    title = "[log10] Drug Use Cases by Province (2017-2022)",
     legend.outside = TRUE,
     frame = FALSE
   )
@@ -1104,13 +1070,13 @@ tm_shape(drug_use) +
 #### possession
 
 ```{r}
-
 range(possession$no_cases)
 ```
 
 > Same settings, same rationale as `drug_use`
 
 ```{r}
+#| code-fold: true
 
 tm_shape(possession) + 
   tm_fill(
@@ -1126,10 +1092,7 @@ tm_shape(possession) +
     legend.outside = TRUE,
     frame = FALSE
   )
-```
-
-```{r}
-
+  
 tm_shape(possession) + 
   tm_fill(
     col = "no_cases",
@@ -1149,13 +1112,13 @@ tm_shape(possession) +
 #### possession with intent to distribute
 
 ```{r}
-
 range(possession_with_intent_to_distribute$no_cases)
 ```
 
 > Smaller range compared to `drug_use` and `possession`, so `quantile` can provide a good balance without compressing the data into a narrow visual range, possibly `jenks` too?
 
 ```{r}
+#| code-fold: true
 
 tm_shape(possession_with_intent_to_distribute) + 
   tm_fill(
@@ -1171,10 +1134,7 @@ tm_shape(possession_with_intent_to_distribute) +
     legend.outside = TRUE,
     frame = FALSE
   )
-```
-
-```{r}
-
+  
 tm_shape(possession_with_intent_to_distribute) + 
   tm_fill(
     col = "no_cases",
@@ -1194,13 +1154,14 @@ tm_shape(possession_with_intent_to_distribute) +
 #### trafficking
 
 ```{r}
-
 range(trafficking$no_cases)
 ```
 
 > Much smaller and more clustered range thus far. Using `jenks` should help discern significant differences without skewness.
 
 ```{r}
+#| code-fold: true
+
 tm_shape(trafficking) + 
   tm_fill(
     col = "no_cases",
@@ -1215,10 +1176,7 @@ tm_shape(trafficking) +
     legend.outside = TRUE,
     frame = FALSE
   )
-```
-
-```{r}
-
+  
 tm_shape(trafficking) + 
   tm_fill(
     col = "no_cases",
@@ -1238,13 +1196,13 @@ tm_shape(trafficking) +
 #### production
 
 ```{r}
-
 range(production$no_cases)
 ```
 
 > Same settings and rationale as trafficking
 
 ```{r}
+#| code-fold: true
 
 tm_shape(production) + 
   tm_fill(
@@ -1260,10 +1218,7 @@ tm_shape(production) +
     legend.outside = TRUE,
     frame = FALSE
   )
-```
-
-```{r}
-
+  
 tm_shape(production) + 
   tm_fill(
     col = "no_cases",
@@ -1283,13 +1238,13 @@ tm_shape(production) +
 #### import
 
 ```{r}
-
 range(import$no_cases)
 ```
 
 > Small range: pretty (default) should suffice since there aren't many useful data points anyways
 
 ```{r}
+#| code-fold: true
 
 tm_shape(import) + 
   tm_fill(
@@ -1311,13 +1266,13 @@ tm_shape(import) +
 #### export
 
 ```{r}
-
 range(export$no_cases)
 ```
 
 > Same settings and rationale as import
 
 ```{r}
+#| code-fold: true
 
 tm_shape(export) + 
   tm_fill(
@@ -1339,13 +1294,13 @@ tm_shape(export) +
 #### conspiracy
 
 ```{r}
-
 range(conspiracy$no_cases)
 ```
 
 > Same settings and rationale as import
 
 ```{r}
+#| code-fold: true
 
 tm_shape(conspiracy) + 
   tm_fill(
@@ -1371,7 +1326,7 @@ Normally, spatial weights can be computed using functions like `poly2nb()` (for 
 
 However I will perform it normally as discussed in class lectures and exercises.
 
-### Global Moran’s I with permutation testing
+## Global Moran’s I with permutation testing
 
 ::: panel-tabset
 ```{r}
@@ -1379,7 +1334,7 @@ set.seed(69)
 yr <- unique(drug_use$fiscal_year)
 ```
 
-Compute weight matrix
+**Compute weight matrix**
 
 ```{r}
 
@@ -1390,7 +1345,7 @@ wm_data <- drug_use %>% filter(fiscal_year==2017)
 #     .before=1)
 ```
 
-The above code outputs this error message:
+**The above code outputs this error message:**
 
 ```         
 Error in `stopifnot()`:
@@ -1404,7 +1359,7 @@ Backtrace:
  15. base::stop("Empty neighbour sets found")
 ```
 
-Lets isolate the error:
+**Lets isolate the error:**
 
 ```{r}
 nb <- st_contiguity(wm_data$geometry)
@@ -1412,7 +1367,7 @@ nb <- st_contiguity(wm_data$geometry)
 
 > row 68 corresponds to Phuket
 
-According to Google Maps,
+**According to Google Maps,**
 
 ![](images/clipboard-2790575953.png)
 
@@ -1433,6 +1388,7 @@ wm_q <- wm_data %>% mutate(
 #### drug_use
 
 ```{r}
+#| code-fold: true
 drug_use_cases <- drug_use %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1442,14 +1398,20 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+With the exception of 2020 and 2022, the observed Moran's I is positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests clustering, meaning areas with high cases tend to be near other areas with high cases.
 
 #### possession
 
 ```{r}
+#| code-fold: true
 possession_cases <- possession %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1459,14 +1421,20 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+With the exception of 2022, the observed Moran's I is greatly positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests **strong clustering**, meaning areas with high cases tend to be near other areas with high cases.
 
 #### possession_with_intent_to_distribute
 
 ```{r}
+#| code-fold: true
 possession_with_intent_to_distribute_cases <- possession_with_intent_to_distribute %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1476,14 +1444,20 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+With the exception of 2022, the observed Moran's I is greatly positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests **strong clustering**, meaning areas with high cases tend to be near other areas with high cases.
 
 #### trafficking
 
 ```{r}
+#| code-fold: true
 trafficking_cases <- trafficking %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1493,14 +1467,20 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+With the exception of 2022, the observed Moran's I is positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests **clustering**, meaning areas with high cases tend to be near other areas with high cases.
 
 #### production
 
 ```{r}
+#| code-fold: true
 production_cases <- production %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1510,14 +1490,20 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+With the exception of 2022, the observed Moran's I is greatly positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests **strong clustering**, meaning areas with high cases tend to be near other areas with high cases.
 
 #### import
 
 ```{r}
+#| code-fold: true
 import_cases <- import %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1527,14 +1513,20 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+With the exception of 2022, the observed Moran's I is greatly positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests **strong clustering**, meaning areas with high cases tend to be near other areas with high cases.
 
 #### export
 
 ```{r}
+#| code-fold: true
 export_cases <- export %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1544,14 +1536,22 @@ for (year in yr){
     nb,
     wm_q$wt,
     nsim = 99)
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
+  
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
 
+This had an unusual pattern compared to the rest. With the exception of 2018 and 2019, the observed Moran's I is **negative** and smaller than the most of the Moran's I values in the simulated distribution, which suggests a more dispersed, **checkerboard** spatial pattern, where high and low number of cases alternate spatially.
+
 #### conspiracy
 
+> Had to account for the years with 0 cases
+
 ```{r}
+#| code-fold: true
 conspiracy_cases <- conspiracy %>% dplyr::select(1,3)
 
 par(mfrow=c(2,3))
@@ -1573,33 +1573,1583 @@ for (year in yr){
     message(paste("Skipping year", year, "due to empty data (0 cases)"))
     next  # continue to next iteration
   }
+  
+  print(paste(year, "statistic:",round(mi_perm$statistic,4)))
 
   hist(mi_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Moran's I"), main=paste("Histogram for", year))
-  abline(v=0,col="red")
+  abline(v=mi_perm$statistic,col="red")
 }
 ```
+
+The observed Moran's I is positive and significantly larger than the most of the Moran's I values in the simulated distribution, which suggests **clustering**, meaning areas with high cases tend to be near other areas with high cases.
 :::
 
 ## Geary's C
 
-## **Spatial Correlogram**
+::: panel-tabset
+#### drug_use
 
-# **Local Indicators of Spatial Association (LISA)**
+```{r}
+#| code-fold: true
+set.seed(69)
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    drug_use_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
 
-## Weights
+C \< 1 for 2019, 2021: stronger positive spatial autocorrelation (cases of similar values group together spatially)
 
-## Moran's I
+C \~ 1 for 2017, 2018: no significant spatial autocorrelation (case values are randomly distributed spatially)
 
-## LISA Cluster Map
+C \> 1 for 2020, 2022: stronger negative spatial autocorrelation (cases of dissimilar values group together spatially)
 
-## Hot Spot and Cold Spot Area Analysis (Getis and Ord’s G-Statistics)
+#### possession
 
-#### Weights
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    possession_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
 
-#### **Computing Gi statistics**
+C \< 1 for 2017, 2018, 2019, 2020, 2021: stronger positive spatial autocorrelation (cases of similar values group together spatially)
 
-#### **Mapping Gi values**
+C \> 1 for 2022: stronger negative spatial autocorrelation (cases of dissimilar values group together spatially)
 
-# \[FUTURE\] Comparing with Population Data
+#### possession_with_intent_to_distribute
 
-\<TODO\>
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
+
+Same pattern as drug_use
+
+#### trafficking
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    trafficking_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
+
+Same pattern as possession
+
+#### production
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    production_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
+
+C \< 1 for **all years**: strong positive spatial autocorrelation (cases of similar values group together spatially)
+
+#### import
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    import_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
+
+C \< 1 for 2017 to 2019: stronger positive spatial autocorrelation (cases of similar values group together spatially)
+
+C \> 1 for 2020 to 2022: stronger negative spatial autocorrelation (cases of dissimilar values group together spatially)
+
+#### export
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  gc_perm <- global_c_perm(
+    export_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    nb,
+    wm_q$wt,
+    nsim = 99)
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+  
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
+
+C \< 1 for 2018, 2019: stronger positive spatial autocorrelation (cases of similar values group together spatially)
+
+C \~ 1 for 2021: no significant spatial autocorrelation (case values are randomly distributed spatially)
+
+C \> 1 for 2017, 2020, 2022: stronger negative spatial autocorrelation (cases of dissimilar values group together spatially)
+
+#### conspiracy
+
+> Had to account for the years with 0 cases
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  cases = conspiracy_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2)
+  gc_perm <- global_c_perm(
+    # x = integer(nrow(wm_q)),
+    cases,
+    nb,
+    wm_q$wt,
+    nsim = 99)
+  
+  # debugging
+  # print(year)
+  # print(cases)
+
+  # checks if the year's vector has no_case = 0
+  if (sum(cases)==0) {
+    message(paste("Skipping year", year, "due to empty data (0 cases)"))
+    next  # continue to next iteration
+  }
+    
+  print(paste(year, "statistic:",round(gc_perm$statistic,4)))
+
+  hist(gc_perm$res, freq=TRUE, breaks=20, xlab=paste("Simulated Geary's C"), main=paste("Histogram for", year))
+  abline(v=gc_perm$statistic,col="red")
+}
+```
+
+C \< 1 for 2017, 2018: stronger positive spatial autocorrelation (cases of similar values group together spatially)
+
+C \> 1 for 2019, 2020: stronger negative spatial autocorrelation (cases of dissimilar values group together spatially)
+:::
+
+## Spatial Correlogram
+
+### Moran's I
+
+::: panel-tabset
+#### drug use
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    drug_use_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "drug_use_cases"))
+  print(MI_corr)}
+```
+
+2017 - 2019, 2021: **Significant** **Short-distance Positive Correlation** (High Moran's I values at low lags) suggests a **clustered pattern; Significant** **Long-distance Negative Correlation** (Negative Moran's I values at larger distances) suggest that **dissimilar** values are found near each other
+
+2020, 2022: Correlogram is flat and close to zero across all distances, suggests **no significant spatial autocorrelation** at any lag, meaning that the spatial distribution of values is **random**
+
+#### possession
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    possession_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "possession_cases"))
+  print(MI_corr)}
+```
+
+2017 - 2021: **Significant** **Short-distance Positive Correlation** (High Moran's I values at low lags) suggests a **clustered pattern; Significant** **Long-distance Negative Correlation** (Negative Moran's I values at larger distances) suggest that **dissimilar** values are found near each other
+
+2022: Correlogram is flat and close to zero across all distances, suggests **no significant spatial autocorrelation** at any lag, meaning that the spatial distribution of values is **random**
+
+#### possession with intent to distribute
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "possession_with_intent_to_distribute_cases"))
+  print(MI_corr)}
+```
+
+For all years,
+
+**Significant** **Short-distance Positive Correlation** (High Moran's I values at low lags) suggests a **clustered pattern; Significant** **Long-distance Negative Correlation** (Negative Moran's I values at larger distances) suggest that **dissimilar** values are found near each other.
+
+#### trafficking
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "possession_with_intent_to_distribute_cases"))
+  print(MI_corr)}
+```
+
+Similar autocorrelation pattern and significance with possession with intent to distribute
+
+#### production
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    production_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "production_cases"))
+  print(MI_corr)}
+```
+
+Similar autocorrelation pattern and significance with possession with intent to distribute
+
+#### import
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    import_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "import_cases"))
+  print(MI_corr)}
+```
+
+Similar autocorrelation pattern and significance with possession with intent to distribute
+
+#### export
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  MI_corr <- sp.correlogram(
+    nb,
+    export_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "export_cases"))
+  print(MI_corr)}
+```
+
+For most of the years, correlogram is flat and close to zero across all distances, suggests **no significant spatial autocorrelation** at any lag, meaning that the spatial distribution of values is **random**.
+
+#### conspiracy
+
+Remember to handle the years with no cases
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  cases = conspiracy_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2)
+  
+    # checks if the year's vector has no_case = 0
+  if (sum(cases)==0) {
+    message(paste("Skipping year", year, "due to empty data (0 cases)"))
+    next  # continue to next iteration
+  }
+  
+  MI_corr <- sp.correlogram(
+    nb,
+    cases,
+    order = 6,
+    method="I", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(MI_corr, main = paste(year, "conspiracy_cases"))
+  print(MI_corr)}
+```
+
+Similar autocorrelation pattern and significance with possession with intent to distribute
+:::
+
+### Geary's C
+
+::: panel-tabset
+#### drug use
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    drug_use_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "drug_use_cases"))
+  print(GC_corr)}
+```
+
+#### possession
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    possession_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "possession_cases"))
+  print(GC_corr)}
+```
+
+#### possession with intent to distribute
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "possession_with_intent_to_distribute_cases"))
+  print(GC_corr)}
+```
+
+#### trafficking
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    trafficking_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "trafficking_cases"))
+  print(GC_corr)}
+```
+
+#### production
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    production_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "production_cases"))
+  print(GC_corr)}
+```
+
+#### import
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    import_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "import_cases"))
+  print(GC_corr)}
+```
+
+#### export
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  GC_corr <- sp.correlogram(
+    nb,
+    export_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "export_cases"))
+  print(GC_corr)}
+```
+
+#### conspiracy
+
+Remember to handle the years with no cases
+
+```{r}
+#| code-fold: true
+par(mfrow=c(2,3))
+for (year in yr){
+  cases = conspiracy_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2)
+  
+    # checks if the year's vector has no_case = 0
+  if (sum(cases)==0) {
+    message(paste("Skipping year", year, "due to empty data (0 cases)"))
+    next  # continue to next iteration
+  }
+  
+  GC_corr <- sp.correlogram(
+    nb,
+    cases,
+    order = 6,
+    method="C", 
+    style="W",
+    zero.policy = TRUE) # handle Phuket, an isolated province
+  plot(GC_corr, main = paste(year, "conspiracy_cases"))
+  print(GC_corr)}
+```
+:::
+
+# Local Indicators of Spatial Association (LISA)
+
+```{r}
+tmap_mode("plot")
+```
+
+::: panel-tabset
+### drug use
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      drug_use_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+-   **Growing Clusters**: At first from 2017 to 2019, significant hotspots were mostly in the Bangkok region; going to 2022, there is a clear increase in the number of significant hotspots in northern regions over time, particularly in 2020 and 2021. This suggests a spread or increase in drug use in those areas, which might indicate a need for more intervention or preventive measures.
+
+-   **Emerging Hotspots in Southern Provinces**: From 2020 onwards, the southern provinces show emerging high-high clusters, indicating a recent increase in drug use cases.
+
+-   **Shifting Patterns**: Some areas shift from being coldspots to neutral or even to hotspots, showing that drug use is dynamic across the country, e.g. northwestern region of Thailand from 2018 to 2020
+
+### possession
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      possession_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+-   **Significant Southern Clustering**: The southern region consistently shows significant **High-High clusters**, indicating concentrated areas of high drug possession rates.
+
+-   **Northern Clusters**: The northern areas display **Low-Low clusters** over the years, representing regions with persistently low drug possession cases, except for a sudden clustering in 2020
+
+-   **Strong Spatial Autocorrelation**: Most regions exhibit statistically significant clustering, especially in the south, suggesting non-random patterns in drug possession cases.
+
+-   **Temporal Decline**: From 2020 onwards, fewer regions show strong clustering, indicating a potential **decline in spatial concentration** of drug possession cases.
+
+-   **Shifts in Patterns**: While southern hot spots remain dominant, new clusters occasionally emerge, reflecting dynamic changes in drug possession trends across the country.
+
+### possession with intent to distribute
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+Similar to possession cases, even following similar spatial positioning across each corresponding years, except:
+
+-   there is **no significant clustering down** at the southern tail region
+
+### trafficking
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      trafficking_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+Similar to drug_use cases except:
+
+-   more significant High-High appeared in the **central** regions and one down south, with the initial clustering trends in the Bangkok region, previously present between 2017 and 2019, vanished after that period, implying a possible spread or progression of trafficking operations towards adjacent borders, may also be servicing import/export operations
+
+### production
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      production_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+Similar clustering patterns with the drug abuse layers: distribution drug production operations are likely correlated to or could even be the cause of the spatio-temporal pattern of drug abuse cases.
+
+### import
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      import_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+### export
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      export_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+
+### conspiracy
+
+```{r}
+#| warning: false
+#| code-fold: true
+
+set.seed(69)
+for (year in yr){
+    
+  if (year==2021 | year==2022){next} # force to skip years with no cases
+    
+  lisa <- wm_q %>% 
+    mutate(local_moran = local_moran(
+      conspiracy_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2), 
+      wm_q$nb, 
+      wm_q$wt, 
+      nsim = 99),.before = 1) %>%
+    unnest(local_moran)
+
+  
+  
+  map1 <- tm_shape(lisa) +
+    tm_fill("ii") + 
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("local Moran's I of no_cases for", year),
+              main.title.size = 0.666)
+  
+  
+  
+  map2 <- tm_shape(lisa) +
+    tm_fill("p_ii",
+            breaks = c(0, 0.001, 0.01, 0.05, 1),
+                labels = c("0.001", "0.01", "0.05", "Not sig")) + 
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of local Moran's I for", year),
+              main.title.size = 0.666)
+
+  
+  
+  lisa_sig <- lisa  %>%
+    filter(p_ii_sim < 0.05)
+  
+  map_lisa <-  tm_shape(lisa) +
+    tm_polygons() +
+    tm_borders(alpha = 0.5)
+
+  if (nrow(lisa_sig) > 0) {
+    map_lisa <-  map_lisa +
+      tm_shape(lisa_sig) +
+      tm_fill("mean") + 
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Clusters for", year),
+                main.title.size = 0.666)
+  } else {
+    map_lisa <- map_lisa +
+      tm_layout(main.title = paste("No Significant LISA Clusters for", year),
+                main.title.size = 0.666)
+  }
+  
+  
+  print(tmap_arrange(map1, map2, map_lisa, ncol = 3))
+  
+}
+```
+:::
+
+# Hot Spot and Cold Spot Area Analysis (Getis and Ord’s G-Statistics)
+
+Compute Inverse Distance Weights
+
+```{r}
+# derive a spatial weight matrix
+wm_idw <- wm_data %>% st_transform(32647) %>%  # UTM Zone 47N for Thailand
+  mutate(
+      nb = include_self(st_contiguity(geometry)),
+      wts = st_inverse_distance(nb, geometry, scale = 1, alpha = 1),
+      .before = 1)
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+::: panel-tabset
+#### drug use
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      drug_use_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+-   Stable temporal pattern of the Bangkok region's hot and cold spots from 2017 to 2019
+
+-   Disperse clustering of hot and cold spots from 2020 to 2022, away from Bangkok region and dispersed across the central region, could be likely dodging anti-drug operations most concentrated near Thailand's capital. Will need to incorporate policing activity data to ascertain this
+
+#### possession
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      possession_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+-   Minor clustering trends near the capital, but most clusters disperse out further north and south ends away from Bangkok
+
+#### possession with intent to distribute
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      possession_with_intent_to_distribute_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+-   Similar significant hotspots pattern as previously mentioned mostly in the capital and neighbouring regions; significant coldspots down south
+
+#### trafficking
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      trafficking_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+Significant production cold spots in the northen and southern regions; Significant production hot spots being dispersed within the central region
+
+#### production
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      production_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+Significant production hot spots in the northen and southern regions; Significant product cold spots being dispersed within the central region, slowing diminishing over time.
+
+#### import
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      import_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+Both significant hot and cold spots clustering down south end of Thailand's border mostly; could be a sign of cross border drug operations.
+
+#### export
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+  print(paste(year, "compute local Gi* statistics"))
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      export_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2),
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+No significant hot spots or clustering; sparse and dispersed cold spots across Thailand.
+
+#### conspiracy
+
+```{r}
+#| warning: false
+#| code-fold: true
+set.seed(69)
+
+for(year in yr){
+    cases = conspiracy_cases %>% filter(fiscal_year==year) %>% dplyr::pull(2)
+  
+    # checks if the year's vector has no_case = 0
+  if (sum(cases)==0) {
+    message(paste("Skipping year", year, "due to empty data (0 cases)"))
+    next  # continue to next iteration
+  }
+  
+  
+  HCSA <- wm_idw %>%
+    mutate(local_Gi = local_gstar_perm(
+      cases,
+      wm_idw$nb,
+      wm_idw$wts,
+      nsim = 99),.before = 1) %>%
+    unnest(local_Gi)
+
+  # print(HCSA)
+
+  
+  map3 <- tm_shape(HCSA) +
+    tm_fill("gi_star") +
+    tm_borders(alpha = 0.5) +
+    tm_view(set.zoom.limits = c(6,8)) +
+    tm_layout(main.title = paste("Gi* of no_cases for", year),
+              main.title.size = 0.666)
+
+  map4 <- tm_shape(HCSA) +
+    tm_fill("p_value",
+      breaks = c(0, 0.001, 0.01, 0.05, 1),
+      labels = c("0.001", "0.01", "0.05", "Not sig")) +
+    tm_borders(alpha = 0.5) +
+    tm_layout(main.title = paste("p-value of Gi* for", year),
+              main.title.size = 0.666)
+
+  
+  HCSA_sig <- HCSA  %>%
+    filter(p_sim < 0.05)
+  
+  map5 <- tm_shape(HCSA) +
+      tm_polygons() +
+      tm_borders(alpha = 0.5)
+
+  if (nrow(HCSA_sig) > 0) {
+    map5 <- map5 +
+      tm_shape(HCSA_sig) +
+      tm_fill("cluster") +
+      tm_borders(alpha = 0.4) +
+      tm_layout(main.title = paste("LISA Map for", year), 
+              main.title.size = 0.666)
+    
+  } else { print(paste("No significant clusters found for", year)) }
+
+  print(tmap_arrange(map3, map4, map5, ncol = 3))
+  
+}
+```
+
+Significant hotspots clustering near the capital became coldspots and dispersed over time.
+:::
