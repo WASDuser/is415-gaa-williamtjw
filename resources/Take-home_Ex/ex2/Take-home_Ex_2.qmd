@@ -295,10 +295,9 @@ str(combined_suspected_offenses_sf)
 #| code-fold: true
 #| warning: false
 
-basemap <- tm_shape(combined_offenses_sf) + tm_polygons() + tm_text("ADM1_PCODE",size = 0.4)
-offenses <- qtm(combined_offenses_sf,"total_cases",title = 'confirmed offenses')
-suspects <- qtm(combined_suspected_offenses_sf,"total_cases", title = 'suspected offenses')
-tmap_arrange(suspects, basemap, offenses, asp=1, ncol=3)
+tm_shape(combined_offenses_sf) + tm_polygons() + tm_text("ADM1_PCODE",size = 0.4)
+qtm(combined_offenses_sf,"total_cases", title = "offenses")
+qtm(combined_suspected_offenses_sf,"total_cases", title = "suspected")
 ```
 
 **Overall Distribution**
