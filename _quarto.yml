@@ -18,7 +18,9 @@ website:
         - text: "Hands-on Exercise 5"
           href: "resources/Hands-on_Ex/ex5/Hands-On_Ex_5.qmd"
         - text: "Hands-on Exercise 6"
-          href: "resources/Hands-on_Ex/ex6/Hands-On_Ex_6.qmd"  
+          href: "resources/Hands-on_Ex/ex6/Hands-On_Ex_6.qmd"
+        - text: "Hands-on Exercise 7"
+          href: "resources/Hands-on_Ex/ex7/Hands-On_Ex_7.qmd"
           
     - text: "In-class Exercise (ICE)"
       menu:
@@ -34,6 +36,8 @@ website:
           href: "resources/ICEs/ex5/ice5.qmd"
         - text: "ICE 6"
           href: "resources/ICEs/ex6/ice6.qmd"
+        - text: "ICE 7"
+          href: "resources/ICEs/ex7/ice7.qmd"
           
     - text: "Take-home Exercise (THE)"
       menu:

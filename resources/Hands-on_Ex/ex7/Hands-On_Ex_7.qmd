@@ -1,0 +1,561 @@
+---
+title: "Hands-on Exericse 7: Geographical Segmentation with Spatially Constrained Clustering Techniques"
+author: "William"
+date: "October 13, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Analytical Question 
+
+In geobusiness and spatial policy, it is a common practice to delineate the market or planning area into homogeneous regions by using multivariate data.
+
+-   planning and implementing targeted policies will be easier
+
+-   reduce data complexity, enabling easier analysis
+
+-   ensure equitable distribution of resources to each homogeneous region
+
+# Packages
+
+-   Spatial data handling
+
+    -   **sf**, **rgdal** and **spdep**
+
+-   Attribute data handling
+
+    -   **tidyverse**, especially **readr**, **ggplot2** and **dplyr**
+
+-   Choropleth mapping
+
+    -   **tmap**
+
+-   Multivariate data visualisation and analysis
+
+    -   **coorplot**, **ggpubr**, and **heatmaply**
+
+-   Cluster analysis
+
+    -   **cluster**
+
+    -   **ClustGeo**
+
+```{r}
+pacman::p_load(spdep, tmap, sf, ClustGeo, 
+               ggpubr, cluster, factoextra, NbClust,
+               heatmaply, corrplot, psych, tidyverse, GGally)
+```
+
+# Data
+
+Two data sets will be used in this study. They are:
+
+-   Myanmar Township Boundary Data (i.e. *myanmar_township_boundaries*) : This is a GIS data in ESRI shapefile format. It consists of township boundary information of Myanmar. The spatial data are captured in polygon features.
+
+-   *Shan-ICT.csv*: This is an extract of [**The 2014 Myanmar Population and Housing Census Myanmar**](https://myanmar.unfpa.org/en/publications/2014-population-and-housing-census-myanmar-data-sheet) at the township level.
+
+Both data sets are download from [Myanmar Information Management Unit (MIMU)](http://themimu.info/)
+
+# Data Import and Prepatation
+
+**Myanmar Township Boundary Data**
+
+```{r}
+shan_sf <- st_read(dsn = "data/geospatial/", layer = "myanmar_township_boundaries")
+shan_sf
+```
+
+```{r}
+# filter out relevant columns and insert ST column accordingly
+shan_sf <- shan_sf %>% 
+    filter(ST %in% c("Shan (East)", "Shan (North)", "Shan (South)")) %>% 
+    dplyr::select(c(2:7))
+glimpse(shan_sf)
+```
+
+**Shan-ICT (Population attribute dataset)**
+
+```{r}
+ict <- read_csv('data/aspatial/Shan-ICT.csv')
+```
+
+```{r}
+summary(ict)
+```
+
+```{r}
+# The unit of measurement of the values are number of household, which is biased by the underlying total number of households. In general, the townships with relatively higher total number of households will also have higher number of households owning radio, TV, etc.
+
+# In order to overcome this problem, we will derive the penetration rate of each ICT variable
+ict_derived <- ict %>%
+  mutate(`RADIO_PR` = `Radio`/`Total households`*1000) %>%
+  mutate(`TV_PR` = `Television`/`Total households`*1000) %>%
+  mutate(`LLPHONE_PR` = `Land line phone`/`Total households`*1000) %>%
+  mutate(`MPHONE_PR` = `Mobile phone`/`Total households`*1000) %>%
+  mutate(`COMPUTER_PR` = `Computer`/`Total households`*1000) %>%
+  mutate(`INTERNET_PR` = `Internet at home`/`Total households`*1000) %>%
+  rename(`DT_PCODE` =`District Pcode`,`DT`=`District Name`,
+         `TS_PCODE`=`Township Pcode`, `TS`=`Township Name`,
+         `TT_HOUSEHOLDS`=`Total households`,
+         `RADIO`=`Radio`, `TV`=`Television`, 
+         `LLPHONE`=`Land line phone`, `MPHONE`=`Mobile phone`,
+         `COMPUTER`=`Computer`, `INTERNET`=`Internet at home`) 
+
+summary(ict_derived)
+```
+
+# Exploratory Data Analysis
+
+::: panel-tabset
+## Histogram
+
+```{r}
+#| code-fold: true
+
+radio <- ggplot(data=ict_derived, 
+             aes(x= `RADIO_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+tv <- ggplot(data=ict_derived, 
+             aes(x= `TV_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+llphone <- ggplot(data=ict_derived, 
+             aes(x= `LLPHONE_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+mphone <- ggplot(data=ict_derived, 
+             aes(x= `MPHONE_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+computer <- ggplot(data=ict_derived, 
+             aes(x= `COMPUTER_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+internet <- ggplot(data=ict_derived, 
+             aes(x= `INTERNET_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue")
+# ggpubr package
+ggarrange(radio, tv, llphone, mphone, computer, internet, ncol = 3, nrow = 2)
+```
+
+All besides TV_PR has a right-skewed distribution: relatively low penetration rate across devices, only TV's appears normally distributed
+
+## Boxplot
+
+```{r}
+#| code-fold: true
+
+radio1 <- ggplot(data=ict_derived, 
+             aes(x= `RADIO_PR`)) +
+  geom_boxplot(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+tv1 <- ggplot(data=ict_derived, 
+             aes(x= `TV_PR`)) +
+  geom_boxplot(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+llphone1 <- ggplot(data=ict_derived, 
+             aes(x= `LLPHONE_PR`)) +
+  geom_boxplot(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+mphone1 <- ggplot(data=ict_derived, 
+             aes(x= `MPHONE_PR`)) +
+  geom_boxplot(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+computer1 <- ggplot(data=ict_derived, 
+             aes(x= `COMPUTER_PR`)) +
+  geom_boxplot(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+internet1 <- ggplot(data=ict_derived, 
+             aes(x= `INTERNET_PR`)) +
+  geom_boxplot(bins=20, 
+                 color="black", 
+                 fill="light blue")
+
+# ggpubr package
+ggarrange(radio1, tv1, llphone1, mphone1, computer1, internet1, ncol = 3, nrow = 2)
+```
+
+## Choropleth
+
+**Relational join**
+
+```{r}
+#| eval: false
+shan_sf <- left_join(shan_sf, ict_derived, by=c("TS_PCODE"="TS_PCODE"))
+  
+write_rds(shan_sf, "data/rds/shan_sf.rds")
+```
+
+**Quick Plot**
+
+```{r}
+#| code-fold: false
+
+shan_sf <- read_rds("data/rds/shan_sf.rds")
+
+qtm(shan_sf, "RADIO_PR")
+```
+
+```{r}
+#| code-fold: false
+# to visualise bias of underlying total number of households at the townships, plot two choropleth maps, one for the total number of households (i.e. TT_HOUSEHOLDS.map) and one for the total number of household with Radio (RADIO.map)
+
+TT_HOUSEHOLDS.map <- tm_shape(shan_sf) + 
+  tm_fill(col = "TT_HOUSEHOLDS",
+          n = 5,
+          style = "jenks", 
+          title = "Total households") + 
+  tm_borders(alpha = 0.5) 
+
+RADIO.map <- tm_shape(shan_sf) + 
+  tm_fill(col = "RADIO",
+          n = 5,
+          style = "jenks",
+          title = "Number Radio ") + 
+  tm_borders(alpha = 0.5) 
+
+tmap_arrange(TT_HOUSEHOLDS.map, RADIO.map,asp=NA, ncol=2)
+```
+
+The above confirms that townships with relatively large number of households also have relatively high number of radio ownerships.
+
+```{r}
+#| code-fold: false
+# visualise distribution of total number of households and Radio PR
+tm_shape(shan_sf) +
+    tm_polygons(c("TT_HOUSEHOLDS", "RADIO_PR"),
+                style="jenks") +
+    tm_facets(sync = TRUE, ncol = 2) +
+  tm_legend(legend.position = c("right", "bottom"))+
+  tm_layout(outer.margins=0, asp=0)
+```
+
+Areas with relatively high number of households tend to have relatively lower radio penetration rates (inversely related).
+:::
+
+# Correlation Analysis
+
+Ensure that cluster variables are not highly correlated before performing analysis. When cluster variables are highly correlated, this increases redundancy in input data, which can confuse the model, lead to overfitting, and negatively impact generation of homogeneous regions.
+
+```{r}
+#| code-fold: true
+
+# corrplot.mixed() of corrplot package to visualise and analyse the correlation of the input variables.
+cluster_vars.cor = cor(ict_derived[,12:17])
+corrplot.mixed(
+    cluster_vars.cor,
+    lower = "ellipse", 
+    upper = "number",
+    tl.pos = "lt",
+    diag = "l",
+    tl.col = "black")
+```
+
+Since COMPUTER_PR and INTERNET_PR are highly correlated, pick either one.
+
+# Hierarchy Cluster Analysis
+
+## Extract cluster variables
+
+```{r}
+# remember to pick one: COMPUTER_PR or INTERNET_PR 
+cluster_vars <- shan_sf %>%
+    st_set_geometry(NULL) %>% 
+    select("TS.x", "RADIO_PR", "TV_PR", "LLPHONE_PR", "MPHONE_PR", "COMPUTER_PR")
+head(cluster_vars)
+```
+
+```{r}
+# change rows by township name instead of row number
+row.names(cluster_vars) <- cluster_vars$TS.x
+head(cluster_vars)
+
+# delete TS.x field
+shan_ict <- select(cluster_vars, c(2:6))
+head(shan_ict)
+```
+
+```{r}
+#| eval: false
+write_rds(shan_ict, 'data/rds/shan_ict.rds')
+```
+
+```{r}
+shan_ict <- read_rds('data/rds/shan_ict.rds')
+```
+
+## Data Standardisation
+
+Clustering variables with large value ranges will dominate and bias the overall cluster analysis. These are some methods how to avoid it:
+
+### Min/Max Standardisation
+
+```{r}
+# normalize() of heatmaply package
+# makes the ranges of the Min-max standardised cluster variables to be 0-1
+shan_ict.std <- normalize(shan_ict)
+summary(shan_ict.std)
+```
+
+### Z-score Standardisation
+
+```{r}
+# scale() of Base R
+# makes the avg & stdev of Z-score standardised cluster variables be 0 and 1 respectively
+# ASSUME THAT all variables come from some NORMAL distribution
+shan_ict.z <- scale(shan_ict)
+describe(shan_ict.z)
+```
+
+### Visualise Standardised cluster variables
+
+Beside reviewing the summary statistics of the standardised clustering variables, it is also a good practice to visualise their distribution graphical.
+
+::: panel-tabset
+#### Histogram
+
+```{r}
+#| code-fold: true
+r <- ggplot(data=ict_derived, 
+             aes(x= `RADIO_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue") +
+  ggtitle("Raw values without standardisation")
+
+shan_ict_s_df <- as.data.frame(shan_ict.std)
+s <- ggplot(data=shan_ict_s_df, 
+       aes(x=`RADIO_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue") +
+  ggtitle("Min-Max Standardisation")
+
+shan_ict_z_df <- as.data.frame(shan_ict.z)
+z <- ggplot(data=shan_ict_z_df, 
+       aes(x=`RADIO_PR`)) +
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue") +
+  ggtitle("Z-score Standardisation")
+
+ggarrange(r, s, z,
+          ncol = 3,
+          nrow = 1)
+```
+
+#### Density
+
+```{r}
+#| code-fold: true
+r <- ggplot(data=ict_derived, 
+             aes(x= `RADIO_PR`)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Raw values without standardisation")
+
+shan_ict_s_df <- as.data.frame(shan_ict.std)
+s <- ggplot(data=shan_ict_s_df, 
+       aes(x=`RADIO_PR`)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Min-Max Standardisation")
+
+shan_ict_z_df <- as.data.frame(shan_ict.z)
+z <- ggplot(data=shan_ict_z_df, 
+       aes(x=`RADIO_PR`)) +
+  geom_density(color="black",
+               fill="light blue") +
+  ggtitle("Z-score Standardisation")
+
+ggarrange(r, s, z,
+          ncol = 3,
+          nrow = 1)
+```
+:::
+
+Pentration rates now more follows a normal distribution.
+
+## Proximity Matrix
+
+```{r}
+# calculate distance matrix using dist() of base R
+
+# dist() supports six distance proximity calculations, they are: 
+    # euclidean (default), 
+    # maximum, 
+    # manhattan, 
+    # canberra, 
+    # binary and 
+    # minkowski.
+
+proxmat <- dist(shan_ict, method = 'euclidean')
+```
+
+```{r}
+#| eval: false
+# to inspect ...
+proxmat
+```
+
+## Hierarchy Clustering
+
+```{r}
+# hclust() employed agglomeration method to compute the cluster. Eight clustering algorithms are supported, they are: 
+    # ward.D, 
+    # ward.D2, 
+    # single, 
+    # complete, 
+    # average(UPGMA), 
+    # mcquitty(WPGMA), 
+    # median(WPGMC) and 
+    # centroid(UPGMC)
+
+# performs hierarchical cluster analysis using ward.D method
+hclust_ward <- hclust(proxmat, method = 'ward.D')
+```
+
+```{r}
+# plot the tree by using plot() of R Graphics
+plot(hclust_ward, cex = 0.6)
+```
+
+## Optimal Clustering Algorithm
+
+```{r}
+# compute the agglomerative coefficients of all hierarchical clustering algorithms.
+
+m <- c( "average", "single", "complete", "ward")
+names(m) <- c( "average", "single", "complete", "ward")
+
+# agnes() computes the agglomerative coefficient: measures the amount of clustering structure found 
+# (closer to 1 suggest strong clustering structure).
+ac <- function(x) {
+  agnes(shan_ict, method = x)$ac
+}
+
+map_dbl(m, ac)
+```
+
+Ward’s method provides the strongest clustering structure among the four methods assessed. Hence, in the subsequent analysis, only Ward’s method will be used.
+
+## Optimal Clusters
+
+Now we have to determine the optimal clusters to retain.
+
+#### [Elbow Method](https://en.wikipedia.org/wiki/Elbow_method_(clustering))
+
+#### [Average Silhouette Method](https://www.sciencedirect.com/science/article/pii/0377042787901257?via%3Dihub)
+
+#### [Gap Statistic Method](http://www.web.stanford.edu/~hastie/Papers/gap.pdf)
+
+Compares the **total within intra-cluster variation for different values of k** with their expected values under null reference distribution of the data. Optimal clusters yields the largest gap statistic, meaning that the clustering structure is far away from the random uniform distribution of points
+
+```{r}
+# clusGap() of cluster package
+set.seed(12345)
+gap_stat <- clusGap(shan_ict, 
+                    FUN = hcut, #  hcut function used is from factoextra package
+                    nstart = 25, 
+                    K.max = 10, 
+                    B = 50)
+# Print the result
+print(gap_stat, method = "firstmax")
+```
+
+```{r}
+# visualise the plot using fviz_gap_stat() of factoextra package
+fviz_gap_stat(gap_stat)
+```
+
+Optimal is k = 1.
+
+However, it is not logical to retain only one cluster. By examine the gap statistic graph, the 6-cluster gives the largest gap statistic and should be the next best cluster to pick.
+
+**Additional Reference:** [NbClust](#0) package(Charrad et al., 2014)
+
+## Dendrograms
+
+![](images/clipboard-576194992.png)
+
+Each leaf corresponds to one observation. Moving up the tree, observations that are similar to each other are combined into branches, which are themselves fused at a higher height.
+
+Height indicates the (dis)similarity between two observations. The higher the height of the fusion, the less similar the observations are.
+
+Note that, conclusions about the proximity of two observations can be drawn only based on the **height** where branches containing those two observations first are fused. We cannot use the proximity of two observations along the horizontal axis as a criteria of their similarity.
+
+```{r}
+plot(hclust_ward, cex = 0.6)
+rect.hclust(hclust_ward, 
+            k = 6, 
+            border = 2:5) # specify the border colors for the rectangle
+```
+
+## Visually-driven Hierarchy Cluster Analysis using [heatmaply](https://cran.r-project.org/web/packages/heatmaply/index.html) package
+
+```{r}
+# Transforming the data frame into a matrix
+shan_ict_mat <- data.matrix(shan_ict)
+
+# Plotting interactive cluster heatmap
+heatmaply(normalize(shan_ict_mat),
+          Colv=NA,
+          dist_method = "euclidean",
+          hclust_method = "ward.D",
+          seriate = "OLO",
+          colors = Blues,
+          k_row = 6,
+          margins = c(NA,200,60,NA),
+          fontsize_row = 4,
+          fontsize_col = 5,
+          main="Geographic Segmentation of Shan State by ICT indicators",
+          xlab = "ICT Indicators",
+          ylab = "Townships of Shan State")
+```
+
+## Map formed clusters
+
+With closed examination of the dendragram above, we have decided to retain **six clusters**.
+
+```{r}
+# cutree() of base R
+groups <- as.factor(cutree(hclust_ward, k=6))
+```
+
+```{r}
+shan_sf_cluster <- cbind(  # append groups onto shan_sf to produce an output sf object
+    shan_sf, 
+    as.matrix(groups)) %>% # convert 'list' object group into a matrix
+  rename(`CLUSTER`=`as.matrix.groups.`)
+
+# plot the choropleth map, showing formed clusters
+qtm(shan_sf_cluster, "CLUSTER")
+```
+
+Very fragmented clusters (major limitation when non-spatial clustering algorithm such as hierarchical cluster analysis method is used)
