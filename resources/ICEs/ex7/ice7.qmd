@@ -1,4 +1,36 @@
 ---
-title: "ICE 7"
+title: "ICE 7: Cluster Analysis"
 author: "William"
+date: "October 14, 2024"
+date-modified: "last-modified"
 ---
+
+Lecture Notes:
+
+-   Rather than using absolute figures for comparison during analysis, consider deriving ratios or percentages to account for external factors (e.g. compute % of observations across total population rather than abolute raw data)
+
+-   Pairwise plots indicate **linearity only,** so if there is no correlation, it only means that the comparison variables are not linearly related, but could possibly exhibit **other** forms of relationship.
+
+-   Choose best optimal method (e.g. Gap Statistics) then decide how many clusters to retain
+
+``` r
+gap_stat <- clusGap(shan_ict, 
+                    FUN = hcut, 
+                    nstart = 25, 
+                    K.max = 10, # modify as needed
+                    B = 50)
+```
+
+-   ![](images/clipboard-2669635383.png)
+
+    -   usually look for anything after 3
+
+-   Beware of lone rangers, very unique/highly dissimilar values (possibly due to rare combination of attributes), consider removing (depends on context)
+
+-   consider isolating input and output fields for prototype interface
+
+-   Alternative view of clustering
+
+    -   Parallel coordinates
+
+-   plotly, giraffe

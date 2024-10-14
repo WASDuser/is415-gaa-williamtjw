@@ -54,5 +54,12 @@
     "title": "About",
     "section": "",
     "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "resources/ICEs/ex7/ice7.html",
+    "href": "resources/ICEs/ex7/ice7.html",
+    "title": "ICE 7: Cluster Analysis",
+    "section": "",
+    "text": "Lecture Notes:\n\nRather than using absolute figures for comparison during analysis, consider deriving ratios or percentages to account for external factors (e.g. compute % of observations across total population rather than abolute raw data)\nPairwise plots indicate linearity only, so if there is no correlation, it only means that the comparison variables are not linearly related, but could possibly exhibit other forms of relationship.\nChoose best optimal method (e.g. Gap Statistics) then decide how many clusters to retain\n\ngap_stat &lt;- clusGap(shan_ict, \n                    FUN = hcut, \n                    nstart = 25, \n                    K.max = 10, # modify as needed\n                    B = 50)\n\n\n\nusually look for anything after 3\n\nBeware of lone rangers, very unique/highly dissimilar values (possibly due to rare combination of attributes), consider removing (depends on context)\nconsider isolating input and output fields for prototype interface\nAlternative view of clustering\n\nParallel coordinates\n\nplotly, giraffe"
   }
 ]
