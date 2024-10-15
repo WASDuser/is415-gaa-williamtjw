@@ -1,0 +1,296 @@
+---
+title: "Hands-on Exericse 9: [Cont. from Hands-on 7] SKATER approach"
+author: "William"
+date: "October 15, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+# Last time on Hands-on Exercise 7...
+
+### Analytical Question
+
+In geobusiness and spatial policy, it is a common practice to delineate the market or planning area into homogeneous regions by using multivariate data.
+
+-   planning and implementing targeted policies will be easier
+
+-   reduce data complexity, enabling easier analysis
+
+-   ensure equitable distribution of resources to each homogeneous region
+
+### Packages
+
+-   Spatial data handling
+
+    -   **sf**, **rgdal** and **spdep**
+
+-   Attribute data handling
+
+    -   **tidyverse**, especially **readr**, **ggplot2** and **dplyr**
+
+-   Choropleth mapping
+
+    -   **tmap**
+
+-   Multivariate data visualisation and analysis
+
+    -   **coorplot**, **ggpubr**, and **heatmaply**
+
+-   Cluster analysis
+
+    -   **cluster**
+
+    -   **ClustGeo**
+
+```{r}
+pacman::p_load(spdep, tmap, sf, ClustGeo, 
+               ggpubr, cluster, factoextra, NbClust,
+               heatmaply, corrplot, psych, tidyverse, GGally)
+```
+
+### Data
+
+Two data sets will be used in this study. They are:
+
+-   Myanmar Township Boundary Data (i.e. *myanmar_township_boundaries*) : This is a GIS data in ESRI shapefile format. It consists of township boundary information of Myanmar. The spatial data are captured in polygon features.
+
+-   *Shan-ICT.csv*: This is an extract of [**The 2014 Myanmar Population and Housing Census Myanmar**](https://myanmar.unfpa.org/en/publications/2014-population-and-housing-census-myanmar-data-sheet) at the township level.
+
+Both data sets are download from [Myanmar Information Management Unit (MIMU)](http://themimu.info/)
+
+```{r}
+shan_sf <- read_rds('data/rds/shan_sf.rds')
+shan_ict <- read_rds('data/rds/shan_ict.rds')
+shan_sf_cluster <- read_rds('../ex7/data/rds/shan_sf_cluster.rds')
+```
+
+# SKATER Approach
+
+To derive spatially constrained cluster
+
+### Overall
+
+### Compute Neighbors list
+
+**SKATER function only support sp objects such as SpatialPolygonDataFrame**
+
+```{r}
+shan_sp <- as_Spatial(shan_sf)
+```
+
+**Compute neighbours list from polygon list**
+
+```{r}
+# poly2nd() of spdep
+shan.nb <- poly2nb(shan_sp)
+summary(shan.nb)
+```
+
+**Apply coordinates to original shan_sf to extract polygons' centroids, which are used as the nodes for the future plot**
+
+```{r}
+coords <- st_coordinates(st_centroid(st_geometry(shan_sf)))
+```
+
+**Plot `shan.nb` on top of `shan_sf`**
+
+> `shan_sf` extends further than the graph, so its plotted first, otherwise some of the areas will be clipped, because plotting area is determined by the characteristics of the first plot
+
+```{r}
+plot(st_geometry(shan_sf), border=grey(.5))
+plot(shan.nb,
+    coords, 
+    col="blue", 
+    add=TRUE) # adds to existing plot, otherwise will be plotted separately
+```
+
+### **Computing minimum spanning tree**
+
+**Compute edge costs**
+
+> edge costs: distance between nodes
+
+```{r}
+# nbcosts() of spdep package
+lcosts <- nbcosts(shan.nb, shan_ict)
+```
+
+> Gives pairwise dissimilarity between its values on the five variables and the values for the neighbouring observation (from the neighbour list). Basically, this is the notion of a generalised weight for a spatial weights matrix.
+
+**Convert `shan.nb` to a list weights object by specifying `lcosts` as the weights**
+
+```{r}
+# nb2listw() of spdep package
+shan.w <- nb2listw(
+    shan.nb,
+    lcosts,
+    style = 'B' # ensures cost values arent row-standardised
+)
+summary(shan.w)
+```
+
+**Compute the tree using `shan.w`**
+
+```{r}
+# mstree() of spdep package
+shan.mst <- mstree(shan.w)
+```
+
+**Check its class and dimension**
+
+```{r}
+class(shan.mst)
+```
+
+```{r}
+dim(shan.mst)
+```
+
+> Note how n (number of dimensions) in `shan.w` is **55** but `dim(shan.mst) = 54` , because `shan.mst` consists on n-1 edges (links) in order to traverse all the nodes
+
+**Plot `shan.mst`**
+
+```{r}
+plot(st_geometry(shan_sf), border = gray(.5))
+
+plot(
+    shan.mst,
+    coords,
+    cex.labels = .7,
+    cex.circles = .005,
+    add = TRUE
+)
+```
+
+### Compute the spatially constrained cluster
+
+```{r}
+# skater() of spdep package.
+clust6 <- skater(
+    edges = shan.mst[,1:2], # exclude the 3rd col (cost)
+    data = shan_ict,
+    method = 'euclidean',
+    ncuts = 5 # one less than number of clusters
+)
+```
+
+> `clust6` is object `skater`
+
+```{r}
+str(clust6)
+```
+
+```{r}
+ccs6 <- clust6$groups
+table(ccs6)
+```
+
+> groups: shows number of observations in each cluster
+
+**Plot pruned tree with 5 clusters**
+
+```{r}
+plot(st_geometry(shan_sf), 
+     border=gray(.5))
+plot(
+    clust6, 
+    coords, 
+    cex.labels = .7 ,
+    groups.colors=c("red","green","blue", "brown", "pink"),
+    cex.circles=0.005,
+    add=TRUE
+    )
+```
+
+### **Visualising the clusters in choropleth map**
+
+```{r}
+# compute proximity matrix
+proxmat <- dist(shan_ict, method = 'euclidean')
+
+# agglomeration method (ward.D) to compute the hierachical cluster
+hclust_ward <- hclust(proxmat, method = 'ward.D')
+
+# retain 6 clusters
+groups <- as.factor(cutree(hclust_ward, k=6))
+
+shan_sf_cluster <- cbind(  # append groups onto shan_sf to produce an output sf object
+    shan_sf, 
+    as.matrix(groups)) %>% # convert 'list' object group into a matrix
+  rename(`CLUSTER`=`as.matrix.groups.`)
+```
+
+```{r}
+groups_mat <- as.matrix(clust6$groups)
+shan_sf_spatialcluster <- cbind(shan_sf_cluster, as.factor(groups_mat)) %>%
+  rename(`SP_CLUSTER`=`as.factor.groups_mat.`)
+qtm(shan_sf_spatialcluster, "SP_CLUSTER")
+```
+
+```{r}
+#| warning: false
+#| message: false
+hclust.map <- qtm(shan_sf_cluster,
+                  "CLUSTER") + 
+  tm_borders(alpha = 0.5) 
+
+shclust.map <- qtm(shan_sf_spatialcluster,
+                   "SP_CLUSTER") + 
+  tm_borders(alpha = 0.5) 
+
+tmap_arrange(hclust.map, shclust.map,
+             asp=NA, ncol=2)
+```
+
+# ClustGeo package
+
+To perform non-spatially constrained hierarchical cluster analysis and spatially constrained cluster analysis
+
+### Overall
+
+### **Ward-like hierarchical clustering**
+
+```{r}
+# hclustgeo() to perform a typical Ward-like hierarchical clustering
+nongeo_cluster <- hclustgeo(proxmat)
+plot(
+    nongeo_cluster,
+    cex = .5
+)
+rect.hclust(
+    nongeo_cluster,
+    k = 6,
+    border = 2:5
+)
+```
+
+### Form clusters
+
+```{r}
+groups <- as.factor(cutree(nongeo_cluster, k=6))
+shan_sf_ngeo_cluster <- cbind(shan_sf, as.matrix(groups)) %>%
+  rename(`CLUSTER` = `as.matrix.groups.`)
+qtm(shan_sf_ngeo_cluster, "CLUSTER")
+```
+
+Cluster clustering
+
+```{r}
+dist = st_distance(shan_sf, shan_sf)
+distmat <- as.dist(dist) # comes to matrix
+```
+
+`choicealpha()` will be used to determine a suitable value for the mixing parameter alpha
+
+```{r}
+# determine a suitable value for the mixing paramete
+cr <- choicealpha(
+    proxmat, 
+    distmat, 
+    range.alpha = seq(0, 1, 0.1), 
+    K=6, 
+    graph = TRUE)
+```
