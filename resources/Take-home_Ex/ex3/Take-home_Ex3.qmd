@@ -1,0 +1,36 @@
+---
+title: "Take-Home Exercise 3: Prototyping Modules for Geospatial Analytics Shiny Application"
+author: "William"
+date: "October 16, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+\<Report Writeup\>
+
+Overview
+
+Movitation
+
+# Methodology
+
+# \[Prototype\] Shiny Application UI Storyboard
+
+> [Storyboard Guide](https://giniceseah.netlify.app/posts/2021-07-31-storyboard/)
+
+summary text
+
+## Tab 1
+
+Figure
+
+~*Figure\ caption*~
+
+Description
+
+\<repeat\>
+
+# Conclusion

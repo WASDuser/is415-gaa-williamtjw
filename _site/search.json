@@ -138,5 +138,12 @@
     "title": "Hands-on Exericse 7: Geographical Segmentation with Spatially Constrained Clustering Techniques",
     "section": "Map formed clusters",
     "text": "Map formed clusters\nWith closed examination of the dendragram above, we have decided to retain six clusters.\n\n# cutree() of base R\ngroups &lt;- as.factor(cutree(hclust_ward, k=6))\n\n\nshan_sf_cluster &lt;- cbind(  # append groups onto shan_sf to produce an output sf object\n    shan_sf, \n    as.matrix(groups)) %&gt;% # convert 'list' object group into a matrix\n  rename(`CLUSTER`=`as.matrix.groups.`)\n\n# plot the choropleth map, showing formed clusters\nqtm(shan_sf_cluster, \"CLUSTER\")\n\n\n\n\n\n\n\n\nVery fragmented clusters (major limitation when non-spatial clustering algorithm such as hierarchical cluster analysis method is used)"
+  },
+  {
+    "objectID": "resources/Take-home_Ex/ex3/Take-home_Ex3.html",
+    "href": "resources/Take-home_Ex/ex3/Take-home_Ex3.html",
+    "title": "Take-Home Exercise 3: Prototyping Modules for Geospatial Analytics Shiny Application",
+    "section": "",
+    "text": "&lt;Report Writeup&gt;\nOverview\nMovitation\n\nMethodology\n\n\n[Prototype] Shiny Application UI Storyboard\n\nStoryboard Guide\n\n\nblah"
   }
 ]
