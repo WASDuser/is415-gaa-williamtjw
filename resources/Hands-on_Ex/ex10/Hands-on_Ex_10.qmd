@@ -1,0 +1,231 @@
+---
+title: "Hands-on Exercise 10: Geographically weighted regression (GWR)"
+author: "William"
+date: "October 17, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+  output: false
+---
+
+In this exercise, I am applying GWR to develop [hedonic pricing](https://www.investopedia.com/terms/h/hedonicpricing.asp) models, where structural and locational variables are used to model 2015 resale condo prices.
+
+# R Packages used
+
+-   OLS and performing diagnostics tests
+
+    -   [**olsrr**](https://olsrr.rsquaredacademy.com/)
+
+-   Calibrating geographical weighted family of models
+
+    -   [**GWmodel**](https://cran.r-project.org/web/packages/GWmodel/index.html)
+
+-   Multivariate data visualisation and analysis
+
+    -   [**corrplot**](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+
+-   Spatial data handling
+
+    -   **sf**
+
+-   Attribute data handling
+
+    -   **tidyverse**, especially **readr**, **ggplot2** and **dplyr**
+
+-   Choropleth mapping
+
+    -   **tmap**
+
+```{r}
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary)
+```
+
+> GW models suit situations when data are not described well by some global model, but where there are spatial regions where a suitably localised calibration provides a better description.
+>
+> GWmodel includes functions to calibrate: GW **summary** statistics, GW principal **components** analysis, GW **discriminant analysis** and various forms of GW **regression**; some of which are provided in basic and robust (outlier resistant) forms.
+>
+> ::: {.callout-note appearance="minimal"}
+> ## **Discriminant analysis**
+>
+> used to analyze data when the dependent variable is categorical and the independent variable is interval in nature
+> :::
+
+# Data
+
+### URA Master Plan subzone boundary
+
+```{r}
+mpsz <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
+```
+
+### Resale prices of condominium in 2015
+
+```{r}
+condo_resale <- read_csv('data/aspatial/Condo_resale_2015.csv')
+```
+
+# Wrangling
+
+### URA Master Plan subzone boundary
+
+Since `mpsz` does not have EPSG information, use `st_tranform()` to modify the projection of `mpsz`
+
+```{r}
+mpsz_3414 <- st_transform(mpsz, 3414)
+
+# to verify
+st_crs(mpsz)
+```
+
+Reveal the extent of `mpsz_3414`
+
+```{r}
+# Returns bounding of a simple feature or simple feature set
+st_bbox(mpsz_3414)
+```
+
+### Resale prices of condominium in 2015
+
+```{r}
+summary(condo_resale)
+```
+
+```{r}
+condo_resale_sf <- condo_resale %>% st_as_sf(coords = c('LONGITUDE','LATITUDE'), crs=4326) %>%
+    st_transform(crs=3414) 
+```
+
+```{r}
+condo_resale_sf
+```
+
+# EDA using `ggplot2`
+
+### Univariate
+
+SELLING_PRICE
+
+```{r}
+#| code-fold: true
+ggplot(data=condo_resale_sf, aes(x=`SELLING_PRICE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+```
+
+Since it has a right-skewed distribution, normalise using logarithmic transformation.
+
+LOG_SELLING_PRICE
+
+```{r}
+condo_resale_sf <- condo_resale_sf %>% 
+    mutate(`LOG_SELLING_PRICE` = log(SELLING_PRICE))
+```
+
+SELLING_PRICE vs LOG_SELLING_PRICE
+
+```{r}
+#| code-fold: true
+#| layout-ncol: 2
+#| layout-nrow: 1
+
+ggplot(data=condo_resale_sf, aes(x=`SELLING_PRICE`)) +
+    geom_histogram(bins=20, color="black", fill="light blue")
+
+ggplot(data=condo_resale_sf, aes(x=`LOG_SELLING_PRICE`)) +
+    geom_histogram(bins=20, color="black", fill="light blue")
+```
+
+### Multivariate (Trellis) 
+
+```{r}
+AREA_SQM <- ggplot(data=condo_resale_sf, aes(x= `AREA_SQM`)) + 
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+AGE <- ggplot(data=condo_resale_sf, aes(x= `AGE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_CBD <- ggplot(data=condo_resale_sf, aes(x= `PROX_CBD`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_CHILDCARE <- ggplot(data=condo_resale_sf, aes(x= `PROX_CHILDCARE`)) + 
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_ELDERLYCARE <- ggplot(data=condo_resale_sf, aes(x= `PROX_ELDERLYCARE`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_URA_GROWTH_AREA <- ggplot(data=condo_resale_sf, 
+                               aes(x= `PROX_URA_GROWTH_AREA`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_HAWKER_MARKET <- ggplot(data=condo_resale_sf, aes(x= `PROX_HAWKER_MARKET`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_KINDERGARTEN <- ggplot(data=condo_resale_sf, aes(x= `PROX_KINDERGARTEN`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_MRT <- ggplot(data=condo_resale_sf, aes(x= `PROX_MRT`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_PARK <- ggplot(data=condo_resale_sf, aes(x= `PROX_PARK`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_PRIMARY_SCH <- ggplot(data=condo_resale_sf, aes(x= `PROX_PRIMARY_SCH`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+PROX_TOP_PRIMARY_SCH <- ggplot(data=condo_resale_sf, 
+                               aes(x= `PROX_TOP_PRIMARY_SCH`)) +
+  geom_histogram(bins=20, color="black", fill="light blue")
+
+ggarrange(AREA_SQM, AGE, PROX_CBD, PROX_CHILDCARE, PROX_ELDERLYCARE, 
+          PROX_URA_GROWTH_AREA, PROX_HAWKER_MARKET, PROX_KINDERGARTEN, PROX_MRT,
+          PROX_PARK, PROX_PRIMARY_SCH, PROX_TOP_PRIMARY_SCH,  
+          ncol = 3, nrow = 4)
+```
+
+### **Statistical Point Map**
+
+```{r}
+tmap_mode("view")
+```
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz_3414)+
+  tm_polygons() +
+tm_shape(condo_resale_sf) +  
+  tm_dots(col = "SELLING_PRICE",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+# **Hedonic Pricing Models in R using `lm()`**
+
+### **Simple Linear Regression**
+
+### **Multiple Linear Regression**
+
+Visualising the relationships of the independent variables
+
+Building the model
+
+Tests
+
+-   olsrr
+
+    -   `ols_regress()` - model summary
+
+    -   `ols_vif_tol()` - check multicolinearity
+
+    -   `ols_plot_resid_fit()` - check linearity
+
+    -   `ols_plot_resid_hist()` or `ols_test_normality()` - check normality
+
+    -   check autocorrelation
+
+-   tbl_regression() from gtsummary
