@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 10: Geographically weighted regression (GWR)"
+title: "Hands-on Exercise 8: Calibrating Hedonic Pricing Model for Private Highrise Property with Geographically weighted regression (GWR)"
 author: "William"
 date: "October 17, 2024"
 date-modified: "last-modified"
@@ -108,6 +108,7 @@ condo_resale_sf
 SELLING_PRICE
 
 ```{r}
+#| output: true
 #| code-fold: true
 ggplot(data=condo_resale_sf, aes(x=`SELLING_PRICE`)) +
   geom_histogram(bins=20, color="black", fill="light blue")
@@ -125,6 +126,7 @@ condo_resale_sf <- condo_resale_sf %>%
 SELLING_PRICE vs LOG_SELLING_PRICE
 
 ```{r}
+#| output: true
 #| code-fold: true
 #| layout-ncol: 2
 #| layout-nrow: 1
@@ -136,9 +138,11 @@ ggplot(data=condo_resale_sf, aes(x=`LOG_SELLING_PRICE`)) +
     geom_histogram(bins=20, color="black", fill="light blue")
 ```
 
-### Multivariate (Trellis) 
+### Multivariate (Trellis)
 
 ```{r}
+#| output: true
+#| code-fold: true
 AREA_SQM <- ggplot(data=condo_resale_sf, aes(x= `AREA_SQM`)) + 
   geom_histogram(bins=20, color="black", fill="light blue")
 
@@ -190,6 +194,9 @@ tmap_mode("view")
 ```
 
 ```{r}
+#| output: true
+#| code-fold: true
+
 tmap_options(check.and.fix = TRUE)
 tm_shape(mpsz_3414)+
   tm_polygons() +
@@ -208,15 +215,96 @@ tmap_mode("plot")
 
 ### **Simple Linear Regression**
 
+Obtain and print a summary analysis
+
+```{r}
+#| output: true
+#| code-fold: true
+
+condo_slr <- lm(
+    SELLING_PRICE ~ AREA_SQM, 
+    condo_resale_sf)
+summary(condo_slr)
+```
+
+::: {.callout-note appearance="minimal"}
+-   SESELLING_PRICE = 14719\*AREA_SQM - 258121.1
+
+-   **R-squared** = 0.4518 (model is able to explain **\~45%** of actual condonresale prices
+
+-   **Model p-values** \<\<\< 0.001 (reject H~0~ that mean is a good estimator of SELLING_PRICE, hence there is sufficient statistic evidence that simple linear regression model above is a good estimator of SELLING_PRICE.
+
+-   **Both coefficient p-values** \<\<\< 0.001 (reject H~0~ ... and can infer that both coefficients are good parameter estimates)
+:::
+
+Visualise best fit curve on a scatterplot
+
+```{r}
+#| output: true
+#| code-fold: true
+#| message: false
+#| warning: false
+
+# using lm() as a method function
+ggplot(data=condo_resale_sf,  
+       aes(x=`AREA_SQM`, y=`SELLING_PRICE`)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+::: {.callout-important appearance="minimal"}
+There are a few statistical outliers with relatively high selling prices.
+:::
+
 ### **Multiple Linear Regression**
 
-Visualising the relationships of the independent variables
+Visualising the relationships of the independent variables (to identify highly correlated variables)
+
+```{r}
+#| output: true
+#| code-fold: true
+
+# corrplot
+corrplot(cor(
+    condo_resale[,5:23]),
+    diag = FALSE,      # correlation coefficients are hidden
+    order = 'AOE',
+    tl.pos = 'td',     # top-diagonal text labels
+    tl.cex = .5,       # size of text labels
+    method = 'number', # visualisation method
+    type = 'upper'     # displays upper half triangle of correlation matrix
+)
+```
+
+::: {.callout-important appearance="minimal"}
+***Freehold*** is highly correlated to ***LEASE_99YEAR***. In view of this, it is wiser to only include either one of them in the subsequent model building. As a result, ***LEASE_99YEAR*** is excluded in the subsequent model building
+:::
 
 Building the model
 
-Tests
+```{r}
+#| output: true
+#| code-fold: true
 
--   olsrr
+# using lm()
+condo_mlr <- lm(formula = SELLING_PRICE ~ AREA_SQM + AGE    + 
+                  PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+                  PROX_URA_GROWTH_AREA + PROX_HAWKER_MARKET + PROX_KINDERGARTEN + 
+                  PROX_MRT  + PROX_PARK + PROX_PRIMARY_SCH + 
+                  PROX_TOP_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_SUPERMARKET + 
+                  PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                data=condo_resale_sf)
+summary(condo_mlr)
+```
+
+### Revising the Model
+
+::: {.callout-important appearance="minimal"}
+We still have to improve the model by removing statistically insignificant variables
+
+**Tests and packages used**:
+
+-   [**olsrr**](https://olsrr.rsquaredacademy.com/)
 
     -   `ols_regress()` - model summary
 
@@ -228,4 +316,169 @@ Tests
 
     -   check autocorrelation
 
--   tbl_regression() from gtsummary
+-   tbl_regression() from [**gtsummary**](https://www.danieldsjoberg.com/gtsummary/index.html)
+:::
+
+#### \[Remove\] statistically insignificant variables
+
+```{r}
+condo_mlr1 <- lm(formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+                   PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+                   PROX_URA_GROWTH_AREA + PROX_MRT  + PROX_PARK + 
+                   PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP + 
+                   NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD,
+                data=condo_resale_sf)
+```
+
+#### \[VIF\] `ols_vif_tol()` - check multicolinearity
+
+```{r}
+#| output: true
+#| code-fold: true
+ols_vif_tol(condo_mlr1)
+```
+
+::: {.callout-important appearance="minimal"}
+**VIF \< 10:** no sign of multi-colinearity
+:::
+
+#### \[Residual\] `ols_plot_resid_fit()` - check linearity
+
+```{r}
+#| output: true
+#| code-fold: true
+ols_plot_resid_fit(condo_mlr1)
+```
+
+::: {.callout-important appearance="minimal"}
+##### Interpretation
+
+Most of the data poitns are scattered around the 0 line, hence we can safely conclude that the relationships between the dependent variable and independent variables are linear.
+:::
+
+#### \[Residual\] `ols_plot_resid_hist()` or
+
+`{#| output: true} #| code-fold: true{r} ols_plot_resid_hist(condo_mlr1)`
+
+::: {.callout-important appearance="minimal"}
+##### Interpretation
+
+Residuals appear normally distributed
+:::
+
+#### \[Stat. test\] `ols_test_normality()` - check normality
+
+```{r}
+#| output: true
+#| code-fold: true
+ols_test_normality(condo_mlr1)
+```
+
+::: {.callout-important appearance="minimal"}
+##### Interpretation
+
+p-values \<\< 0.05(significance level). Hence we will reject the null H~0~ and infer that there is statistical evidence that the residual are not normally distributed
+:::
+
+#### Spatial autocorrelation test
+
+```{r}
+#| output: true
+#| code-fold: true
+
+# save residual of the hedonic pricing model as a data frame
+mlr_output <- as.data.frame(condo_mlr1$residuals)
+
+# join with condo_resale_sf
+condo_resale_res_sf <- cbind(condo_resale_sf, mlr_output) %>% 
+    mutate(MLR_RES = condo_mlr1$residuals)
+# convert condo_resale_res_sf into a SpatialPointsDataFrame
+condo_resale_sp <- as_Spatial(condo_resale_res_sf)
+condo_resale_sp
+```
+
+```{r}
+tmap_mode("view")
+```
+
+```{r}
+#| output: true
+#| code-fold: true
+#| warning: false
+#| message: false
+
+tm_shape(mpsz_3414) +
+  tmap_options(check.and.fix = TRUE) +
+  tm_polygons(alpha = 0.4) +
+tm_shape(condo_resale_res_sf) +  
+  tm_dots(col = "MLR_RES",
+          alpha = 0.6,
+          style="quantile") +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+::: {.callout-important appearance="minimal"}
+##### Interpretation
+
+Signs of spatial autocorrelation. Now need to test for its significance
+:::
+
+```{r}
+tmap_mode('plot')
+```
+
+```{r}
+#| output: true
+#| code-fold: true
+
+# Moran's I
+
+# compute the distance-based weight matrix
+nb <- dnearneigh(
+    coordinates(condo_resale_sp),
+    0,    # lower bound
+    1500, # upper bound
+    longlat = FALSE
+)
+
+# convert nb into spatial weights
+nb_lw <- nb2listw(nb, style = 'W')
+
+# perform Moran's I
+lm.morantest(condo_mlr1, nb_lw)
+
+# summary(nb)
+# summary(nb_lw)
+```
+
+### **Generate publication-ready summary tables**
+
+```{r}
+#| output: true
+#| code-fold: true
+
+ols_regress(condo_mlr1)
+```
+
+OR,
+
+```{r}
+#| output: true
+#| code-fold: true
+
+tbl_regression(condo_mlr1, intercept = TRUE) %>% 
+    
+    # include model statistics as a table source note
+    add_glance_source_note(
+        label = list(sigma ~ "\U03C3"),
+        include = c(
+            r.squared, 
+            adj.r.squared, 
+            AIC, 
+            statistic,
+            p.value, 
+            sigma))
+
+# More info
+# https://www.danieldsjoberg.com/gtsummary/articles/tbl_regression.html
+```
