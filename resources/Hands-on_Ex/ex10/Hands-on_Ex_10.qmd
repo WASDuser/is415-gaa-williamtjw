@@ -482,3 +482,11 @@ tbl_regression(condo_mlr1, intercept = TRUE) %>%
 # More info
 # https://www.danieldsjoberg.com/gtsummary/articles/tbl_regression.html
 ```
+
+# RDS
+
+```{r}
+#| eval: false
+write_rds(mpsz_3414,'../ex11/data/rds/mpsz_3414.rds')
+write_rds(condo_resale_sp,'../ex11/data/rds/condo_resale_sp.rds')
+```
