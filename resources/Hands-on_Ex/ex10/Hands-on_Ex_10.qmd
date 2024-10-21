@@ -7,7 +7,6 @@ execute:
   eval: true
   echo: true
   freeze: true
-  output: false
 ---
 
 In this exercise, I am applying GWR to develop [hedonic pricing](https://www.investopedia.com/terms/h/hedonicpricing.asp) models, where structural and locational variables are used to model 2015 resale condo prices.
