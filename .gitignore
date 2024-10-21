@@ -11,5 +11,3 @@ data/
 .utf8.md
 .knit.md
 site_libs
-*_cache/
-*_files/
