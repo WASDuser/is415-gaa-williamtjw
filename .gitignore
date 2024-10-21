@@ -12,3 +12,4 @@ data/
 .knit.md
 site_libs
 *_cache/
+*_files/
