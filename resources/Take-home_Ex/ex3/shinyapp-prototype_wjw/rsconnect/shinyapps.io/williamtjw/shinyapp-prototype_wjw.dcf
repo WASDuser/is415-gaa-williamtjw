@@ -1,0 +1,12 @@
+name: shinyapp-prototype_wjw
+title: shinyapp-prototype_wjw
+username: williamtjw
+account: williamtjw
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13033106
+bundleId: 9229715
+url: https://williamtjw.shinyapps.io/shinyapp-prototype_wjw/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

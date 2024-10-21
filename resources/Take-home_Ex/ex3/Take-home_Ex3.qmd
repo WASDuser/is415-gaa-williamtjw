@@ -11,11 +11,17 @@ execute:
 
 \<Report Writeup\>
 
-Overview
+# Overview
 
-Movitation
+# Motivation
 
 # Methodology
+
+### R packages used
+
+### Import Derived Datasets
+
+### Tabs (Creating, Modifying, Exploring...)
 
 # \[Prototype\] Shiny Application UI Storyboard
 
@@ -23,11 +29,11 @@ Movitation
 
 summary text
 
-## Tab 1
+### Tab 1
 
 Figure
 
-~*Figure\ caption*~
+~*Figure caption*~
 
 Description
 
