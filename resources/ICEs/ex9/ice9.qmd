@@ -167,6 +167,8 @@ qtm(shan_sf_clustGeo, "CLUSTER")
 ```
 
 ```{r}
+#| fig-cap: "With #| fig-width: 12 and #| fig-column: page-right"
+#| cap-location: margin
 #| fig-column: page-right
 #| fig-width: 12
 # characterising clusters
@@ -182,10 +184,9 @@ ggparcoord(
 )
 ```
 
-Without `#| fig-width: 12` ,
-
 ```{r}
-#| fig-column: page-right
+#| fig-cap: "Without #| fig-width: 12 and #| fig-column: page-right"
+#| cap-location: margin
 ggparcoord(
     data = shan_sf_clustGeo,
     columns = c(17:21),
@@ -196,4 +197,15 @@ ggparcoord(
   facet_grid(~ CLUSTER) + 
   theme(axis.text.x = element_text(angle = 30)
 )
+```
+
+```{r}
+#| fig-cap: "Used #| layout-nrow: 1, #| fig-width: 4"
+#| cap-location: margin
+#| layout-nrow: 1
+#| fig-width: 4
+
+qtm(shan_sf_cluster, "CLUSTER")
+qtm(shan_sf_spatialcluster, "SKATER_CLUSTER")
+qtm(shan_sf_clustGeo, "CLUSTER")
 ```
