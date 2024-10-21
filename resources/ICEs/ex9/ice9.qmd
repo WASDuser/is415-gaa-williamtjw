@@ -7,4 +7,193 @@ execute:
   eval: true
   echo: true
   freeze: true
+  cache: true
 ---
+
+Load packages
+
+```{r}
+pacman::p_load(spdep, tmap, sf, ClustGeo, 
+               ggpubr, cluster, factoextra, NbClust,
+               heatmaply, corrplot, psych, tidyverse, GGally)
+```
+
+Load RDS
+
+```{r}
+shan_ict <- read_rds('data/rds/shan_ict.rds')
+shan_sf_cluster <- read_rds('data/rds/shan_sf_cluster.rds')
+shan_sf <- read_rds('data/rds/shan_sf.rds')
+```
+
+```{r}
+# H. clustering
+proxmat <- dist(shan_ict, method='euclidean')
+hclust_ward <- hclust(proxmat, method = 'ward.D')
+groups <- as.factor(cutree(hclust_ward, k = 6)) # cutree directly uses hclust object; won't understand k without it
+
+# 'method', 'k' should be the user input parameter
+```
+
+```{r}
+# append to geo data
+shan_sf_cluster <- cbind(
+    shan_sf, as.matrix(groups)) %>% # for it to be appendable, must convert to tibble/dt/matrix 
+    rename(`CLUSTER` = `as.matrix.groups.`) %>% # for application friendly analysis
+    select(-c(3:4,7:9)) %>% # minus sign to drop
+    rename(TS = TS.x) # application cleanliness
+```
+
+```{r}
+# dendrogram
+plot(hclust_ward, cex = .6)
+rect.hclust(hclust_ward, k = 6,border = 2:5)
+```
+
+```{r}
+qtm(shan_sf_cluster, "CLUSTER") # any of the 16 random colors are assigned 
+```
+
+```{r}
+# SKATER
+shan.nb <- poly2nb(shan_sf)
+summary(shan.nb)
+```
+
+```{r}
+# visualise nb
+coords <- st_coordinates(st_centroid(st_geometry(shan_sf)))
+plot(st_geometry(shan_sf), border=grey(.5))
+plot(shan.nb,
+    coords, 
+    col="blue", 
+    add=TRUE) # adds to existing plot, otherwise will be plotted separately
+```
+
+```{r}
+# Compute edge costs
+lcosts <- nbcosts(shan.nb, shan_ict)
+
+shan.w <- nb2listw(
+    shan.nb,
+    lcosts,
+    style = 'B' # ensures cost values arent row-standardised
+)
+```
+
+```{r}
+# compute tree
+plot(st_geometry(shan_sf), border = gray(.5))
+shan.mst <- mstree(shan.w)
+plot(
+    shan.mst,
+    coords,
+    cex.labels = .7,
+    cex.circles = .005,
+    add = TRUE
+)
+```
+
+```{r}
+#| warning: false
+#| layout-ncol: 2
+
+# compute spatially constrained clusters using SKATER
+skater_clust6 <- skater(
+    edges = shan.mst[,1:2], # exclude the 3rd col (cost)
+    data = shan_ict,
+    method = 'euclidean',
+    ncuts = 5 # one less than number of clusters
+)
+# plot
+plot(st_geometry(shan_sf), 
+     border=gray(.5))
+plot(
+    skater_clust6, 
+    coords, 
+    cex.labels = .7 ,
+    groups.colors=c("red","green","blue", "brown", "pink"),
+    cex.circles=0.005,
+    add=TRUE)
+# plot chloropleth map
+groups_mat <- as.matrix(skater_clust6$groups)
+shan_sf_spatialcluster <- cbind(shan_sf_cluster, as.factor(groups_mat)) %>%
+  rename(`SKATER_CLUSTER`=`as.factor.groups_mat.`)
+qtm(shan_sf_spatialcluster, "SKATER_CLUSTER")
+```
+
+ClustGeo
+
+```{r}
+#| layout-nrow: 1
+#| fig-column: page-right
+#| fig-keep: first
+# compute spatial distance matrix
+dist <- st_distance(shan_sf, shan_sf) # in tib format(col.) so need to convert to dist matrix obj
+distmat <- as.dist(dist)
+
+cr <- choicealpha(
+    proxmat, 
+    distmat, 
+    range.alpha = seq(0, 1, 0.1), # start, stop, step
+    K = 6, 
+    graph = TRUE)
+
+# expose only the first, so the end-user interpret cut-off
+# can use #| fig-keep: first to only show first figure
+```
+
+```{r}
+# save ClustGEO outputs
+
+clustG <- hclustgeo(
+    proxmat,
+    distmat,
+    alpha = 0.2) # user parameter interface: slider; only changes backend when user selects AND clicks a button, not everytime the slider is dragged
+
+# derive cluster object
+groups <- as.factor(cutree(clustG, k=6))
+
+# join ClusterGeo groups list of formed clusters with shan_sf
+shan_sf_clustGeo <- cbind(
+    shan_sf,
+    as.matrix(groups)) %>% 
+    rename(`CLUSTER` = `as.matrix.groups.`)
+```
+
+```{r}
+# plot clustGEO chloropleth
+qtm(shan_sf_clustGeo, "CLUSTER")
+```
+
+```{r}
+#| fig-column: page-right
+#| fig-width: 12
+# characterising clusters
+ggparcoord(
+    data = shan_sf_clustGeo,
+    columns = c(17:21),
+    scale = 'globalminmax', # no scaling, determined by global data range
+    alphaLines = .2,
+    boxplot = TRUE, # boxplot overlay
+    title = "Multiple Parallel Coordinates Plots of ICT Variables by Cluster") +
+  facet_grid(~ CLUSTER) + 
+  theme(axis.text.x = element_text(angle = 30)
+)
+```
+
+Without `#| fig-width: 12` ,
+
+```{r}
+#| fig-column: page-right
+ggparcoord(
+    data = shan_sf_clustGeo,
+    columns = c(17:21),
+    scale = 'globalminmax', # no scaling, determined by global data range
+    alphaLines = .2,
+    boxplot = TRUE, # boxplot overlay
+    title = "Multiple Parallel Coordinates Plots of ICT Variables by Cluster") +
+  facet_grid(~ CLUSTER) + 
+  theme(axis.text.x = element_text(angle = 30)
+)
+```
