@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 8: Calibrating Hedonic Pricing Model for Private Highrise Property with Geographically weighted regression (GWR)"
+title: "Hands-on Exercise 10: Calibrating Hedonic Pricing Model for Private Highrise Property with Geographically weighted regression (GWR)"
 author: "William"
 date: "October 17, 2024"
 date-modified: "last-modified"
