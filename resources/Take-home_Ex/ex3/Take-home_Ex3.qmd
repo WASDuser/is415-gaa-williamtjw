@@ -4,12 +4,19 @@ author: "William"
 date: "October 16, 2024"
 date-modified: "last-modified"
 execute: 
-  eval: true
+  eval: false
   echo: true
   freeze: true
+format: 
+  html:
+    code-fold: true
+    code-tools: true
+    code-link: true
+    grid:
+      margin-width: 350px
 ---
 
-\<Report Writeup\>
+NOTE: EVAL: FALSE
 
 # Overview
 
@@ -17,9 +24,151 @@ execute:
 
 # Methodology
 
+My group and I will be investigating crime in Malaysia. This is how we decided to split the workload of the initial analysis:
+
+-   each of us focus on one crime subtype under 'Assault' (referred to as 'violent crimes' on the source website)
+
+    -   will: causing injury
+
+    -   marcus: murder
+
+    -   santhya:
+
+-   Clustering analysis:
+
+    -   ESDA (LISA maps with main input parameters: crime type, contiguity?/bandwidth analysis/k-means method, confidence level)
+
+    -   Clustering
+
+        -   santhya: hclust
+        -   marcus: clustGEO
+        -   will: SKATER
+
 ### R packages used
 
-### Import Derived Datasets
+```{r}
+pacman::p_load(spdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally)
+```
+
+### Datasets
+
++---------------------------------------------------+-----------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Data                                              | Description                                                                 | Source                                                                                                                                                                          |
++===================================================+=============================================================================+=================================================================================================================================================================================+
+| Crimes in Malaysia                                | Number of crimes in Malaysia by district, crime category, and type of crime | [data.gov.my](https://data.gov.my/data-catalogue/crime_district?state=johor&district=all&category=assault&type=all&visual=timeseries)                                           |
++---------------------------------------------------+-----------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Population figures                                | Population at state level from 1970 - 2024                                  | [data.gov.my](https://data.gov.my/data-catalogue/population_state?state=johor&visual=table)                                                                                     |
++---------------------------------------------------+-----------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Malaysia's Sub-national Administrative Boundaries | Malaysia administrative level 0-2 boundaries, where:                        | [data.humdata.org](https://data.humdata.org/dataset/b85a92b8-e29d-444c-9990-94e4a3a85480/resource/fb5bcaee-8421-4ee9-9fe4-b31a275b0ba7/download/mys_adm_unhcr_20210211_shp.zip) |
+|                                                   |                                                                             |                                                                                                                                                                                 |
+|                                                   | -   level 1: state                                                          |                                                                                                                                                                                 |
+|                                                   |                                                                             |                                                                                                                                                                                 |
+|                                                   | -   level 2: district                                                       |                                                                                                                                                                                 |
++---------------------------------------------------+-----------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+```{r}
+library(readr)
+crime_district <- read_csv("data/crime_district.csv")
+population_state <- read_csv("data/population_state.csv")
+msia_adm1_sf <- st_read(dsn = 'data/mys_adm_unhcr_20210211_shp/', layer = 'mys_admbnda_adm1_unhcr_20210211')
+```
+
+**`crime_district`** :
+
+-   remove rows containing country-aggregated data, 'property'-type crimes
+
+-   remove columns where `category='assault'` and `district='All'`
+
+    ```{r}
+    crime_state <- crime_district %>% 
+        filter(state != "Malaysia") %>% 
+        filter(category != "property") %>% 
+        filter(district == "All") %>% 
+        select(-c(2:3))
+    ```
+
+`population_state` :
+
+-   remove all the dates outside the 2016 to 2022 time period
+
+-   select rows aggregated by sex, age and ethnicity (where data under the corresponding columns equals both or overall)
+
+    ```{r}
+    {r}
+    library(dplyr)
+    library(lubridate)
+
+    # population_state_filtered <- 
+    pop_data <- population_state %>%
+        filter(year(ymd(date)) >= 2016 & year(ymd(date)) <= 2022) %>% 
+        filter(sex == 'both') %>% 
+        filter(age == 'overall') %>% 
+        filter(ethnicity == 'overall') %>% 
+        select(-c(3:5))
+    ```
+
+::: {.callout-important appearance="minimal"}
+**Population figures are in the '000s (Thousands of people)**
+:::
+
+`msia_adm1_sf` :
+
+-   extract `ADM1_EN`, `ADM1_PCODE`, `Shape_` and `geometry` data
+
+    ```{r}
+    adm1_sf <- msia_adm1_sf %>% select(-c(3:7))
+    ```
+
+Ensure that consistent state labels across datasets.
+
+```{r}
+unique(pop_data$state)
+unique(crime_state$state)
+unique(adm1_sf$ADM1_EN)
+```
+
+After running each dataset through `unique()` , **W.P. Labuan** **and** **W.P. Putrajaya are missing from crime data.** This is because "data for W.P. Putrajaya and W.P. Labuan are classified under **W.P. Kuala Lumpur** and **Sabah** respectively" ([source](https://data.gov.my/data-catalogue/crime_district?state=johor&district=all&category=assault&type=all&visual=table#:~:text=One%20of%2016%20states%2C%20or%20Malaysia%3B%20however%2C%20data%20for%20W.P.%20Putrajaya%20and%20W.P.%20Labuan%20are%20subsumed%20under%20W.P.%20Kuala%20Lumpur%20and%20Sabah%20respectively.)). Hence, I will have to modify `pop_data` (specifically W.P. Kuala Lumpur data).
+
+```{r}
+fixed_pop_data <- pop_data %>%
+  mutate(state = case_when( # case_when allows for multiple if-else statements
+    state == "W.P. Putrajaya" ~ "W.P. Kuala Lumpur",
+    state == "W.P. Labuan" ~ "Sabah",
+    TRUE ~ state # assumes no NA, which there arent any
+  )) %>%
+  group_by(state, date) %>%
+  summarise(population = sum(population), .groups = 'drop')
+```
+
+```{r}
+#| echo: false
+fixed_pop_data <- read_rds('data/rds/fixed_pop_data.rds')
+crime_state <- read_rds('data/rds/crime_state.rds')
+adm1_sf <- read_rds('data/rds/adm1_sf.rds')
+```
+
+Derive crime **rate** rather than using absolute crime figures. Benefits include:
+
+::: column-margin
+$$
+\text{Crime Rate} = \Bigg( \frac{\text{Number of Crimes}}{\text{Population in Thousands}} \Bigg) \times \ 1\text{,}000
+$$
+:::
+
+-   Easier to judge the prevalence of crime relative to the population size of the state
+
+-   Understanding rates can help communicate the actual risk of crime to the community, helping to mitigate unnecessary fear
+
+    ```{r}
+    crime_rates_state <- crime_state %>% 
+        left_join(fixed_pop_data, by = c("state", "date")) %>% 
+        mutate(crime_rate = (crimes / population) * 1000)
+    ```
+
+    ```{r}
+    #| eval: false
+    write_rds(crime_rates_state, 'data/rds/crime_rates_state.rds')
+    ```
 
 ### Tabs (Creating, Modifying, Exploring...)
 
