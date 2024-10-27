@@ -1,0 +1,199 @@
+---
+title: "Hands-on Exercise 11:[Cont.] GWR"
+author: "William"
+date: "October 18, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  freeze: true
+---
+
+```{r}
+pacman::p_load(olsrr, corrplot, ggpubr, sf, spdep, GWmodel, tmap, tidyverse, gtsummary)
+```
+
+Reusing derived data from previous section,
+
+```{r}
+condo_resale.sp = read_rds('data/rds/condo_resale_sp.rds')
+mpsz_3414 = read_rds('data/rds/mpsz_3414.rds')
+```
+
+# **Building Fixed Bandwidth GWR Model**
+
+```{r}
+# compute fixed BW using bw.gwr() from GWModel
+bw.fixed <- bw.gwr(
+    formula = SELLING_PRICE ~ 
+        AREA_SQM + AGE + PROX_CBD + PROX_CHILDCARE + 
+        PROX_ELDERLYCARE  + PROX_URA_GROWTH_AREA + 
+        PROX_MRT   + PROX_PARK + PROX_PRIMARY_SCH + 
+        PROX_SHOPPING_MALL + PROX_BUS_STOP + NO_Of_UNITS + 
+        FAMILY_FRIENDLY + FREEHOLD, 
+    data=condo_resale.sp, 
+    approach="CV", # cross-validation
+    kernel="gaussian", 
+    adaptive=FALSE, 
+    longlat=FALSE)
+```
+
+::: {.callout-note appearance="minimal"}
+**Recommend BW = 971.34 metres**
+
+Unit of measurement is in metres because of WGS84 datum used by its CRS
+:::
+
+```{r}
+# use recommend BW and gaussian kernel to calibrate GWR mode
+gwr.fixed <- gwr.basic(
+    formula = SELLING_PRICE ~ 
+        AREA_SQM + AGE + PROX_CBD + PROX_CHILDCARE + 
+        PROX_ELDERLYCARE  + PROX_URA_GROWTH_AREA + 
+        PROX_MRT   + PROX_PARK + PROX_PRIMARY_SCH + 
+        PROX_SHOPPING_MALL + PROX_BUS_STOP + NO_Of_UNITS + 
+        FAMILY_FRIENDLY + FREEHOLD, 
+    data=condo_resale.sp, 
+    bw=bw.fixed, 
+    kernel = 'gaussian', 
+    longlat = FALSE)
+gwr.fixed
+```
+
+::: {.callout-note appearance="minimal"}
+AIC corrected of the GWR Model = 42263.61 \> AIC corrected of global regression
+:::
+
+# **Building Adaptive Bandwidth GWR Model**
+
+```{r}
+# compute BW
+bw.adaptive <- bw.gwr(formula = SELLING_PRICE ~ AREA_SQM + AGE  + 
+                        PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE    + 
+                        PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK + 
+                        PROX_PRIMARY_SCH + PROX_SHOPPING_MALL   + PROX_BUS_STOP +
+                        NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                      data=condo_resale.sp, 
+                      approach="CV", 
+                      kernel="gaussian", 
+                      adaptive=TRUE, # set to true
+                      longlat=FALSE)
+```
+
+::: {.callout-note appearance="minimal"}
+**Recommended number of data points to use = 30**
+:::
+
+```{r}
+# calibrate using a.BW GWR model
+gwr.adaptive <- gwr.basic(formula = SELLING_PRICE ~ AREA_SQM + AGE + 
+                            PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE + 
+                            PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK + 
+                            PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP + 
+                            NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+                          data=condo_resale.sp, bw=bw.adaptive, 
+                          kernel = 'gaussian', 
+                          adaptive=TRUE, 
+                          longlat = FALSE)
+gwr.adaptive
+```
+
+::: {.callout-note appearance="minimal"}
+AICc the adaptive distance gwr is 41982.22 which is even smaller than the AICc of the fixed distance gwr
+:::
+
+# Visualise GWR Output
+
+Lets break down the loooong output:
+
+-   **Condition Number**: computes local **collinearity** (Results associated with condition numbers \> 30, may be unreliable.
+
+-   **Local R2**: range between 0.0 and 1.0; indicates **how well the local regression model fits observed y** values. Very low values indicate the local model is performing poorly. Mapping the Local R2 values to see where GWR predicts well and where it predicts poorly may provide clues about important variables that may be missing from the regression model.
+
+-   Predicted: estimated (or fitted) y values; computed by GWR.
+
+-   **Residuals: estimated y - observed y**. Standardized residuals have a avg=0, stdev = 1. A cold-to-hot rendered map of standardized residuals can be produce by using these values.
+
+-   **Coefficient Standard Error**: these values measure the **reliability of each coefficient estimate**. Confidence in those estimates are higher when standard errors are small in relation to the actual coefficient values. Large standard errors may indicate problems with local collinearity
+
+They are all stored in a SpatialPointsDataFrame or SpatialPolygonsDataFrame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its “data” slot in an object called **SDF** of the output list.
+
+### **Converting SDF into *sf* data.frame**
+
+```{r}
+condo_resale.sf.adaptive <- st_as_sf(gwr.adaptive$SDF) %>% st_transform(crs=3414)
+condo_resale.sf.adaptive.svy21 <- st_transform(condo_resale.sf.adaptive, 3414)
+gwr.adaptive.output <- as.data.frame(gwr.adaptive$SDF)
+condo_resale.sf.adaptive <- cbind(condo_resale.sf.adaptive.svy21, as.matrix(gwr.adaptive.output))
+
+glimpse(condo_resale.sf.adaptive)
+```
+
+```{r}
+summary(gwr.adaptive$SDF$yhat)
+```
+
+### **Visualise local R2**
+
+```{r}
+#| code-fold: true
+
+tmap_mode("view")
+tmap_options(check.and.fix = TRUE)
+
+tm_shape(mpsz_3414) +
+  tm_polygons(alpha = 0.1) +
+tm_shape(condo_resale.sf.adaptive) +  
+  tm_dots(col = "Local_R2",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+### **Visualise coefficient estimates**
+
+```{r}
+#| code-fold: true
+
+tmap_mode("view")
+tmap_options(check.and.fix = TRUE)
+
+AREA_SQM_SE <- tm_shape(mpsz_3414)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(condo_resale.sf.adaptive) +  
+  tm_dots(col = "AREA_SQM_SE",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+
+AREA_SQM_TV <- tm_shape(mpsz_3414)+
+  tm_polygons(alpha = 0.1) +
+tm_shape(condo_resale.sf.adaptive) +  
+  tm_dots(col = "AREA_SQM_TV",
+          border.col = "gray60",
+          border.lwd = 1) +
+  tm_view(set.zoom.limits = c(11,14))
+
+tmap_arrange(AREA_SQM_SE, AREA_SQM_TV, asp=1, ncol=2, sync = TRUE)
+```
+
+To view by region,
+
+```{r}
+#| code-fold: true
+
+tmap_mode("plot")
+tmap_options(check.and.fix = TRUE)
+
+tm_shape(mpsz_3414[mpsz_3414$REGION_N=="CENTRAL REGION", ])+
+  tm_polygons()+
+tm_shape(condo_resale.sf.adaptive) + 
+  tm_bubbles(col = "Local_R2",
+           size = 0.15,
+           border.col = "gray60",
+           border.lwd = 1)
+```
