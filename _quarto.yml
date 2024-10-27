@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "William's Simple Geode"
+  title: "IS415"
   favicon: ~/is415-gaa-williamtjw/pompom.jpeg
   image: ~/is415-gaa-williamtjw/pompom.jpeg
   navbar:
