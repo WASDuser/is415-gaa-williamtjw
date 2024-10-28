@@ -7,4 +7,201 @@ execute:
   eval: true
   echo: true
   freeze: true
+  cache: true
 ---
+
+```{r}
+#| warning: false
+pacman::p_load(olsrr, ggstatplot, sf, tmap, tidyverse, performance, see, sfdep)
+```
+
+```{r}
+mpsz <- st_read(dsn = 'data/geospatial/', layer = 'MP14_SUBZONE_WEB_PL')
+condo_resale <- read_csv('data/aspatial/Condo_resale_2015.csv')
+```
+
+```{r}
+mpsz <- st_transform(mpsz, 3414)
+
+condo_resale_sf <- condo_resale %>% st_as_sf(coords = c('LONGITUDE','LATITUDE'), crs=4326) %>%
+    st_transform(crs=3414) 
+```
+
+```{r}
+# correlation analysis using ggstatplot
+library(ggstatsplot)
+ggcorrmat(condo_resale[,5:23])
+```
+
+![](images/clipboard-1808234412.png)
+
+::: {.callout-note appearance="minimal"}
+## Interpretation
+
+By default, a diverging color palette is used; statistically not significant values are 'X'ed out.
+
+We only can know if they are strongly correlated or not, unable to tell if any of the assumptions like multi-collinearity are violated.
+:::
+
+```{r}
+# using lm() from BASE R
+condo_mlr <- lm(formula = 
+        SELLING_PRICE ~ # dependent variable
+        
+        # independent variables
+        AREA_SQM + AGE + PROX_CBD + PROX_CHILDCARE + PROX_ELDERLYCARE +
+        PROX_URA_GROWTH_AREA + PROX_HAWKER_MARKET + PROX_KINDERGARTEN + 
+        PROX_MRT  + PROX_PARK + PROX_PRIMARY_SCH + 
+        PROX_TOP_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_SUPERMARKET + 
+        PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+
+                data=condo_resale_sf)
+summary(condo_mlr)
+```
+
+```         
+Call:
+lm(formula = SELLING_PRICE ~ AREA_SQM + AGE + PROX_CBD + PROX_CHILDCARE + 
+    PROX_ELDERLYCARE + PROX_URA_GROWTH_AREA + PROX_HAWKER_MARKET + 
+    PROX_KINDERGARTEN + PROX_MRT + PROX_PARK + PROX_PRIMARY_SCH + 
+    PROX_TOP_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_SUPERMARKET + 
+    PROX_BUS_STOP + NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD, 
+    data = condo_resale_sf)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-3475964  -293923   -23069   241043 12260381 
+
+Coefficients:
+                       Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           481728.40  121441.01   3.967 7.65e-05 ***
+AREA_SQM               12708.32     369.59  34.385  < 2e-16 ***
+AGE                   -24440.82    2763.16  -8.845  < 2e-16 ***
+PROX_CBD              -78669.78    6768.97 -11.622  < 2e-16 ***
+PROX_CHILDCARE       -351617.91  109467.25  -3.212  0.00135 ** 
+PROX_ELDERLYCARE      171029.42   42110.51   4.061 5.14e-05 ***
+PROX_URA_GROWTH_AREA   38474.53   12523.57   3.072  0.00217 ** 
+PROX_HAWKER_MARKET     23746.10   29299.76   0.810  0.41782    
+PROX_KINDERGARTEN     147468.99   82668.87   1.784  0.07466 .  
+PROX_MRT             -314599.68   57947.44  -5.429 6.66e-08 ***
+PROX_PARK             563280.50   66551.68   8.464  < 2e-16 ***
+PROX_PRIMARY_SCH      180186.08   65237.95   2.762  0.00582 ** 
+PROX_TOP_PRIMARY_SCH    2280.04   20410.43   0.112  0.91107    
+PROX_SHOPPING_MALL   -206604.06   42840.60  -4.823 1.57e-06 ***
+PROX_SUPERMARKET      -44991.80   77082.64  -0.584  0.55953    
+PROX_BUS_STOP         683121.35  138353.28   4.938 8.85e-07 ***
+NO_Of_UNITS             -231.18      89.03  -2.597  0.00951 ** 
+FAMILY_FRIENDLY       140340.77   47020.55   2.985  0.00289 ** 
+FREEHOLD              359913.01   49220.22   7.312 4.38e-13 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 755800 on 1417 degrees of freedom
+Multiple R-squared:  0.6518,	Adjusted R-squared:  0.6474 
+F-statistic: 147.4 on 18 and 1417 DF,  p-value: < 2.2e-16
+```
+
+::: {.callout-note appearance="minimal"}
+## Note on LM Model Output:
+
+-   Data **must be data frame**, not matrices — disclose to the end-user of the required input data type
+
+-   **Residual interpretation (observed - predicted):**
+
+    -   Median: moderate-acceptable overestimation
+
+    -   Min, 1Q: severe overestimation (\>3 mil)
+
+-   Not the usual presentation — use `olsrr` package
+:::
+
+**olsrr -- wrapper of BASE R lm(),**
+
+:::: panel-tabset
+## Comprehensive Report
+
+```{r}
+olsrr_condo <- ols_regress(condo_mlr)
+olsrr_condo
+```
+
+## Variable Selection
+
+**`ols_step_forward_p`**
+
+```{r}
+condo_fw_alr <- ols_step_forward_p( # base model is the 0th iteration
+    condo_mlr,
+    p_val = .05,
+    details = FALSE
+)
+condo_fw_alr
+```
+
+```{r}
+plot(condo_fw_alr)
+```
+
+::: {.callout-note appearance="minimal"}
+## Note:
+
+Favorable output should reflect the effect of "diminishing returns" of adding more variables (a flat curve is bad)
+:::
+
+**`ols_step_backward_p`**
+
+```{r}
+condo_bw_alr <- ols_step_backward_p( # full model is the 0th iteration; drops variables every iteration
+    condo_mlr,
+    p_val = .05,
+    details = FALSE
+)
+condo_bw_alr
+```
+
+**`ols_step_both_p`**
+
+```{r}
+condo_both_alr <- ols_step_both_p( # base model is the 0th iteration
+    condo_mlr,
+    p_val = .05,
+    details = FALSE
+)
+condo_both_alr
+```
+
+## Model Selection
+
+```{r}
+metric <- compare_performance(
+    condo_mlr,
+    condo_fw_alr$model,
+    condo_bw_alr$model,
+    condo_both_alr$model
+)
+```
+
+**text-cleaning using `gsub()` for test value in *`Name`* field**
+
+```{r}
+metric$Name <- gsub(".*\\\\([a-zA-Z0-9_]+)\\\\, \\\\model\\\\.*", "\\1", metric$Name)
+```
+
+**Radial chart**
+
+```{r}
+plot(metric)
+```
+
+## Visualising Model Parameters
+
+```{r}
+ggcoefstats(condo_both_alr$model, sort = 'ascending')
+```
+::::
+
+::: {.callout-note appearance="minimal"}
+## lm() vs ols_regress()
+
+In the data table of `olsrr_condo` , inside the sub data table 'model', it contains the exact same data table as that of the `lm().`
+:::
