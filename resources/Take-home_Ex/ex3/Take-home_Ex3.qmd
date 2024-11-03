@@ -302,30 +302,28 @@ skater_clust <- skater(
 
 </details>
 
-### Tabs (Creating, Modifying, Exploring...)
-
 # \[Prototype\] Shiny Application UI Storyboard
 
-![](images/clipboard-3966629040.png)
+### DATA
 
-![](images/clipboard-671098939.png)
+![Data tab: different display options](images/clipboard-3966629040.png)
+
+### EDA
+
+![Boxplots, bar charts, histograms ...](images/clipboard-671098939.png){fig-align="center"}
+
+### ESDA: choropleth
 
 ![](images/clipboard-2687066471.png)
 
+### ESDA: Global measures of autocorrelation
+
 ![](images/clipboard-2457631902.png)
+
+### ESDA: LISA
 
 ![](images/clipboard-2974412810.png)
 
-summary text
+Because of data wrangling issues, I could not get SKATER to work due to there being several sub-graphs (disjointed nb lists).
 
-### Tab 1
-
-Figure
-
-~*Figure caption*~
-
-Description
-
-\<repeat\>
-
-# Conclusion
+\~ To be continued \~
