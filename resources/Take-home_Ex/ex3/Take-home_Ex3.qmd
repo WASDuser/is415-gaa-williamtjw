@@ -12,8 +12,6 @@ format:
     code-fold: true
     code-tools: true
     code-link: true
-    grid:
-      margin-width: 350px
 ---
 
 # Introduction
@@ -44,7 +42,9 @@ pacman::p_load(spdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, 
 |                                                   | -   level 2: district                                                       |                                                                                                                                                                                 |
 +---------------------------------------------------+-----------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-formatting the crime data to only include the state names and their respective districts. Also filter out the rows where the data is aggregated across the crime types, as well as across the districts. Since population data is from 2016-2022, we will also remove the 2023 date rows.
+### Team wrangling notes
+
+**Format crime data: remove rows aggregated across the crime types, as well as across the districts, and those outside the 2020-2023 period.**
 
 ```{r}
 crime_district <- crime_district %>%
@@ -55,7 +55,7 @@ crime_district <- crime_district %>%
     filter(type != "all") 
 ```
 
-formatting the population data table to be simpler
+**Similar to crime data, remove all rows that are aggregated by other factors, and outside time range**
 
 ```{r}
 library(dplyr)
@@ -70,13 +70,13 @@ pop_data <- population_district %>%
     select(-c(4:6))
 ```
 
-formatting the district boundary sf by dropping unnecessary columns
+**Format boundary sf by dropping unnecessary columns**
 
 ```{r}
 adm2_sf <- msia_adm2_sf %>% select(-c(3:5, 8,9,11,12))
 ```
 
-Upon visual inspection of the data, we noticed some clear discrepancies among the districts column of all the dataframes. Hence, we decided to check for the unique districts in each of the dataframe.
+**Upon visual inspection of the data, we noticed some clear discrepancies among the districts column of all the dataframes. Hence, we decided to check for the unique districts in each of the dataframe.**
 
 ```{r}
 unique(pop_data$district)
@@ -92,11 +92,7 @@ unique(adm2_sf$ADM2_EN)
 unique(crime_district$district)
 ```
 
-As expected, all the dataframes contained different numbers of districts. There were also lots of discrepancies to be handled; differing spelling/naming conventions, splitting of districts into north/south regions, and totally missing districts.
-
-As little can be done in salvaging missing districts, we decided to handle the other forms of discrepancies.
-
-First, we will convert all the district names to lowercase letters to eliminate any errors on that front, and to standardise the naming conventions.
+**Convert all the district names to lowercase letters to standardise the naming conventions.**
 
 ```{r}
 crime_district$district <- tolower(trimws(crime_district$district))
@@ -134,7 +130,9 @@ crime_district <- bind_rows(crime_johor, crime_klang, other_rows) %>%
   mutate(category = 'assault')
 ```
 
-Next, we sought to isolate the districts in the other dataframes that were still not matching with that of the crimes dataframe. To do this, a left join of the tables were performed, before the NA rows were extracted and saved in a separate dataframe.
+Next, we sought to isolate the districts in the other dataframes that were still not matching with that of the crimes dataframe.
+
+**To do this, a left join of the tables were performed, before the NA rows were extracted and saved in a separate dataframe.**
 
 ```{r}
 pop_crime<- left_join(pop_data, crime_district, by= "district")
@@ -147,7 +145,7 @@ adm_crime <- left_join(adm2_sf, crime_district, by= c("ADM2_EN" = "district"))
 adm_crime_na <- adm_crime[rowSums(is.na(adm_crime)) > 0,]
 ```
 
-This made it easier for identifying dissimilarities, although it was still tedious. After much close comparisons, we managed to identify a handful of spelling and formatting errors across the three dataframes. Hence, we made changes to these rows.
+This made it easier for identifying dissimilarities, although it was still tedious. After much close comparisons, we managed to identify a **handful of spelling and formatting errors** across the three dataframes. Hence, we made changes to these rows.
 
 ```{r}
 crime_district<- crime_district%>% 
@@ -170,7 +168,7 @@ pop_data <- pop_data %>%
   
 ```
 
-Once this was done, we isolated the NA values once again. The remaining districts are districts that were missing from one or more of the dataframes, and would have to be removed from the analysis due to the missing data.
+Once this was done, we isolated the NA values once again. The remaining districts are districts that were **missing from one or more of the dataframes, and would have to be removed** from the analysis due to the missing data.
 
 ```{r}
 
@@ -222,9 +220,9 @@ adm2_sf <- read_rds("data/rds/adm2_sf.rds")
 
 ```
 
-# ARCHIVE NOTES
+### ARCHIVE NOTES
 
-\<details\>
+<details>
 
 **`crime_district`** :
 
@@ -302,13 +300,21 @@ skater_clust <- skater(
 )
 ```
 
-\</details\>
+</details>
 
 ### Tabs (Creating, Modifying, Exploring...)
 
 # \[Prototype\] Shiny Application UI Storyboard
 
-> [Storyboard Guide](https://giniceseah.netlify.app/posts/2021-07-31-storyboard/)
+![](images/clipboard-3966629040.png)
+
+![](images/clipboard-671098939.png)
+
+![](images/clipboard-2687066471.png)
+
+![](images/clipboard-2457631902.png)
+
+![](images/clipboard-2974412810.png)
 
 summary text
 
