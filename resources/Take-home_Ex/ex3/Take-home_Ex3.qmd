@@ -16,35 +16,13 @@ format:
       margin-width: 350px
 ---
 
-NOTE: EVAL: FALSE
+# Introduction
 
-# Overview
+My group and I will be investigating crime in Malaysia. We aim to apply Exploratory Data Analysis (EDA), Exploratory Spatial Data Analysis (ESDA), and clustering analysis techniques to uncover patterns across space and time. This is to help tourists assess risk associated to their destinations in Malaysia.
 
-# Motivation
+I will be primarily focusing on data preparation (update: still ongoing!), EDA plots, global and local measures of spatial autocorrelation and clustering analysis using SKATER (\*not working at the moment).
 
-# Methodology
-
-My group and I will be investigating crime in Malaysia. This is how we decided to split the workload of the initial analysis:
-
--   each of us focus on one crime subtype under 'Assault' (referred to as 'violent crimes' on the source website)
-
-    -   will: causing injury
-
-    -   marcus: murder
-
-    -   santhya:
-
--   Clustering analysis:
-
-    -   ESDA (LISA maps with main input parameters: crime type, contiguity?/bandwidth analysis/k-means method, confidence level)
-
-    -   Clustering
-
-        -   santhya: hclust
-        -   marcus: clustGEO
-        -   will: SKATER
-
-### R packages used
+### R packages used (TBA)
 
 ```{r}
 pacman::p_load(spdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally)
@@ -66,12 +44,187 @@ pacman::p_load(spdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, 
 |                                                   | -   level 2: district                                                       |                                                                                                                                                                                 |
 +---------------------------------------------------+-----------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
+formatting the crime data to only include the state names and their respective districts. Also filter out the rows where the data is aggregated across the crime types, as well as across the districts. Since population data is from 2016-2022, we will also remove the 2023 date rows.
+
 ```{r}
-library(readr)
-crime_district <- read_csv("data/crime_district.csv")
-population_state <- read_csv("data/population_state.csv")
-msia_adm1_sf <- st_read(dsn = 'data/mys_adm_unhcr_20210211_shp/', layer = 'mys_admbnda_adm1_unhcr_20210211')
+crime_district <- crime_district %>%
+    filter(year(ymd(date)) >= 2020 & year(ymd(date)) <= 2023) %>% 
+    filter(state != "Malaysia") %>% 
+    filter(category == "assault") %>% 
+    filter(district != "All") %>% 
+    filter(type != "all") 
 ```
+
+formatting the population data table to be simpler
+
+```{r}
+library(dplyr)
+library(lubridate)
+
+# population_state_filtered <- 
+pop_data <- population_district %>%
+    filter(!year(ymd(date)) == 2024) %>% 
+    filter(sex == 'both' | sex == 'overall' ) %>% 
+    filter(age == 'overall') %>% 
+    filter(ethnicity == 'overall') %>% 
+    select(-c(4:6))
+```
+
+formatting the district boundary sf by dropping unnecessary columns
+
+```{r}
+adm2_sf <- msia_adm2_sf %>% select(-c(3:5, 8,9,11,12))
+```
+
+Upon visual inspection of the data, we noticed some clear discrepancies among the districts column of all the dataframes. Hence, we decided to check for the unique districts in each of the dataframe.
+
+```{r}
+unique(pop_data$district)
+
+```
+
+```{r}
+unique(adm2_sf$ADM2_EN)
+
+```
+
+```{r}
+unique(crime_district$district)
+```
+
+As expected, all the dataframes contained different numbers of districts. There were also lots of discrepancies to be handled; differing spelling/naming conventions, splitting of districts into north/south regions, and totally missing districts.
+
+As little can be done in salvaging missing districts, we decided to handle the other forms of discrepancies.
+
+First, we will convert all the district names to lowercase letters to eliminate any errors on that front, and to standardise the naming conventions.
+
+```{r}
+crime_district$district <- tolower(trimws(crime_district$district))
+adm2_sf$ADM2_EN <- tolower(trimws(adm2_sf$ADM2_EN))
+pop_data$district <- tolower(trimws(pop_data$district))
+
+```
+
+Since our main focus was crime data and it was the dataframe that will be mutually connected to both the boundary layer and the population data (phrase better), we will use the districts in the crime dataframe as a guide to formatting the other tables.
+
+We first started off by handling the very obvious differences that could be observed through visual inspection as well as through the use of the unique function. We noticed that 2 districts, Johor Bahru and Klang, were split up in the crime dataframe. Hence, we merged these rows and summed up their crime number values.
+
+str_detect() function of the stringr package was used to identify rows that contained the given input string. In our case, it was the district name. mutate() was then used to change the values of these rows. Since this produces a new dataframe, another dataframe was created with the rest of the values, before all three were bound together.
+
+```{r}
+library(stringr)
+crime_johor<- crime_district %>%
+  filter(str_detect(district,"johor bahru")) %>%
+  mutate(district = 'johor bahru') %>%
+  group_by(state, district,type, date) %>%
+  summarise(crimes = sum(crimes))
+
+crime_klang<- crime_district %>%
+  filter(str_detect(district,"klang")) %>%
+  mutate(district = 'klang') %>%
+  group_by(state, district,type, date) %>%
+  summarise(crimes = sum(crimes))
+
+
+other_rows <- crime_district %>% 
+  filter(!str_detect(district, "johor bahru"))
+
+crime_district <- bind_rows(crime_johor, crime_klang, other_rows) %>% 
+  select(-c(6)) %>% 
+  mutate(category = 'assault')
+```
+
+Next, we sought to isolate the districts in the other dataframes that were still not matching with that of the crimes dataframe. To do this, a left join of the tables were performed, before the NA rows were extracted and saved in a separate dataframe.
+
+```{r}
+pop_crime<- left_join(pop_data, crime_district, by= "district")
+pop_crime_na<- pop_crime[rowSums(is.na(pop_crime)) > 0,]
+
+```
+
+```{r}
+adm_crime <- left_join(adm2_sf, crime_district, by= c("ADM2_EN" = "district"))
+adm_crime_na <- adm_crime[rowSums(is.na(adm_crime)) > 0,]
+```
+
+This made it easier for identifying dissimilarities, although it was still tedious. After much close comparisons, we managed to identify a handful of spelling and formatting errors across the three dataframes. Hence, we made changes to these rows.
+
+```{r}
+crime_district<- crime_district%>% 
+  mutate(district = ifelse(district == "cameron highland", "cameron highlands", district)) %>% 
+  mutate(district = ifelse(district == "kuala lipis", "lipis", district)) %>% 
+  mutate(district = ifelse(district == "kota kinabatangan", "kinabatangan", district)) %>% 
+  mutate(district = ifelse(district == "seberang perai tengah", "s.p. tengah", district)) %>% 
+  mutate(district = ifelse(district == "seberang perai utara", "s.p. utara", district)) %>% 
+  mutate(district = ifelse(district == "seberang perai selatan", "s.p.selatan", district)) %>% 
+  mutate(district = ifelse(district == "petaling jaya", "petaling", district)) %>% 
+   mutate(district = ifelse(district == "matu daro", "matu", district))
+  
+
+pop_data <- pop_data %>% 
+  mutate(district = ifelse(district == "kulai", "kulaijaya", district)) %>% 
+  mutate(district = ifelse(district == "sp tengah", "s.p. tengah", district)) %>% 
+  mutate(district = ifelse(district == "sp utara", "s.p. utara", district)) %>% 
+  mutate(district = ifelse(district == "sp selatan", "s.p.selatan", district)) %>%
+  mutate(district = ifelse(district == "cameron highland", "cameron highlands", district))
+  
+```
+
+Once this was done, we isolated the NA values once again. The remaining districts are districts that were missing from one or more of the dataframes, and would have to be removed from the analysis due to the missing data.
+
+```{r}
+
+pop_crime<- left_join(pop_data, crime_district, by= "district")
+pop_crime_na<- pop_crime[rowSums(is.na(pop_crime)) > 0,]
+
+drop_list_pop <- pop_crime_na$district
+pop_data <- pop_data %>%
+  filter(!(district %in% drop_list_pop))
+
+pop_crime2<-left_join(crime_district, pop_data, by="district")
+pop_crime_na2 <-pop_crime2[rowSums(is.na(pop_crime2)) > 0,]
+
+drop_list_pop <- pop_crime_na2$district
+crime_district <- crime_district %>%
+  filter(!(district %in% drop_list_pop))
+
+```
+
+```{r}
+adm_crime <- left_join(adm2_sf, crime_district, by= c("ADM2_EN" = "district"))
+adm_crime_na <- adm_crime[rowSums(is.na(adm_crime)) > 0,]
+
+drop_list <- adm_crime_na$ADM2_EN
+adm2_sf <- adm2_sf %>% 
+  filter(!(ADM2_EN %in% drop_list))
+
+adm_crime2 <- left_join(crime_district, adm2_sf, by= c("district" = "ADM2_EN"))
+adm_crime_na2 <- adm_crime2[rowSums(is.na(adm_crime2)) > 0,]
+
+drop_list <- adm_crime_na2$ADM2_EN
+crime_district <- crime_district %>% 
+  filter(!(district %in% drop_list))
+
+```
+
+Now, we would be able to join the dataframes smoothly.
+
+```{r}
+write_rds(pop_data, "data/rds/pop_data.rds")
+write_rds(crime_district, "data/rds/crime_district.rds")
+write_rds(adm2_sf, "data/rds/adm2_sf.rds")
+```
+
+```{r}
+pop_data<- read_rds("data/rds/pop_data.rds")
+crime_district <- read_rds("data/rds/crime_district.rds")
+adm2_sf <- read_rds("data/rds/adm2_sf.rds")
+
+```
+
+# ARCHIVE NOTES
+
+\<details\>
 
 **`crime_district`** :
 
@@ -79,73 +232,21 @@ msia_adm1_sf <- st_read(dsn = 'data/mys_adm_unhcr_20210211_shp/', layer = 'mys_a
 
 -   remove columns where `category='assault'` and `district='All'`
 
-    ```{r}
-    crime_state <- crime_district %>% 
-        filter(state != "Malaysia") %>% 
-        filter(category != "property") %>% 
-        filter(district == "All") %>% 
-        select(-c(2:3))
-    ```
-
-`population_state` :
+`population_district` :
 
 -   remove all the dates outside the 2016 to 2022 time period
 
 -   select rows aggregated by sex, age and ethnicity (where data under the corresponding columns equals both or overall)
 
-    ```{r}
-    {r}
-    library(dplyr)
-    library(lubridate)
-
-    # population_state_filtered <- 
-    pop_data <- population_state %>%
-        filter(year(ymd(date)) >= 2016 & year(ymd(date)) <= 2022) %>% 
-        filter(sex == 'both') %>% 
-        filter(age == 'overall') %>% 
-        filter(ethnicity == 'overall') %>% 
-        select(-c(3:5))
-    ```
-
 ::: {.callout-important appearance="minimal"}
 **Population figures are in the '000s (Thousands of people)**
 :::
 
-`msia_adm1_sf` :
+`msia_adm2_sf` :
 
 -   extract `ADM1_EN`, `ADM1_PCODE`, `Shape_` and `geometry` data
 
-    ```{r}
-    adm1_sf <- msia_adm1_sf %>% select(-c(3:7))
-    ```
-
 Ensure that consistent state labels across datasets.
-
-```{r}
-unique(pop_data$state)
-unique(crime_state$state)
-unique(adm1_sf$ADM1_EN)
-```
-
-After running each dataset through `unique()` , **W.P. Labuan** **and** **W.P. Putrajaya are missing from crime data.** This is because "data for W.P. Putrajaya and W.P. Labuan are classified under **W.P. Kuala Lumpur** and **Sabah** respectively" ([source](https://data.gov.my/data-catalogue/crime_district?state=johor&district=all&category=assault&type=all&visual=table#:~:text=One%20of%2016%20states%2C%20or%20Malaysia%3B%20however%2C%20data%20for%20W.P.%20Putrajaya%20and%20W.P.%20Labuan%20are%20subsumed%20under%20W.P.%20Kuala%20Lumpur%20and%20Sabah%20respectively.)). Hence, I will have to modify `pop_data` (specifically W.P. Kuala Lumpur data).
-
-```{r}
-fixed_pop_data <- pop_data %>%
-  mutate(state = case_when( # case_when allows for multiple if-else statements
-    state == "W.P. Putrajaya" ~ "W.P. Kuala Lumpur",
-    state == "W.P. Labuan" ~ "Sabah",
-    TRUE ~ state # assumes no NA, which there arent any
-  )) %>%
-  group_by(state, date) %>%
-  summarise(population = sum(population), .groups = 'drop')
-```
-
-```{r}
-#| echo: false
-fixed_pop_data <- read_rds('data/rds/fixed_pop_data.rds')
-crime_state <- read_rds('data/rds/crime_state.rds')
-adm1_sf <- read_rds('data/rds/adm1_sf.rds')
-```
 
 Derive crime **rate** rather than using absolute crime figures. Benefits include:
 
@@ -159,16 +260,49 @@ $$
 
 -   Understanding rates can help communicate the actual risk of crime to the community, helping to mitigate unnecessary fear
 
-    ```{r}
-    crime_rates_state <- crime_state %>% 
-        left_join(fixed_pop_data, by = c("state", "date")) %>% 
-        mutate(crime_rate = (crimes / population) * 1000)
-    ```
+Debugging
 
-    ```{r}
-    #| eval: false
-    write_rds(crime_rates_state, 'data/rds/crime_rates_state.rds')
-    ```
+```{r}
+library(sfdep)
+WEST_MSIA <- read_rds('shinyapp-prototype_wjw/data/rds/WEST_MSIA.rds') %>% ungroup()
+
+WEST_MSIA1 <- WEST_MSIA[rowSums(is.na(WEST_MSIA))==0,]
+
+temp <- WEST_MSIA1 %>% filter(year(date)==2020) %>% filter(type=='CAUSING_INJURY')
+
+temp_att <- temp %>% select(-c(10:12))
+temp_sf <- temp %>% select(-c(5:7)) %>% st_as_sf()
+```
+
+```{r}
+temp_sp <- as_Spatial(temp_sf)
+temp_nb <- poly2nb(temp_sp)
+```
+
+```{r}
+nb[17]<- as.integer(19)
+lcosts <- nbcosts(nb, temp_att)
+```
+
+```{r}
+temp_w <- nb2listw(
+    temp_nb,
+    lcosts,
+    style = 'B'
+)
+temp_mst <- mstree(temp_w)
+```
+
+```{r}
+skater_clust <- skater(
+    edges = temp_mst[,1:2],
+    data = temp_att,
+    method = 'euclidean',
+    ncuts = 5 # TO BE CHANGED
+)
+```
+
+\</details\>
 
 ### Tabs (Creating, Modifying, Exploring...)
 

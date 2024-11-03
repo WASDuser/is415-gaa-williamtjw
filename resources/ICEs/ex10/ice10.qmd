@@ -196,7 +196,37 @@ plot(metric)
 ## Visualising Model Parameters
 
 ```{r}
+#| warning: false
 ggcoefstats(condo_both_alr$model, sort = 'ascending')
+```
+
+## Assumption Tests
+
+```{r}
+#| fig-width: 12
+#| fig-height: 6
+#| warning: false
+# multi-collinearity
+multi_col_plot = check_collinearity(condo_both_alr$model)
+plot(multi_col_plot) + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) # to tidy xaxis
+
+# linearity
+out <- plot(check_model(condo_both_alr$model, panel = FALSE))
+out[[2]] # linearity test plot
+
+# normality
+out[[6]]
+
+# multi-collinearity
+out[[5]]
+
+# outliers
+outliers <- check_outliers(condo_both_alr$model, method = 'cook')
+outliers
+
+# outliers
+out[[4]]
 ```
 ::::
 
@@ -204,4 +234,21 @@ ggcoefstats(condo_both_alr$model, sort = 'ascending')
 ## lm() vs ols_regress()
 
 In the data table of `olsrr_condo` , inside the sub data table 'model', it contains the exact same data table as that of the `lm().`
+:::
+
+**Visualise spatial non-stationary**
+
+::: panel-tabset
+## 1.
+
+```{r}
+mlr_output <- as.data.frame(condo_fw_alr$model$residuals) %>% 
+    rename('FW_MLR_RES' = `condo_fw_alr$model$residuals`)
+```
+
+## 2.
+
+## 3.
+
+## Residual Map
 :::
