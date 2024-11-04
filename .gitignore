@@ -12,3 +12,6 @@ data/
 .knit.md
 site_libs
 _freeze/
+_site/**/*.qmd
+resources/**/*_cache/
+resources/**/*_files/

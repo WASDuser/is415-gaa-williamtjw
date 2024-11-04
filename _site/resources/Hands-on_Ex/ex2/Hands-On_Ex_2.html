@@ -220,6 +220,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../../resources/ICEs/ex10/ice10.html">
  <span class="dropdown-text">ICE 10-11</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../../resources/ICEs/ex11/ice11.html">
+ <span class="dropdown-text">ICE 11</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -236,7 +240,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Take-home Exercise 2</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../../resources/Take-home_Ex/ex3/Take-home_Ex_3.qmd">
+    <a class="dropdown-item" href="../../../resources/Take-home_Ex/ex3/Take-home_Ex3.html">
  <span class="dropdown-text">Take-home Exercise 3</span></a>
   </li>  
     </ul>
@@ -283,7 +287,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#color-scheme" id="toc-color-scheme" class="nav-link" data-scroll-target="#color-scheme">Color Scheme</a></li>
   <li><a href="#map-layout" id="toc-map-layout" class="nav-link" data-scroll-target="#map-layout">Map layout</a></li>
   <li><a href="#drawing-small-multiple-choropleth-maps" id="toc-drawing-small-multiple-choropleth-maps" class="nav-link" data-scroll-target="#drawing-small-multiple-choropleth-maps">Drawing Small Multiple Choropleth Maps</a></li>
-  <li><a href="#mapping-spatial-object-meeting-a-selection-criterion" id="toc-mapping-spatial-object-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mapping-spatial-object-meeting-a-selection-criterion">Mapping Spatial Object Meeting a Selection Criterion</a></li>
+  <li><a href="#mapping-spatial-object-meeting-a-selection-criterion" id="toc-mapping-spatial-object-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mapping-spatial-object-meeting-a-selection-criterion"><strong>Mapping Spatial Object Meeting a Selection Criterion</strong></a></li>
   </ul></li>
   <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings">Readings</a></li>
   </ul>
@@ -1254,7 +1258,7 @@ therefore deprecated</code></pre>
 </section>
 </section>
 <section id="mapping-spatial-object-meeting-a-selection-criterion" class="level3">
-<h3 class="anchored" data-anchor-id="mapping-spatial-object-meeting-a-selection-criterion">Mapping Spatial Object Meeting a Selection Criterion</h3>
+<h3 class="anchored" data-anchor-id="mapping-spatial-object-meeting-a-selection-criterion"><strong>Mapping Spatial Object Meeting a Selection Criterion</strong></h3>
 <p>Use selection funtion to map spatial objects meeting the selection criterion</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2020[mpsz_pop2020<span class="sc">$</span>REGION_N<span class="sc">==</span><span class="st">"CENTRAL REGION"</span>,])<span class="sc">+</span></span>
@@ -1353,7 +1357,12 @@ Please use legend.outside.size to control the width of the outside legend</code>
 <li><p>minimize misleading representations or patterns</p></li>
 <li><p>minimize within-group variance; maximize between-group variance (also method)</p></li>
 </ul></li>
-<li><p>Methods</p></li>
+<li><p>Methods</p>
+<ul>
+<li><p>Equal interval</p></li>
+<li><p>Quantile</p></li>
+<li><p>Manual (based on summary stats or other criteria)</p></li>
+</ul></li>
 <li><p>Tools (for future reference)</p>
 <ul>
 <li><p><a href="https://www.qgis.org/">QGIS</a></p></li>
@@ -1361,9 +1370,6 @@ Please use legend.outside.size to control the width of the outside legend</code>
 <li><p><a href="https://d3js.org/getting-started">D3</a> - JS libraries for visualising spatial data (web mapping)</p></li>
 </ul></li>
 </ul>
-<p><a href="https://dplyr.tidyverse.org/">dplyr</a> cheatsheets</p>
-<p><a href="https://dplyr.tidyverse.org/"><img src="data/dplyr-cheatsheet.png" class="img-fluid"></a></p>
-<p><a href="https://dplyr.tidyverse.org/"><img src="data/dplyr-cheatsheet2.png" class="img-fluid"></a></p>
 
 
 </section>
