@@ -1,0 +1,10 @@
+---
+title: "ICE 11"
+author: "William"
+date: "November 4, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  cache: true
+---
