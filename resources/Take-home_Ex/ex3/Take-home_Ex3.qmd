@@ -217,12 +217,141 @@ write_rds(adm2_sf, "data/rds/adm2_sf.rds")
 pop_data<- read_rds("data/rds/pop_data.rds")
 crime_district <- read_rds("data/rds/crime_district.rds")
 adm2_sf <- read_rds("data/rds/adm2_sf.rds")
-
 ```
 
 ### ARCHIVE NOTES
 
 <details>
+
+**NEW NEW WRANGLING**
+
+```{r}
+crime_district <- read_csv("shinyapp-prototype_wjw/data/aspatial/crime_district.csv")
+population_district <- read_csv("shinyapp-prototype_wjw/data/aspatial/population_district.csv")
+msia_adm2_sf <- st_read(dsn = 'shinyapp-prototype_wjw/data/geospatial/mys_adm_unhcr_20210211_shp/', layer = 'mys_admbnda_adm2_unhcr_20210211')
+```
+
+```{r}
+library(dplyr)
+library(lubridate)
+
+crime_district <- crime_district %>%
+    filter(year(ymd(date)) >= 2020 & year(ymd(date)) <= 2023) %>% 
+    filter(state != "Malaysia") %>% 
+    filter(category == "assault") %>% 
+    filter(district != "All") %>% 
+    filter(type != "all") 
+
+
+pop_data <- population_district %>%
+    filter(year(ymd(date)) >= 2020 & year(ymd(date)) <= 2023) %>% 
+    filter(sex == 'both' | sex == 'overall' ) %>% 
+    filter(age == 'overall') %>% 
+    filter(ethnicity == 'overall') %>% 
+    select(-c(4:6))
+
+
+adm2_sf <- msia_adm2_sf %>% select(-c(3:5, 8,9,11,12))
+
+crime_district <- crime_district %>% mutate_if(is.character,toupper)
+pop_data <- pop_data %>% mutate_if(is.character,toupper)
+adm2_sf <- adm2_sf %>% mutate_if(is.character,toupper)
+```
+
+```{r}
+library(stringr)
+crime_johor<- crime_district %>%
+  filter(str_detect(district,"johor bahru")) %>%
+  mutate(district = 'johor bahru') %>%
+  group_by(state, district,type, date) %>%
+  summarise(crimes = sum(crimes))
+
+crime_klang<- crime_district %>%
+  filter(str_detect(district,"klang")) %>%
+  mutate(district = 'klang') %>%
+  group_by(state, district,type, date) %>%
+  summarise(crimes = sum(crimes))
+
+other_rows <- crime_district %>% 
+  filter(!str_detect(district, "johor bahru"))
+
+crime_district <- bind_rows(crime_johor, crime_klang, other_rows) %>% 
+  select(-c(6)) %>% 
+  mutate(category = 'assault')
+
+
+pop_crime<- left_join(pop_data, crime_district, by= "district")
+pop_crime_na<- pop_crime[rowSums(is.na(pop_crime)) > 0,]
+adm_crime <- left_join(adm2_sf, crime_district, by= c("ADM2_EN" = "district"))
+adm_crime_na <- adm_crime[rowSums(is.na(adm_crime)) > 0,]
+
+
+crime_district<- crime_district%>% 
+  mutate(district = ifelse(district == "cameron highland", "cameron highlands", district)) %>% 
+  mutate(district = ifelse(district == "kuala lipis", "lipis", district)) %>% 
+  mutate(district = ifelse(district == "kota kinabatangan", "kinabatangan", district)) %>% 
+  mutate(district = ifelse(district == "seberang perai tengah", "s.p. tengah", district)) %>% 
+  mutate(district = ifelse(district == "seberang perai utara", "s.p. utara", district)) %>% 
+  mutate(district = ifelse(district == "seberang perai selatan", "s.p.selatan", district)) %>% 
+  mutate(district = ifelse(district == "petaling jaya", "petaling", district)) %>% 
+   mutate(district = ifelse(district == "matu daro", "matu", district))
+
+pop_data <- pop_data %>% 
+  mutate(district = ifelse(district == "kulai", "kulaijaya", district)) %>% 
+  mutate(district = ifelse(district == "sp tengah", "s.p. tengah", district)) %>% 
+  mutate(district = ifelse(district == "sp utara", "s.p. utara", district)) %>% 
+  mutate(district = ifelse(district == "sp selatan", "s.p.selatan", district)) %>%
+  mutate(district = ifelse(district == "cameron highland", "cameron highlands", district))
+
+
+pop_crime<- left_join(pop_data, crime_district, by= "district")
+pop_crime_na<- pop_crime[rowSums(is.na(pop_crime)) > 0,]
+
+drop_list_pop <- pop_crime_na$district
+pop_data <- pop_data %>%
+  filter(!(district %in% drop_list_pop))
+
+pop_crime2<-left_join(crime_district, pop_data, by="district")
+pop_crime_na2 <-pop_crime2[rowSums(is.na(pop_crime2)) > 0,]
+
+drop_list_pop <- pop_crime_na2$district
+crime_district <- crime_district %>%
+  filter(!(district %in% drop_list_pop))
+
+
+adm_crime <- left_join(adm2_sf, crime_district, by= c("ADM2_EN" = "district"))
+adm_crime_na <- adm_crime[rowSums(is.na(adm_crime)) > 0,]
+
+drop_list <- adm_crime_na$ADM2_EN
+adm2_sf <- adm2_sf %>% 
+  filter(!(ADM2_EN %in% drop_list))
+
+adm_crime2 <- left_join(crime_district, adm2_sf, by= c("district" = "ADM2_EN"))
+adm_crime_na2 <- adm_crime2[rowSums(is.na(adm_crime2)) > 0,]
+
+drop_list <- adm_crime_na2$ADM2_EN
+crime_district <- crime_district %>% 
+  filter(!(district %in% drop_list))
+```
+
+```{r}
+write_rds(pop_data, "shinyapp-prototype_wjw/data/rds/pop_data.rds")
+write_rds(crime_district, "shinyapp-prototype_wjw/data/rds/crime_district.rds")
+write_rds(adm2_sf, "shinyapp-prototype_wjw/data/rds/adm2_sf.rds")
+```
+
+```{r}
+pop_data<- read_rds("shinyapp-prototype_wjw/data/rds/pop_data.rds")
+crime_district <- read_rds("shinyapp-prototype_wjw/data/rds/crime_district.rds")
+adm2_sf <- read_rds("shinyapp-prototype_wjw/data/rds/adm2_sf.rds")
+```
+
+**Additional wrangling**
+
+```{r}
+crime_district <- crime_district %>% select(-6)
+adm2_sf <- adm2_sf %>% select(-5)
+```
 
 **`crime_district`** :
 

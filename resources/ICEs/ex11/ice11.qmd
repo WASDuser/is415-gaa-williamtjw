@@ -1,5 +1,5 @@
 ---
-title: "ICE 11"
+title: "ICE 11: Data Preparation tips (condo dataset)"
 author: "William"
 date: "November 4, 2024"
 date-modified: "last-modified"
@@ -7,4 +7,150 @@ execute:
   eval: true
   echo: true
   cache: true
+format: 
+  html:
+    code-tools: true
+    code-link: true
 ---
+
+### From Hands-on 11,
+
+```{r}
+pacman::p_load(tidyverse, sf, tmap, httr, performance)
+# httr: web-browser compatible
+```
+
+```{r}
+mpsz <- read_rds("data/rds/mpsz_3414.rds")
+```
+
+```{r}
+# imports multiple csv files in folder_path and
+# appends them into a single tibble df
+# using map_dfr() from purrr
+folder_path <- 'data/aspatial'
+file_list <- list.files(
+    path = folder_path,
+    pattern = "^realis.*\\csv$",
+    full.names = TRUE)
+realis_data <- file_list %>% map_dfr(read_csv)
+```
+
+::: {.callout-important appearance="minimal"}
+## Data Fields
+
+-   6-digit character Postal codes can start with 0, which will be truncated away, so will need to add them back in
+
+-   `realis_data`'s dates are in a 'character' format, which is not directly usable
+
+```{r}
+condo_resale <- realis_data %>% 
+    mutate(`Sale Date` = dmy(`Sale Date`)) %>% 
+    filter(`Type of Sale` == "Resale" & `Property Type` == "Condominium")
+```
+:::
+
+```{r}
+# Geocoding - need internet access
+url <- "https://onemap.gov.sg/api/common/elastic/search"
+found <- data.frame()
+not_found <- data.frame()
+postcode <- unique(condo_resale$`Postal Code`)
+
+for (postcode in postcode){
+    query <- list(
+        'searchVal' = postcode,
+        'returnGeom' = 'Y',
+        'getAddrDetails' = 'Y',
+        'pageNum' = '1')
+    res <-  GET(url, query=query)
+    if ((content(res)$found)!=0){
+        found <- rbind(found, data.frame(content(res))[4:13])
+    } else{not_found <- data.frame(postcode)}
+}
+```
+
+::: {.callout-note appearance="minimal"}
+`not_found` dataframe is empty, meaning all of the data has been successfully geocoded
+:::
+
+**When the Geocoding chunk has executed, run the code below.**
+
+```{r}
+# cleaning out field names
+found <- found %>% 
+    select(c(6:8)) %>% 
+    rename(
+        POSTAL = `results.POSTAL`,
+        XCOORD = `results.X`,
+        YCOORD = `results.Y`)
+```
+
+```{r}
+# left join
+condo_resale_geocoded <- left_join(
+    condo_resale,
+    found,
+    by = c('Postal Code' = 'POSTAL')
+)
+```
+
+```{r}
+# convert to sf
+condo_resale_sf <- st_as_sf(
+    condo_resale_geocoded,
+    coords = c('XCOORD', 'YCOORD'), # lat-long (cartesian)
+    crs=3414                        # no need for st_transform
+)
+```
+
+```{r}
+# check for overlapping point features
+overlapping_points <- condo_resale_sf %>% 
+    mutate(overlap = lengths(st_equals(., .)) > 1)
+sum(overlapping_points$overlap == TRUE)
+```
+
+**IMPORTANT FOR GEOCODING – overlapping geocodes**
+
+```{r}
+# st_jitter() to move overlapping features by 2 metres from their common point
+condo_resale_sf <- condo_resale_sf %>% st_jitter(amount = 2)
+```
+
+```{r}
+overlapping_points <- condo_resale_sf %>% 
+    mutate(overlap = lengths(st_equals(., .)) > 1)
+sum(overlapping_points$overlap == TRUE)
+```
+
+### From Take-home 2,
+
+-   Checking boundary layer using qtm(), look out for islands not part of the mainland but still are classified under a mainland province
+
+-   converting MULTIPOLYGON to single POLYGON, will produce replicate provinces
+
+```{r}
+#| eval: false
+sf_polygon <- province_sf %>% 
+    st_cast("POLYGON") %>%
+    mutate(area = st_area(.))
+```
+
+::: {.callout-note appearance="minimal"}
+`st_cast()` : Converts any MULTIPOLYGON geometries in province_sf into individual POLYGON geometries, creating separate entries for each polygon part
+
+`mutate(area = st_area(.))` : '.' serves as a placeholder for the current object being piped into the function
+:::
+
+```{r}
+#| eval: false
+provinced_cleaned <- sf_polygon %>% 
+    group_by(ADM1_EN) %>% 
+    filter(area == max(area)) %>% 
+    ungroup() %>% 
+    select(-area) %>% 
+    select(ADM1_EN)
+```
+
+<details>![](images/clipboard-2950921876.png){fig-align="center" width="100" height="66"}</details>
