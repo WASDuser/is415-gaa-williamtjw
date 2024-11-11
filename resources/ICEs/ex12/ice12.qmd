@@ -1,0 +1,14 @@
+---
+title: "ICE 12: Predictive Modelling"
+author: "William"
+date: "November 11, 2024"
+date-modified: "last-modified"
+execute: 
+  eval: true
+  echo: true
+  cache: true
+format: 
+  html:
+    code-tools: true
+    code-link: true
+---
